@@ -1,24 +1,36 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback} from 'react';
+import { Link } from "react-router-dom";
 import { render } from 'react-dom';
 import { AgGridReact } from 'ag-grid-react'; // the AG Grid React Component
 
 import 'ag-grid-community/styles/ag-grid.css'; // Core grid CSS, always needed
 import 'ag-grid-community/styles/ag-theme-alpine.css'; // Optional theme CSS
 
-const Read= () => {
+const EarnerRead= () => {
 
  const gridRef = useRef(); // Optional - for accessing Grid's API
  const [rowData, setRowData] = useState(); // Set rowData to Array of Objects, one Object per Row
-
+ const autoSizeAll = () => {
+  const allColumnIds = [];
+  gridRef.getAllColumns().forEach(column => allColumnIds.push(column.colId));;
+  gridRef.autoSizeColumns(allColumnIds, false);
+};
  // Each Column Definition results in one Column.
  const [columnDefs, setColumnDefs] = useState([
-   {field: 'make', filter: true},
-   {field: 'model', filter: true},
-   {field: 'price'},
-   {field: 'price'},
-   {field: 'price'},
-   {field: 'price'},
-   {field: 'price'},
+   {field: '소득자명', filter: true,
+   width: 120},
+   {field: '주민(외국인)등록번호', filter: true,width: 200},
+   {field: '소득구분',width: 120},
+   {field: '귀속년월',width: 120},
+   {field: '지급년월일',width: 150},
+   {field: '지급액',width: 150},
+   {field: '세율(%)',width: 100},
+   {field: '학자금상환액',width: 180},
+   {field: '소득세',width: 150},
+   {field: '지방소득세',width: 180},
+   {field: '예술인경비',width: 160},
+   {field: '고용보험료',width: 180},
+   {field: '차인지급액',width: 160},
  
  ]);
 
@@ -46,12 +58,11 @@ const Read= () => {
 
  return (
    <div>
-
-     {/* Example using Grid's API */}
-     <button onClick={buttonListener}>Push Me</button>
+    <Link to="/earnerRead">소득자별</Link> | <Link to="/earnDivRead">소득구분별</Link>
+    
 
      {/* On div wrapping Grid a) specify theme CSS Class Class and b) sets Grid size */}
-     <div className="ag-theme-alpine" style={{width: 1500, height: 600}}>
+     <div className="ag-theme-alpine" style={{width: 2000, height: 600}}>
 
        <AgGridReact
            ref={gridRef} // Ref for accessing Grid's API
@@ -63,7 +74,7 @@ const Read= () => {
           
            animateRows={true} // Optional - set to 'true' to have rows animate when sorted
            rowSelection='multiple' // Options - allows click selection of rows
-         
+       
            onCellClicked={cellClickedListener} // Optional - registering for Grid Event
            />
      </div>
@@ -71,4 +82,4 @@ const Read= () => {
  );
 };
 
-export default Read;
+export default EarnerRead;
