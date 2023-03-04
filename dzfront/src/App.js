@@ -1,11 +1,17 @@
+import './App.css';
+import {Route, Routes} from 'react-router-dom'
+// import Login from './components/Login'
+// import Model from './Model'
 
-export default function App() {
+function App() {
+  <>
+ {/* // const [onLogin] = Model();
   return (
-    <div>
-      <h1>메인</h1>
-
-
-
-    </div>
+  //  <Routes> 
+	//   	 <Route path ="/Login" element={<Login onLogin={onLogin} />} />    	
+  //  </Routes> */}
   );
-}
+  </>
+};
+
+export default App;
