@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import "../public.css";
-import { Link } from "react-router-dom";
 import Modal from "./Modal";
 import FindAddr from "./FindAddr";
 
