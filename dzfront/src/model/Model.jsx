@@ -21,12 +21,12 @@ import { useNavigate } from 'react-router-dom';
     const navigate = useNavigate();
 
     const onLogin = (userid, passwd) => {
-      fetch("/login.do", { 
+      fetch("api/hello.do", { 
         method: "POST",
         headers : {"Content-type" : "application/json; charset=utf-8"},
         body: JSON.stringify({
-         userid : userid,
-         passwd : passwd
+          MEMBER_ID : userid,
+          MEMBER_PW: passwd
         })
       })
       .then(response => response.json())

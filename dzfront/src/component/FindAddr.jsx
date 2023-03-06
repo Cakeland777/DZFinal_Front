@@ -16,6 +16,6 @@ const FindAddr = ({}) => {
         }
       
     }
-    return (<DaumPostCode onComplete={handleComplete} className="post-code" />);
+    return (<DaumPostCode onComplete={handleComplete}  autoClose={true}  className="post-code" />);
 }
 export default FindAddr;

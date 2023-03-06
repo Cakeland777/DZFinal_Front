@@ -28,7 +28,7 @@ const closeModal = () => {
       <>
       <button onClick={openModal}>주소검색</button>
        
-        <Modal open={modalOpen} close={closeModal} header="Modal heading">
+        <Modal open={modalOpen} close={closeModal} header="주소검색">
         
          
         </Modal>

@@ -8,6 +8,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom";
+import Model from './model/Model';
 import Login from './component/Login';
 import Register from './component/Register';
 import Header from './component/Header';
@@ -16,7 +17,10 @@ import EarnerRead from './component/EarnerRead';
 import FindAddr from './component/FindAddr';
 import EarnDivRead from './component/EarnDivRead';
 const rootElement = document.getElementById("root");
+
+
 render(
+  
   <BrowserRouter>
     <Header />
     <Routes>

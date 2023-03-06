@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import {useNavigate} from 'react-router-dom';
-
+import '../css/login.css';
 
 const Login=({member, onLogin}) =>{
 
@@ -31,11 +31,11 @@ const handlePasswd = (e) => {
    
     <div>
       <h2>로그인</h2>
-      <form>
+      <form className='box' >
     
-        <input type='text' name="userid" value="userid" placeholder='아이디' onChange={handleUserid} ></input>
+        <input type='text' name="userid" value={userid} placeholder='아이디' onChange={handleUserid} ></input>
         <br/>
-        <input type='password' name="passwd" value="passwd" placeholder='비밀번호' onChange={handlePasswd}></input>
+        <input type='password' name="passwd" value={passwd} placeholder='비밀번호' onChange={handlePasswd}></input>
         <br/>
         <button onClick={onClickLogin}>로그인</button>
         <button onClick={home}>돌아가기</button>
