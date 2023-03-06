@@ -1,26 +1,37 @@
 import './App.css';
 
-import {Route, Routes} from 'react-router-dom'
-// import Login from './components/Login'
-// import Model from './model/Model'
+import { Route, Link, Switch, Routes } from 'react-router-dom';
+import Login from './component/Login'
+import Model from './model/Model'
+
+import Header from './component/Header';
+import FindAddr from './component/FindAddr';
+import Register from './component/Register';
+import Registration from './component/Registration';
+import EarnerRead from './component/EarnerRead';
+import EarnDivRead from './component/EarnDivRead';
 
 function App() {
+  const [member, onLogin] = Model();
   return (
-  
-<>메인</>
- );
-}
+  <>
+   <div>
+      <Header/>
+      <Routes>
+        <Route path ="/login" element={<Login onLogin={onLogin}/>} />  
+        <Route path="/register" element={Register} />
+        <Route path="/registration" element={Registration} />
+        <Route path="/earnerRead" element={EarnerRead} />
+        <Route path="/earnDivRead" element={EarnDivRead} />
+        <Route path="/findaddr" element={FindAddr} />
+        <Route/>
+      </Routes>
+    </div>
 
-// function App() {
-//   <>
-//  {/* // const [onLogin] = Model();
-//   return (
-//   //  <Routes> 
-// 	//   	 <Route path ="/Login" element={<Login onLogin={onLogin} />} />    	
-//   //  </Routes> */}
-//   );
-//   </>
-// };
+  </>
+  );
+ 
+};
 
 export default App;
 

@@ -12,7 +12,7 @@
     "react": "^16.8.0",
     "react-daum-postcode": "^3.1.1",
     "react-dom": "^16.8.0",
-    "react-router-dom": "^6.8.1",
+    "react-router-dom": "^6.6.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.0"
   },
