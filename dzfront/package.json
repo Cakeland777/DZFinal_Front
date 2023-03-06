@@ -2,6 +2,7 @@
   "name": "dzfront",
   "version": "0.1.0",
   "private": true,
+  "proxy": "http://localhost:8080",
   "dependencies": {
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
@@ -9,6 +10,7 @@
     "ag-grid-community": "^29.1.0",
     "ag-grid-react": "^29.1.0",
     "react": "^16.8.0",
+    "react-daum-postcode": "^3.1.1",
     "react-dom": "^16.8.0",
     "react-router-dom": "^6.8.1",
     "react-scripts": "5.0.1",
