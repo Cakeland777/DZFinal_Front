@@ -4,7 +4,7 @@ import '../css/login.css';
 
 const Login=({member, onLogin}) =>{
 
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
  
   const [userid, setUserid] = useState('')
   const [passwd, setPasswd] = useState('')
@@ -23,7 +23,7 @@ const handlePasswd = (e) => {
 }
 
   const home = () => {
-    //navigate("/");
+    navigate("/");
   }; 
  
   return (

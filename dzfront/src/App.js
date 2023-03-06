@@ -1,6 +1,6 @@
 import './App.css';
 
-import { Route, Link, Switch } from 'react-router-dom';
+import { Route, Link, Switch, Routes } from 'react-router-dom';
 import Login from './component/Login'
 import Model from './model/Model'
 
@@ -10,21 +10,22 @@ import Register from './component/Register';
 import Registration from './component/Registration';
 import EarnerRead from './component/EarnerRead';
 import EarnDivRead from './component/EarnDivRead';
+
 function App() {
   const [member, onLogin] = Model();
   return (
   <>
    <div>
       <Header/>
-      <Switch>
-        <Route path ="/login" component={<Login onLogin={onLogin}/>} />  
-        <Route path="/register" component={Register} />
-        <Route path="/registration" component={Registration} />
-        <Route path="/earnerRead" component={EarnerRead} />
-        <Route path="/earnDivRead" component={EarnDivRead} />
-        <Route path="/findaddr" component={FindAddr} />
+      <Routes>
+        <Route path ="/login" element={<Login onLogin={onLogin}/>} />  
+        <Route path="/register" element={Register} />
+        <Route path="/registration" element={Registration} />
+        <Route path="/earnerRead" element={EarnerRead} />
+        <Route path="/earnDivRead" element={EarnDivRead} />
+        <Route path="/findaddr" element={FindAddr} />
         <Route/>
-      </Switch>
+      </Routes>
     </div>
 
   </>

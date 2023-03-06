@@ -1,5 +1,5 @@
 import  { useReducer } from 'react';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
   const MEMBER_ACTION = {
     LOGIN: 1
@@ -18,7 +18,7 @@ import  { useReducer } from 'react';
   
   export default function Model() {
     const [member, dispatch] = useReducer(memberReducer, {login_status : 0, memberInfo:{userid:'', passwd:''}});
-    //const navigate = useNavigate();
+    const navigate = useNavigate();
 
     const onLogin = (userid, passwd) => {
       fetch("api/hello.do", { 
