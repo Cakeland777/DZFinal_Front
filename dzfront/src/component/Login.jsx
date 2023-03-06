@@ -4,7 +4,7 @@ import '../css/login.css';
 
 const Login=({member, onLogin}) =>{
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
  
   const [userid, setUserid] = useState('')
   const [passwd, setPasswd] = useState('')
@@ -23,7 +23,7 @@ const handlePasswd = (e) => {
 }
 
   const home = () => {
-    navigate("/");
+    //navigate("/");
   }; 
  
   return (
@@ -32,7 +32,7 @@ const handlePasswd = (e) => {
     <div>
       <h2>로그인</h2>
       <form className='box' >
-    
+   
         <input type='text' name="userid" value={userid} placeholder='아이디' onChange={handleUserid} ></input>
         <br/>
         <input type='password' name="passwd" value={passwd} placeholder='비밀번호' onChange={handlePasswd}></input>

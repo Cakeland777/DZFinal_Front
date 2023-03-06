@@ -21,7 +21,9 @@ const closeModal = () => {
   const Tab = [
     {
       title: "기본사항",
-      content: <>거주구분 <input type={"text"} />
+      content: <>
+      <h3>소득자 등록</h3>
+      거주구분 <input type={"text"} />
       <br/> 소득구분 <input type={"text"} /><br/>
       내/외국인 <input type={"text"} />
       <br/>
@@ -40,7 +42,14 @@ const closeModal = () => {
   
     {
       title: "예술인",
-      content: <input type={"text"}/>
+      content:    <><h3>예술인 해당 사업소득자 등록</h3>
+     예술인여부 <select>
+  <option value="value1">0.부</option>
+  <option value="value2">1.여</option>
+ 
+</select>
+
+      </>
     }
   ];
   
@@ -67,7 +76,7 @@ const closeModal = () => {
           </button>
         ))}
       </div>
-      <h3>사업소득자등록</h3>
+   
       <div>{currentItem.content}</div>
     </div>
   );
