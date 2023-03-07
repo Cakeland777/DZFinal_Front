@@ -100,16 +100,34 @@ const closeModal = () => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <div>
-    
       <div >
+      조회영역입니다
+      </div>
+      <div style={{float:"left" ,backgroundColor:"grey" ,width:"100px",height:"200px",margin:"auto"}}>
+       <table>
+        <thead>
+        <th>안녕</th>
+        </thead>
+        <tbody>
+         <tr>안녕</tr>
+         <tr>안녕</tr>
+         <tr>안녕</tr>
+         <tr>안녕</tr>
+         <tr>안녕</tr>
+         <tr>안녕</tr>
+
+        </tbody>
+       </table>
+      </div>
+      <div style={{float:"right"}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
             {e.title}
           </button>
         ))}
-      </div>
+      
    
-      <div>{currentItem.content}</div>
+     {currentItem.content}</div>
     </div>
   );
 }
