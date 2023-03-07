@@ -21,7 +21,7 @@ import { useNavigate } from 'react-router-dom';
     const navigate = useNavigate();
 
     const onLogin = (userid, passwd) => {
-      fetch("api/hello.do", { 
+      fetch("http://localhost:8080/hello.do", { 
         method: "POST",
         headers : {"Content-type" : "application/json; charset=utf-8"},
         body: JSON.stringify({
@@ -31,14 +31,14 @@ import { useNavigate } from 'react-router-dom';
       })
       .then(response => response.json())
       .then(result => {
-        if (result.status === true) {
-          dispatch({type : MEMBER_ACTION.LOGIN, memberInfo:result.memberInfo, login_status:1});
-          alert(result.memberInfo.userid + "님 로그인되었습니다.")
-          localStorage.setItem("memberInfo", result.memberInfo);
+        if (result.isLogOn=== true) {
+          dispatch({type : MEMBER_ACTION.LOGIN, memberInfo:result.member, login_status:1});
+          alert(result.member.worker_id+"님 로그인되었습니다.");
+          localStorage.setItem("memberInfo", result.member);
           localStorage.setItem("login_status", 1);
           //navigate("/");
         } else {
-         alert(result.message);
+         alert(result.isLogOn);
         }
       });
     } 

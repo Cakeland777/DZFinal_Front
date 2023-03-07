@@ -1,49 +1,66 @@
-import { useState } from 'react';
-import {useNavigate} from 'react-router-dom';
-import '../css/login.css';
-
-const Login=({member, onLogin}) =>{
-
+import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
+function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  function handleUsernameChange(event) {
+    setUsername(event.target.value);
+  }
+
+  function handlePasswordChange(event) {
+    setPassword(event.target.value);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
  
-  const [userid, setUserid] = useState('')
-  const [passwd, setPasswd] = useState('')
+    fetch("http://localhost:8080/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        MEMBER_ID: username,
+        MEMBER_PW: password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.isLogOn===true){
+          alert(data.member.worker_id+"님 로그인되었습니다.");
+          localStorage.setItem("memberInfo", data.member);
+          localStorage.setItem("isLogOn", 1);
+          navigate("/registration");
+      
+      }
+        else{
+          alert('실패');
 
-  const handleUserid = (e) => {
-    setUserid(e.target.value);
-}
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert('실패');
+      });
+  }
 
-const handlePasswd = (e) => {
-    setPasswd(e.target.value);
-}
-
-  const onClickLogin = () => {
-    console.log('click_login');
-    onLogin(userid, passwd);
-}
-
-  const home = () => {
-    navigate("/");
-  }; 
- 
   return (
-
-   
-    <div>
-      <h2>로그인</h2>
-      <form className='box' >
-   
-        <input type='text' name="userid" value={userid} placeholder='아이디' onChange={handleUserid} ></input>
-        <br/>
-        <input type='password' name="passwd" value={passwd} placeholder='비밀번호' onChange={handlePasswd}></input>
-        <br/>
-        <button onClick={onClickLogin}>로그인</button>
-        <button onClick={home}>돌아가기</button>
-      </form>
-     
-    </div>
+    <form onSubmit={handleSubmit}>
+      <label>
+        아이디:
+        <input type="text" value={username} onChange={handleUsernameChange} />
+      </label>
+      <br/>
+      <label>
+       비밀번호:
+        <input type="password" value={password} onChange={handlePasswordChange} />
+      </label>
+      <br/>
+      <button type="submit">로그인</button>
+    </form>
   );
 }
-
 
 export default Login;
