@@ -47,7 +47,7 @@ function Login() {
   }
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{position:"relative"}}>
       <label>
         아이디:
         <input type="text" value={username} onChange={handleUsernameChange} />

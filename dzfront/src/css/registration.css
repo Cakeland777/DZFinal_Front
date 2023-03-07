@@ -1,0 +1,17 @@
+.table {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border: 1px solid #ccc;
+  }
+  
+  .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border: 1px solid #ccc;
+  }
+  
+  .cell {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #dc0c0c;
+  }

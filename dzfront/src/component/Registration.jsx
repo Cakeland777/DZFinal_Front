@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import "../public.css";
+
+import '../css/registration.css';
+
 import Modal from "./Modal";
 import FindAddr from "./FindAddr";
 
@@ -70,7 +72,7 @@ const closeModal = () => {
      예술인여부 <select>
   <option value="value1" name="is_artist">0.부</option>
   <option value="value2" name="is_artist">1.여</option>
-  </select>
+  </select>''
 
   <br/> 예술인유형 <select>
   <option value="value1" name="artist_type">1.일반예술인</option>
@@ -100,25 +102,31 @@ const closeModal = () => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <div>
-      <div >
-      조회영역입니다
-      </div>
-      <div style={{float:"left" ,backgroundColor:"grey" ,width:"100px",height:"200px",margin:"auto"}}>
-       <table>
-        <thead>
-        <th>안녕</th>
-        </thead>
-        <tbody>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
+    
+  <div class="table" style={{float:"left"}}>
+    <thead>
+  <div class="row header">
+    <div class="cell">Code</div>
+    <div class="cell">소득자명</div>
+    <div class="cell">주민(외국인)번호</div>
+    <div class="cell">소득구분</div>
+  </div>
+  </thead>
+  <tbody>
+  <div class="row">
+    <div class="cell">내용1</div>
+    <div class="cell">내용2</div>
+    <div class="cell">내용3</div>
+  </div>
+  <div class="row">
+    <div class="cell">내용4</div>
+    <div class="cell">내용5</div>
+    <div class="cell">내용6</div>
+  </div>
+  </tbody>
+</div>
 
-        </tbody>
-       </table>
-      </div>
+
       <div style={{float:"right"}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
