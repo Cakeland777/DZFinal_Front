@@ -96,6 +96,7 @@ const EarnerRead = () => {
   return (
     <div>
       <form onSubmit={handleSubmit}>
+        
         기준
         <select onChange={handleSelect} value={selected}>
           <option value="accrual_ym">1.귀속년월</option>
@@ -108,7 +109,7 @@ const EarnerRead = () => {
         <select onChange={handleSelect2} value={selected2}>
           <option value="earner_no">1.소득자명순</option>
         </select>
-        <button type="submit">조회</button>
+        <button type="submit" >조회</button>
       </form>
       <Link to="/earnerRead">소득자별</Link> |{" "}
       <Link to="/earnDivRead">소득구분별</Link>
