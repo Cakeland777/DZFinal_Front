@@ -36,7 +36,7 @@ import { useNavigate } from 'react-router-dom';
           alert(result.member.worker_id+"님 로그인되었습니다.");
           localStorage.setItem("memberInfo", result.member);
           localStorage.setItem("login_status", 1);
-          //navigate("/");
+          //navigate("/"); 
         } else {
          alert(result.isLogOn);
         }
