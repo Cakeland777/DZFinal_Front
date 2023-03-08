@@ -54,9 +54,41 @@ const EarnDivRead= () => {
  const buttonListener = useCallback( e => {
    gridRef.current.api.deselectAll();
  }, []);
+ const [earner, setEarner] = useState("");
+ const [date1, setDate1] =useState("");
+ const [date2, setDate2] =useState("");
+  const [password, setPassword] = useState("");
+ 
+  function handleEarner(event) {
+    setEarner(event.target.value);
+  }
 
+  function handleDate1(event) {
+    setDate1(event.target.value);
+  }
+  function handleDate2(event) {
+    setDate2(event.target.value);
+  }
+  function handleSubmit(event) {
+    event.preventDefault();}
  return (
    <div>
+     <form onSubmit={handleSubmit}>
+    기준
+    <select>
+  <option value="param1" name="param1">1.귀속년월</option>
+  <option value="param2" name="param1">2.지급년월</option>
+  </select>
+<input value={date1} onChange={handleDate1} type="text"  ></input>~<input onChange={handleDate2} value={date2} type="text"></input>
+
+소득구분<input  onChange={handleEarner} value={earner} type="text" placeholder='사업자소득구분' ></input>
+  현재소득구분
+    <select>
+  <option value="param1" name="param5">1.소득자명순</option>
+ 
+  </select>
+  <button type='submit' >조회</button>
+    </form>
     <Link to="/earnerRead">소득자별</Link> | <Link to="/earnDivRead">소득구분별</Link>
     
 

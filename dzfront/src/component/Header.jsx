@@ -4,11 +4,14 @@ import '../css/header.css';
 
 const Header = () => {
 
-  
+  function logout() {
+    localStorage.clear();
+    
+    localStorage.setItem("isLogOn", 0);
+  }
 
   return (
     <div className="header"> 
-       
       <Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/login">로그인</Link> | 
       <Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/register">회원가입</Link> | 
       <Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}}  to="/registration">사업소득자등록</Link> |

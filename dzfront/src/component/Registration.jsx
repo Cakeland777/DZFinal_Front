@@ -119,7 +119,7 @@ const closeModal = () => {
         </tbody>
        </table>
       </div>
-      <div style={{float:"right"}}>
+      <div style={{float:"left" ,marginLeft:"100px"}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
             {e.title}
