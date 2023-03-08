@@ -1,4 +1,41 @@
-.box{
-    
+form {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+  }
+  
+ 
+  
+  label {
+    margin-bottom: 5px;
+  }
+  
+  input {
+    padding: 10px;
+    margin:10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
 
-}
+  select{
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+  
+  button {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: #6273D9;
+    color: #fff;
+    cursor: pointer;
+    margin: 10px;
+  }
+  
+  button:hover {
+    background-color:#3B42BF;
+  }

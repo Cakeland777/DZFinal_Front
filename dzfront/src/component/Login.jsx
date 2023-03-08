@@ -1,49 +1,93 @@
-import { useState } from 'react';
-import {useNavigate} from 'react-router-dom';
+import { Column } from "ag-grid-community";
+import React, { useState } from "react";
+import { useNavigate } from 'react-router-dom';
 import '../css/login.css';
-
-const Login=({member, onLogin}) =>{
-
+import Swal from 'sweetalert2';
+function Login() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  function handleUsernameChange(event) {
+    setUsername(event.target.value);
+  }
+
+  function handlePasswordChange(event) {
+    setPassword(event.target.value);
+  }
+
+  function handleSubmit(event) {
+    event.preventDefault();
+
  
-  const [userid, setUserid] = useState('')
-  const [passwd, setPasswd] = useState('')
+    fetch("http://localhost:8080/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        MEMBER_ID: username,
+        MEMBER_PW: password,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        if(data.isLogOn===true){
 
-  const handleUserid = (e) => {
-    setUserid(e.target.value);
-}
+          Swal.fire({
+            title:data.member.worker_id+"님 로그인되었습니다.",
+            text:'환영합니다',
+            icon:'success',
 
-const handlePasswd = (e) => {
-    setPasswd(e.target.value);
-}
+          });
+         
+          localStorage.setItem("memberInfo", data.member);
+          localStorage.setItem("isLogOn", 1);
+          navigate("/registration");
+      
+      }
+        else{
+          Swal.fire({
+            title:'로그인 실패',
+            text:'정보를 확인해주세요',
+            icon:'error',
 
-  const onClickLogin = () => {
-    console.log('click_login');
-    onLogin(userid, passwd);
-}
+          });
+        
 
-  const home = () => {
-    navigate("/");
-  }; 
- 
+        }
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+        alert('실패');
+      });
+  }
+
   return (
+  
 
-   
-    <div>
-      <h2>로그인</h2>
-      <form className='box' >
-   
-        <input type='text' name="userid" value={userid} placeholder='아이디' onChange={handleUserid} ></input>
-        <br/>
-        <input type='password' name="passwd" value={passwd} placeholder='비밀번호' onChange={handlePasswd}></input>
-        <br/>
-        <button onClick={onClickLogin}>로그인</button>
-        <button onClick={home}>돌아가기</button>
-      </form>
+    <div className="App">
+    <form onSubmit={handleSubmit} style={{ flexDirection:"Column"}}>
+    <div className="input-container">
+          <input type="text" placeholder="아이디" value={username} onChange={handleUsernameChange}/>
+      
+        </div>
+        
+        <div className="input-container">
+          <input type="password"  value={password} onChange={handlePasswordChange} placeholder="비밀번호"/>
      
-    </div>
+        </div>
+        
+        <button type="submit">로그인</button>
+   
+      </form>
+      </div>
+   
+ 
+   
+
+ 
+    
   );
 }
-
 
 export default Login;
