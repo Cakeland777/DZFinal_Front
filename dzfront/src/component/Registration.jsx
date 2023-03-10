@@ -1,14 +1,29 @@
 import React, { useState } from "react";
-import "../public.css";
+
+import '../css/registration.css';
+
 import Modal from "./Modal";
 import FindAddr from "./FindAddr";
 
+import { AgGridReact } from 'ag-grid-react';
 
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 
 
 
 export default function Registration() {
-   
+  const data = [
+    { make: '홍길동', model: '111111', price: "배우" },
+    { make: '', model: '', price:"" },
+    { make: '', model: '', price: ""}
+  ];
+  
+  const columnDefs = [
+    { headerName: '소득자명', field: 'make' },
+    { headerName: '주민(외국인)번호', field: 'model' },
+    { headerName: '소득구분', field: 'price' }
+  ];
   const [modalOpen, setModalOpen] = useState(false);
 
 const openModal = () => {
@@ -70,7 +85,7 @@ const closeModal = () => {
      예술인여부 <select>
   <option value="value1" name="is_artist">0.부</option>
   <option value="value2" name="is_artist">1.여</option>
-  </select>
+  </select>''
 
   <br/> 예술인유형 <select>
   <option value="value1" name="artist_type">1.일반예술인</option>
@@ -100,26 +115,14 @@ const closeModal = () => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <div>
-      <div >
-      조회영역입니다
-      </div>
-      <div style={{float:"left" ,backgroundColor:"grey" ,width:"100px",height:"200px",margin:"auto"}}>
-       <table>
-        <thead>
-        <th>안녕</th>
-        </thead>
-        <tbody>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
-         <tr>안녕</tr>
+    
+  <div className="ag-theme-alpine" style={{ height: 800, width: 600 ,float:"left",marginRight:"90px"}}>
+          <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
+        </div>
 
-        </tbody>
-       </table>
-      </div>
-      <div style={{float:"left" ,marginLeft:"100px"}}>
+
+
+      <div style={{float:"left"}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
             {e.title}

@@ -10,8 +10,9 @@ import FindAddr from './component/FindAddr';
 import Registration from './component/Registration';
 import EarnerRead from './component/EarnerRead';
 import EarnDivRead from './component/EarnDivRead';
-
+import IncomeInput from './component/IncomeInput';
 function App() {
+  
   const [member, onLogin] = Model();
   return (
   <>
@@ -24,6 +25,7 @@ function App() {
         <Route path="/earnerRead" element={<EarnerRead/>} />
         <Route path="/earnDivRead" element={<EarnDivRead/>} />
         <Route path="/findaddr" element={<FindAddr/>} />
+        <Route path="/incomeInput" element={<IncomeInput/>}/>
        
       </Routes>
     </div>

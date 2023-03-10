@@ -1,0 +1,19 @@
+.dropDown{
+
+    background-color: rgb(98, 115, 217);
+    color:white;
+    height: 50px;
+    text-align: center;
+    
+   
+    
+}
+
+li{
+    background-color:rgb(98, 115, 217) ;
+    z-index: 800;
+    text-align: center;
+    list-style: none;
+}
+
+

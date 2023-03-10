@@ -5,85 +5,89 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import { BiCalendar } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { render } from "react-dom";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import DatePicker from "react-datepicker";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-
+import "react-datepicker/dist/react-datepicker.css";
+import { format } from "date-fns";
 const EarnerRead = () => {
   const [rowData, setRowData] = useState();
 
   const gridRef = useRef();
 
   const [columnDefs, setColumnDefs] = useState([
-    { field: "worker_id" },
-    { field: "earner_name" },
-    { field: "artist_type" },
-    { field: "artist_ins_red" },
-    { field: "total_payment" },
+    { field: "earner_name", headerName: "소득자명", resizable: true },
+    {
+      field: "personal_no",
+      headerName: "주민(외국인)등록번호",
+      resizable: true,
+    },
+    { field: "div_name", headerName: "소득구분", resizable: true },
+    { field: "accural_ym", headerName: "귀속년월", resizable: true },
+    { field: "payment_ym", headerName: "지급년월일", resizable: true },
 
-    { field: "dif_payment" },
-    { field: "belonging_ym" },
-    { field: "payment_date" },
-    { field: "etc" },
-    { field: "zonecode" },
+    { field: "total_payment", headerName: "지급액", resizable: true },
+    { field: "tax_rate", headerName: "세율(%)", resizable: true },
+    { field: "tuition_amount", headerName: "학자금상환액", resizable: true },
+    { field: "tax_income", headerName: "소득세", resizable: true },
+    { field: "tax_local", headerName: "지방소득세", resizable: true },
+    { field: "artist_cost", headerName: "예술인경비", resizable: true },
+    { field: "ins_cost", headerName: "고용보험료", resizable: true },
+    { field: "real_payment", headerName: "차인지급액", resizable: true },
   ]);
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
     filter: true,
   }));
+  useEffect(() => {
+    fetch("https://www.ag-grid.com/example-assets/row-data.json")
+      .then((result) => result.json())
+      .then((rowData) => setRowData(rowData));
+  }, []);
 
   const cellClickedListener = useCallback((event) => {
     console.log("cellClicked", event);
   }, []);
+  const [selectedOption, setSelectedOption] = useState("accural_ym");
 
-  useEffect(() => {
-    fetch("http://localhost:8080/login1")
-      .then((result) => result.json())
-      .then((rowData) => {
-        const wrappedData = [rowData];
-        setRowData(wrappedData);
-      });
-  }, []);
-
-  const [selected, setSelected] = useState("");
-  const [selected2, setSelected2] = useState("");
-  const [date1, setDate1] = useState("");
-  const [date2, setDate2] = useState("");
-  const [earner, setEarner] = useState("");
-  function handleSelect2(event) {
-    setSelected2(event.target.value);
+  function handleChange(event) {
+    setSelectedOption(event.target.value);
   }
 
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  
+  const [selected, setSelected] = useState("earner_name");
+
+  const [earner, setEarner] = useState("");
   function handleSelect(event) {
     setSelected(event.target.value);
   }
-  function handleDate1(event) {
-    setDate1(event.target.value);
-  }
-  function handleDate2(event) {
-    setDate2(event.target.value);
-  }
+
+
+
   function handleEarner(event) {
     setEarner(event.target.value);
   }
+
   function handleSubmit(event) {
     event.preventDefault();
     fetch("http://localhost:8080/earner_list", {
-      method: "POST",
+      method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        param1: "accrual_ym",
-        param2: date1,
-        param3: date2,
-        param4: "earner_code",
-        param5: "",
-        param6: "earner_no",
+        param1: selectedOption,
+        param2: format(startDate, "yyyyMM"),
+        param3: format(endDate, "yyyyMM"),
+        param4: earner,
+        param5: selected,
       }),
     })
       .then((result) => result.json())
@@ -95,24 +99,48 @@ const EarnerRead = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <Link to="/earnerRead">소득자별</Link> |{" "}
+      <Link to="/earnDivRead">소득구분별</Link>
+      <form style={{ border: "1px solid black" }} onSubmit={handleSubmit}>
         기준
-        <select onChange={handleSelect} value={selected}>
-          <option value="accrual_ym">1.귀속년월</option>
+        <select value={selectedOption} onChange={handleChange}>
+          <option value="accural_ym">1.귀속년월</option>
           <option value="payment_ym">2.지급년월</option>
         </select>
-        <input value={date1} onChange={handleDate1} type="text"></input>~
-        <input onChange={handleDate2} value={date2} type="text"></input>
+        <div style={{ position: "relative", zIndex: 800 }}>
+          <label>
+            <DatePicker
+              showIcon
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              dateFormat="yyyy.MM"
+              showMonthYearPicker
+            />
+          </label>
+        </div>{" "}
+        ~
+        <div style={{ position: "relative", zIndex: 800 }}>
+          <DatePicker
+            selected={endDate}
+            onChange={(date) => setEndDate(date)}
+            dateFormat="yyyy.MM"
+            showMonthYearPicker
+          />
+        </div>
         소득자<input onChange={handleEarner} value={earner} type="text"></input>
         정렬
-        <select onChange={handleSelect2} value={selected2}>
-          <option value="earner_no">1.소득자명순</option>
+        <select onChange={handleSelect} value={selected}>
+          <option value="earner_name">1.소득자명순</option>
+          <option value="div">2.소득구분순</option>
+          <option value="payment_ym">3.지급년월순</option>
+          <option value="personal_no">4.주민(사업자)번호순</option>
         </select>
         <button type="submit">조회</button>
       </form>
-      <Link to="/earnerRead">소득자별</Link> |{" "}
-      <Link to="/earnDivRead">소득구분별</Link>
-      <div className="ag-theme-alpine" style={{ width: 2000, height: 800 }}>
+      <div
+        className="ag-theme-alpine"
+        style={{ width: 2000, height: 800, zIndex: -100 }}
+      >
         <AgGridReact
           ref={gridRef}
           rowData={rowData}
