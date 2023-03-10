@@ -56,10 +56,10 @@ const handleInputChange = (inputValue) => {
         <CodeModal open={modalOpen} close={closeModal} onInputChange={handleInputChange} header="사업소득자 코드도움">
        
         </CodeModal>
-      <div className="ag-theme-alpine" style={{ height: 500, width: 300 }}>
+      <div className="ag-theme-alpine" style={{ height: 500, width: 200 }}>
           <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
         </div>
-      <table style={{ border: "1px solid" ,width:300 }}>
+      <table style={{ border: "1px solid" ,width:200 }}>
         <thead></thead>
 
         <tbody>
@@ -103,7 +103,7 @@ const handleInputChange = (inputValue) => {
       </div>
       <div style={{ float: "left",marginLeft:"50px" }}>
         소득지급내역
-        <div className="ag-theme-alpine" style={{ height: 700, width: 1500  }}>
+        <div className="ag-theme-alpine" style={{ height: 700, width: 1000  }}>
           <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
         </div>
       </div>

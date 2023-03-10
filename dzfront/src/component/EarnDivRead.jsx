@@ -32,7 +32,6 @@ const EarnDivRead = () => {
     { field: "dif_payment", headerName: "연간총지급액", resizable: true },
     { field: "belonging_ym", headerName: "세율(%)", resizable: true },
     { field: "payment_date", headerName: "소득세", resizable: true },
-    { field: "etc", headerName: "소득세", resizable: true },
     { field: "zonecode", headerName: "지방소득세", resizable: true },
     { field: "zonecode", headerName: "예술인경비", resizable: true },
     { field: "zonecode", headerName: "고용보험료", resizable: true },

@@ -5,12 +5,25 @@ import '../css/registration.css';
 import Modal from "./Modal";
 import FindAddr from "./FindAddr";
 
+import { AgGridReact } from 'ag-grid-react';
 
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 
 
 
 export default function Registration() {
-   
+  const data = [
+    { make: '홍길동', model: '111111', price: "배우" },
+    { make: '', model: '', price:"" },
+    { make: '', model: '', price: ""}
+  ];
+  
+  const columnDefs = [
+    { headerName: '소득자명', field: 'make' },
+    { headerName: '주민(외국인)번호', field: 'model' },
+    { headerName: '소득구분', field: 'price' }
+  ];
   const [modalOpen, setModalOpen] = useState(false);
 
 const openModal = () => {
@@ -103,31 +116,13 @@ const closeModal = () => {
   return (
     <div>
     
-  <div class="table" style={{float:"left"}}>
-    <thead>
-  <div class="row header">
-    <div class="cell">Code</div>
-    <div class="cell">소득자명</div>
-    <div class="cell">주민(외국인)번호</div>
-    <div class="cell">소득구분</div>
-  </div>
-  </thead>
-  <tbody>
-  <div class="row">
-    <div class="cell">내용1</div>
-    <div class="cell">내용2</div>
-    <div class="cell">내용3</div>
-  </div>
-  <div class="row">
-    <div class="cell">내용4</div>
-    <div class="cell">내용5</div>
-    <div class="cell">내용6</div>
-  </div>
-  </tbody>
-</div>
+  <div className="ag-theme-alpine" style={{ height: 800, width: 600 ,float:"left",marginRight:"90px"}}>
+          <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
+        </div>
 
 
-      <div style={{float:"right"}}>
+
+      <div style={{float:"left"}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
             {e.title}
