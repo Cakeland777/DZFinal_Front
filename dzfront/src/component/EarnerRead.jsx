@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import {BiCalendar} from 'react-icons/bi';
+import { BiCalendar } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { render } from "react-dom";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
@@ -20,7 +20,7 @@ const EarnerRead = () => {
   const gridRef = useRef();
 
   const [columnDefs, setColumnDefs] = useState([
-    { field: "worker_id", headerName: "소득자명", resizable: true },
+    { field: "earner_name", headerName: "소득자명", resizable: true },
     {
       field: "earner_name",
       headerName: "주민(외국인)등록번호",
@@ -110,13 +110,15 @@ const EarnerRead = () => {
           <option value="payment_ym">2.지급년월</option>
         </select>
         <div style={{ position: "relative", zIndex: 800 }}>
-     <label>
-          <DatePicker showIcon
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            dateFormat="yyyy.MM"
-            showMonthYearPicker
-          /></label> 
+          <label>
+            <DatePicker
+              showIcon
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              dateFormat="yyyy.MM"
+              showMonthYearPicker
+            />
+          </label>
         </div>{" "}
         ~
         <div style={{ position: "relative", zIndex: 800 }}>
@@ -150,7 +152,6 @@ const EarnerRead = () => {
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}
         />
-       
       </div>
     </div>
   );

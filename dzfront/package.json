@@ -7,6 +7,7 @@
     "@testing-library/jest-dom": "^5.14.1",
     "@testing-library/react": "^13.0.0",
     "@testing-library/user-event": "^13.2.1",
+    "@toast-ui/react-grid": "^4.21.8",
     "ag-grid-community": "^29.1.0",
     "ag-grid-react": "^29.1.0",
     "react": "^16.8.0",

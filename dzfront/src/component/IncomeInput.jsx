@@ -6,7 +6,7 @@ import { AgGridReact } from 'ag-grid-react';
 
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-
+import CodeModal from "./CodeModal";
 const IncomeInput = () => {
 
 const data = [
@@ -20,7 +20,21 @@ const columnDefs = [
   { headerName: 'Model', field: 'model' },
   { headerName: 'Price', field: 'price' }
 ];
+const [modalOpen, setModalOpen] = useState(false);
 
+const openModal = () => {
+  setModalOpen(true);
+};
+const closeModal = () => {
+  setModalOpen(false);
+};
+const [code,setCode] = useState("");
+
+const handleInputChange = (inputValue) => {
+  console.log(inputValue);
+  setCode(inputValue);
+  // 모달에서 입력한 값이 출력됩니다.
+}
   const [startDate, setStartDate] = useState(new Date());
   return (
     <div>
@@ -36,6 +50,12 @@ const columnDefs = [
         <button>조회</button>
       </form>
       <div style={{ float: "left"}}>
+        <input type="text" value={code} onChange={handleInputChange} readOnly></input>
+      <button onClick={openModal}>C</button>
+       
+        <CodeModal open={modalOpen} close={closeModal} onInputChange={handleInputChange} header="사업소득자 코드도움">
+       
+        </CodeModal>
       <div className="ag-theme-alpine" style={{ height: 500, width: 300 }}>
           <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
         </div>

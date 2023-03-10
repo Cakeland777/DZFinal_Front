@@ -12,6 +12,7 @@ import EarnerRead from './component/EarnerRead';
 import EarnDivRead from './component/EarnDivRead';
 import IncomeInput from './component/IncomeInput';
 function App() {
+  
   const [member, onLogin] = Model();
   return (
   <>

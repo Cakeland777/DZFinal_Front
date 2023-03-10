@@ -42,7 +42,7 @@ function Login() {
          
           localStorage.setItem("memberInfo", data.member);
           localStorage.setItem("isLogOn", 1);
-          navigate("/registration");
+          navigate("/earnerRead");
       
       }
         else{
