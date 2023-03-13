@@ -19,23 +19,24 @@ const EarnDivRead = () => {
   const gridRef = useRef();
 
   const [columnDefs, setColumnDefs] = useState([
-    { field: "worker_id", headerName: "소득구분", resizable: true },
-    { field: "earner_name", headerName: "소득자명(상호)", resizable: true },
+    { field: "div_code", headerName: "소득구분", resizable: true },
+    { field: "div_name", headerName: "소득자명(상호)", resizable: true },
     {
-      field: "artist_type",
+      field: "personal_no",
       headerName: "주민(사업자)등록번호",
       resizable: true,
     },
-    { field: "artist_ins_red", headerName: "내/외국인", resizable: true },
-    { field: "total_payment", headerName: "건수", resizable: true },
+    { field: "is_native", headerName: "내/외국인", resizable: true },
+    { field: "", headerName: "건수", resizable: true },
 
-    { field: "dif_payment", headerName: "연간총지급액", resizable: true },
-    { field: "belonging_ym", headerName: "세율(%)", resizable: true },
-    { field: "payment_date", headerName: "소득세", resizable: true },
-    { field: "zonecode", headerName: "지방소득세", resizable: true },
-    { field: "zonecode", headerName: "예술인경비", resizable: true },
-    { field: "zonecode", headerName: "고용보험료", resizable: true },
-    { field: "zonecode", headerName: "계", resizable: true },
+    { field: "total_payment", headerName: "연간총지급액", resizable: true },
+    { field: "tax_rate", headerName: "세율(%)", resizable: true },
+    { field: "tax_income", headerName: "소득세", resizable: true },
+    { field: "tax_income", headerName: "소득세", resizable: true },
+    { field: "tax_local", headerName: "지방소득세", resizable: true },
+    { field: "artist_cost", headerName: "예술인경비", resizable: true },
+    { field: "ins_cost", headerName: "고용보험료", resizable: true },
+    { field: "", headerName: "계", resizable: true },
   ]);
 
   const defaultColDef = useMemo(() => ({

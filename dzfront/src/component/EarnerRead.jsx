@@ -31,7 +31,7 @@ const EarnerRead = () => {
     { field: "payment_ym", headerName: "지급년월일", resizable: true },
 
     { field: "total_payment", headerName: "지급액", resizable: true },
-    { field: "tax_rate", headerName: "세율(%)", resizable: true },
+    { field: "tax-rate", headerName: "세율(%)", resizable: true },
     { field: "tuition_amount", headerName: "학자금상환액", resizable: true },
     { field: "tax_income", headerName: "소득세", resizable: true },
     { field: "tax_local", headerName: "지방소득세", resizable: true },
