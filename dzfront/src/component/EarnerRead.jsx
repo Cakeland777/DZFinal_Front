@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import { FaFile } from 'react-icons/fa';
 import { BiCalendar } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { render } from "react-dom";
@@ -19,7 +20,7 @@ const EarnerRead = () => {
 
   const gridRef = useRef();
 
-  const [columnDefs, setColumnDefs] = useState([
+  const columnDefs =[
     { field: "earner_name", headerName: "소득자명", resizable: true },
     {
       field: "personal_no",
@@ -38,18 +39,13 @@ const EarnerRead = () => {
     { field: "artist_cost", headerName: "예술인경비", resizable: true },
     { field: "ins_cost", headerName: "고용보험료", resizable: true },
     { field: "real_payment", headerName: "차인지급액", resizable: true },
-  ]);
+  ];
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
     filter: true,
   }));
-  useEffect(() => {
-    fetch("https://www.ag-grid.com/example-assets/row-data.json")
-      .then((result) => result.json())
-      .then((rowData) => setRowData(rowData));
-  }, []);
-
+ 
   const cellClickedListener = useCallback((event) => {
     console.log("cellClicked", event);
   }, []);
@@ -77,23 +73,22 @@ const EarnerRead = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch("http://localhost:8080/earner_list", {
+    fetch(`/earner_list?param1=${selectedOption}&param2=${format(startDate, "yyyyMM")}&param3=${format(endDate, "yyyyMM")}&param4=${earner}&param5=${selected}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        param1: selectedOption,
-        param2: format(startDate, "yyyyMM"),
-        param3: format(endDate, "yyyyMM"),
-        param4: earner,
-        param5: selected,
-      }),
+      // body: JSON.stringify({
+      //   param1: selectedOption,
+      //   param2: format(startDate, "yyyyMM"),
+      //   param3: format(endDate, "yyyyMM"),
+      //   param4: earner,
+      //   param5: selected,
+      // }),
     })
-      .then((result) => result.json())
-      .then((rowData) => {
-        const wrappedData = [rowData.earnerInfo];
-        setRowData(wrappedData);
+      .then(result => result.json())
+      .then(rowData => {
+        setRowData([rowData.earnerInfo]);
       });
   }
 
@@ -146,6 +141,7 @@ const EarnerRead = () => {
           rowData={rowData}
           columnDefs={columnDefs}
           animateRows={true}
+          overlayLoadingTemplate="<FaFile /><b>데이터가 없습니다.</b>"
           rowSelection="multiple"
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}

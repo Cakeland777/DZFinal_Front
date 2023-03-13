@@ -5,6 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import { FaFile } from 'react-icons/fa';
 import { Link } from "react-router-dom";
 import { render } from "react-dom";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
@@ -18,9 +19,9 @@ const EarnDivRead = () => {
 
   const gridRef = useRef();
 
-  const [columnDefs, setColumnDefs] = useState([
-    { field: "div_code", headerName: "소득구분", resizable: true },
-    { field: "div_name", headerName: "소득자명(상호)", resizable: true },
+  const columnDefs = [
+    { field: "worker_id", headerName: "소득구분", resizable: true },
+    { field: "earner_name", headerName: "소득자명(상호)", resizable: true },
     {
       field: "personal_no",
       headerName: "주민(사업자)등록번호",
@@ -43,11 +44,7 @@ const EarnDivRead = () => {
     sortable: true,
     filter: true,
   }));
-  useEffect(() => {
-    fetch("https://www.ag-grid.com/example-assets/row-data.json")
-      .then((result) => result.json())
-      .then((rowData) => setRowData(rowData));
-  }, []);
+
 
   const cellClickedListener = useCallback((event) => {
     console.log("cellClicked", event);
@@ -146,6 +143,7 @@ const EarnDivRead = () => {
           columnDefs={columnDefs}
           animateRows={true}
           rowSelection="multiple"
+          overlayLoadingTemplate="<b>데이터가 없습니다.</b>"
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}
         />

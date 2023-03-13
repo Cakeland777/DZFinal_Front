@@ -1,8 +1,27 @@
 import React from 'react';
 import '../modal.css';
 import FindAddr from './FindAddr';
+import DaumPostcode from "react-daum-postcode";
 const Modal = (props) => {
   
+  const handlePostCode = (data) => {
+    let fullAddress = data.address;
+    let extraAddress = ''; 
+    
+    if (data.addressType === 'R') {
+      if (data.bname !== '') {
+        extraAddress += data.bname;
+      }
+      if (data.buildingName !== '') {
+        extraAddress += (extraAddress !== '' ? `, ${data.buildingName}` : data.buildingName);
+      }
+      fullAddress += (extraAddress !== '' ? ` (${extraAddress})` : '');
+    }
+    console.log(data)
+    console.log(fullAddress)
+    console.log(data.zonecode)
+    props.onClose()
+}
   const { open, close, header } = props;
 
   return (
@@ -16,7 +35,10 @@ const Modal = (props) => {
               &times;
             </button>
           </header>
-          <main>{props.children}  <FindAddr></FindAddr></main>
+          <main>  
+
+          <DaumPostcode  onComplete={handlePostCode} />
+          </main>
           <footer>
             <button className="close" onClick={close}>
               close

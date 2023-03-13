@@ -40,9 +40,10 @@ function Login() {
 
           });
          
-          localStorage.setItem("memberInfo", data.member);
+          localStorage.setItem("worker_id", data.member.worker_id);
+          localStorage.setItem("code_count", data.member.code_count);
           localStorage.setItem("isLogOn", 1);
-          navigate("/earnerRead");
+          navigate("/");
       
       }
         else{
