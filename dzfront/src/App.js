@@ -12,6 +12,7 @@ import EarnDivRead from './component/list/EarnDivRead';
 import IncomeInput from './component/input/IncomeInput';
 import Test from './component/test';
 import Home from './component/Home';
+import RegistPage from './component/regist/RegistPage';
 
 function App() {
 
@@ -29,6 +30,7 @@ function App() {
         <Route path="/test" element={<Test/>} />
         <Route path="/test2" element={<EarnerGrid/>} />
         <Route path="/incomeInput" element={<IncomeInput/>}/>
+        <Route path="/registPage" element={<RegistPage/>}/>
        
       </Routes>
     </div>

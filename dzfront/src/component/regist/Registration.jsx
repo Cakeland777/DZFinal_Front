@@ -126,7 +126,7 @@ const handleBlur = (event) => {
       <option value="비거주">1.비거주</option>
       </select>
        
-      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={div} onBlur={handleBlur} onChange={onChange} /><br/>
+      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={div} onBlur={handleBlur} onChange={onChange}  /><br/>
       내/외국인 <select value={isNative} name="is_native" onBlur={handleBlur} onChange={onChange}>
       <option value="내" >0.내국인</option>
       <option value="외">1.외국인</option>
@@ -215,14 +215,14 @@ const handleBlur = (event) => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (  
     <div>
-    <EarnerGrid></EarnerGrid>
-      <div style={{float:"left"}}>
+      <div style={{float:"left" ,marginLeft:"50px"}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
             {e.title}
           </button>
         ))}
      {currentItem.content}</div>
+     <p>{sessionStorage.getItem("code")}</p>
     </div>
   );
 }

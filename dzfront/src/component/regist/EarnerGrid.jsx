@@ -10,33 +10,49 @@ import MyContext from "../util/Context";
     const [isModalOpen, setIsModalOpen] = useState(false);
     const gridRef = useRef();
     const gridRef2 = useRef();
-    const columnDefs = [ {
-      headerName: "Button Column",
-      field: "buttonColumn",
-      editable:true,
-      width:100,
-      cellRenderer: (params) => {
-        const handleClick = () => {
-          setIsModalOpen(true);
-        };
-        return <button style={{height:"20px",width:"10px",zIndex:"-100"}}onClick={handleClick}>.</button>;
-      },
+    const columnDefs = [ 
+      
+      { headerName: "Code", field: "earner_code",editable:true,width:90 },
+      { headerName: "소득자명", field: "earner_name", editable: true,width:90 },
+
+      {
+        headerName: "주민(외국인)번호",
+        children: [
+            { headerName: "구분",field: 'is_native' ,editable:true,width:60},
+            { headerName: "번호",field: 'personal_no',width:150,editable:true,colspan:2},
+        ]
     },
-        { headerName: "Code", field: "code",editable:true,width:100 },
-        { headerName: "소득자명", field: "name", editable: true,width:90 },
-        { headerName: "주민(외국인)번호", field: "number", editable: true },
-        { headerName: "소득구분", field: "div", editable: true }
+    {
+
+      headerName: '소득구분',
+      children: [
+          { headerName: "구분코드",field: 'div_code' ,width:90},
+          { headerName: "구분명",field: 'div_name',width:100,colspan:2},
+          {
+            headerName: "",
+            field: "buttonColumn",
+            editable:true,
+            width:100,
+            cellRenderer: (params) => {
+              const handleClick = () => {
+                setIsModalOpen(true);
+              };
+              return <button style={{height:"20px",width:"10px",zIndex:"-100"}}onClick={handleClick}>.</button>;
+            },
+          },
+      ]
+  },
+ 
       ];
       const divColumn = [
           { headerName: "소득구분코드", field: "div_code",width:180 },
           { headerName: "소득구분명", field: "div_name", width:160 },
-          
-           
+                    
         ];
 
       const emptyRowData = { code: "000001", name: "", number: "", div: "" };
       
-    const [rowData, setRowData] = useState([emptyRowData]);
+    const [rowData, setRowData] = useState();
     const [divRowData, setDivRowData] = useState();
  
   const onGridReady = useCallback((params) => {
@@ -60,11 +76,15 @@ import MyContext from "../util/Context";
           });
       }
     };
-  //   useEffect(() => {
-  //     fetch(`http://localhost:8080/earner_list?worker_id=yuchan2`)
-  //     .then(result => result.json())
-  //     .then(rowData => setRowData([rowData]))
-  //  }, []);
+    useEffect(() => {
+      fetch(`http://localhost:8080/earner_list/yuchan2`)
+      .then(result => result.json())
+      .then((rowData) =>{ 
+        setRowData(rowData.earner_list);   
+       
+       }
+        )
+   }, []);
    
     const createNewRow = () => {
       const lastRowData = rowData[rowData.length - 1];
@@ -75,6 +95,7 @@ import MyContext from "../util/Context";
     };
   
     const handleSubmit = () => {
+      
       const lastRowData = rowData[rowData.length - 1];
       const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
       if (isLastRowFilled) {
@@ -116,7 +137,7 @@ import MyContext from "../util/Context";
       const selectedRows = gridRef.current.api.getSelectedRows();
 
       setIsModalOpen(false);
-
+      
       console.log("selectValue->", selectedRows[0]);
       setRowData([{...rowData[0], name : selectedRows[0].div_code, number: "aaaaaa"}]);
       gridRef2.current.api.applyTransaction({ add: [{ code: "", name: "", number: "", div: "" }] });
@@ -131,6 +152,12 @@ import MyContext from "../util/Context";
         selectedRows.length === 1 ? selectedRows[0].div_code : '';
         
     }, []);
+
+    const onSelectionChanged2 = useCallback(() => {
+      const selectedRows2 = gridRef2.current.api.getSelectedRows();
+      sessionStorage.setItem("code",selectedRows2[0].earner_code);
+        
+    }, []);
     const customStyles = {
       content: {
         top: '50%',
@@ -142,18 +169,29 @@ import MyContext from "../util/Context";
       },
     };
 
- 
+    // const fetchData = (code) => {
+    //   fetch(`http://localhost:8080/get_earner?earner_code=${code}&worker_id=yuchan2`, {
+    //         method: "GET",
+    //         headers: {
+    //           "Content-Type": "application/json"
+    //         }
+    //       })
+    //       .then((res) => {
+    //         return res.json(); 
+    //     })
+    //     .then((json) => {
+    //         console.log(json); 
+    //     });
+      
+   
+    // };
     return (
       
       <div className="ag-theme-alpine" style={{ float:"left" ,height: 800, width: 600 }}>
         <AgGridReact
           columnDefs={columnDefs}
           rowData={rowData}
-          onRowSelected={event => {
-            const EarnselectedRows = event.api.getSelectedRows();
-            const EarnselectedRowData = EarnselectedRows[0]; 
-           
-          }}
+          onSelectionChanged={onSelectionChanged2}
           rowSelection={'single'}
           onCellEditingStopped={handleCellEditingStopped}
           ref={gridRef2}
