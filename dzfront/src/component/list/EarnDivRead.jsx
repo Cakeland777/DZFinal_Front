@@ -75,18 +75,27 @@ const EarnDivRead = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
+<<<<<<< refs/remotes/origin/yujin:dzfront/src/component/list/EarnDivRead.jsx
     fetch("http://localhost:8080/search_div_code", {
       method: "POST",
+=======
+    fetch(`/earner_list?param1=${selectedOption}
+                       &param2=${format(startDate, "yyyyMM")}
+                       &param3=${format(endDate, "yyyyMM")}
+                       &param4=${earner}
+                       &param5=${selected2}`, {
+      method: "GET",
+>>>>>>> ..:dzfront/src/component/EarnDivRead.jsx
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        param1: selectedOption,
-        param2: format(startDate, "yyyyMM"),
-        param3: format(endDate, "yyyyMM"),
-        param4: earner,
-        param5: selected2,
-      }),
+      // body: JSON.stringify({
+      //   param1: selectedOption,
+      //   param2: format(startDate, "yyyyMM"),
+      //   param3: format(endDate, "yyyyMM"),
+      //   param4: earner,
+      //   param5: selected2,
+      // }),
     })
       .then((result) => result.json())
       .then((rowData) => {
