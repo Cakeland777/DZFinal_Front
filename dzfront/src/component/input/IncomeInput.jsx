@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 
 import { AgGridReact } from 'ag-grid-react';
@@ -15,11 +16,52 @@ const data = [
   { make: 'Porsche', model: 'Boxter', price: 72000 }
 ];
 
+// const columnDefs = [
+//   { headerName: "v", field: "v",editable:true,width:100 },
+//   { headerName: "소득자명", field: "name", editable: true,width:90 },
+//   { headerName: "주민(외국인)번호", field: "number", editable: true},
+//   { headerName: "소득구분", field: "div", editable: true }
+// ];
+
 const columnDefs = [
-  { headerName: 'Make', field: 'make' },
-  { headerName: 'Model', field: 'model' },
-  { headerName: 'Price', field: 'price' }
+  { headerName: "v", field: "v"},
+  { headerName: "Code", field: "Code"},
+  { headerName: "소득자명", field: "name"},
+  
+  {
+    headerName: '주민(외국인)번호',
+    marryChildren: true,
+    children: [
+      { field: '내', colId: 'is_native' },
+      { field: '990909-1099999', colId: 'number' },
+    ],
+  },
+  {
+    headerName: '소득구분',
+    marryChildren: true,
+    children: [
+      { field: '940302', colId: 'div_code' },
+      { field: '배우', colId: 'div_name' }
+    ],
+  },
 ];
+
+const gridOptions = {
+  defaultColDef: {
+    resizable: true,
+    width: 160,
+  },
+  columnDefs: columnDefs,
+  rowData: null,
+};
+document.addEventListener('DOMContentLoaded', () => {
+  const gridDiv = document.querySelector('#myGrid');
+
+  fetch('https://www.ag-grid.com/example-assets/olympic-winners.json')
+    .then((response) => response.json())
+    .then((data) => gridOptions.api.setRowData(data));
+});
+
 const [modalOpen, setModalOpen] = useState(false);
 
 const openModal = () => {
@@ -35,16 +77,23 @@ const handleInputChange = (inputValue) => {
   setCode(inputValue);
   // 모달에서 입력한 값이 출력됩니다.
 }
+
+
+registerLocale("ko", ko);
+
   const [startDate, setStartDate] = useState(new Date());
   return (
     <div> 
+      
       <form style={{padding:"10"}}>
       지급년월<DatePicker
+      
           showIcon
           selected={startDate}
           onChange={(date) => setStartDate(date)}
           dateFormat="yyyyMM"
           showMonthYearPicker
+          locale="ko"
         />
         <button>조회</button>
       </form>
