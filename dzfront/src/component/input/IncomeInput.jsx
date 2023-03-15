@@ -6,7 +6,7 @@ import { AgGridReact } from 'ag-grid-react';
 
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-import CodeModal from "./CodeModal";
+import CodeModal from "../CodeModal";
 const IncomeInput = () => {
 
 const data = [
@@ -37,10 +37,9 @@ const handleInputChange = (inputValue) => {
 }
   const [startDate, setStartDate] = useState(new Date());
   return (
-    <div>
-      <form>
-        지급년월{" "}
-        <DatePicker
+    <div> 
+      <form style={{padding:"10"}}>
+      지급년월<DatePicker
           showIcon
           selected={startDate}
           onChange={(date) => setStartDate(date)}

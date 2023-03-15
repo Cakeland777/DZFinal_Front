@@ -73,18 +73,11 @@ const EarnerRead = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch(`/earner_list?param1=${selectedOption}&param2=${format(startDate, "yyyyMM")}&param3=${format(endDate, "yyyyMM")}&param4=${earner}&param5=${selected}`, {
+    fetch(`http://localhost:8080/search_earner_code?param1=${selectedOption}&param2=${format(startDate, "yyyyMM")}&param3=${format(endDate, "yyyyMM")}&param4=${earner}&param5=${selected}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
       },
-      // body: JSON.stringify({
-      //   param1: selectedOption,
-      //   param2: format(startDate, "yyyyMM"),
-      //   param3: format(endDate, "yyyyMM"),
-      //   param4: earner,
-      //   param5: selected,
-      // }),
     })
       .then(result => result.json())
       .then(rowData => {
@@ -130,7 +123,7 @@ const EarnerRead = () => {
           <option value="payment_ym">3.지급년월순</option>
           <option value="personal_no">4.주민(사업자)번호순</option>
         </select>
-        <button type="submit">조회</button>
+        <button type="submit" style={{marginLeft:"650px"}}>조회</button>
       </form>
       <div
         className="ag-theme-alpine"

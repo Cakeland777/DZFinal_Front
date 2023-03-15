@@ -1,8 +1,8 @@
 import { Column } from "ag-grid-community";
 import React, { useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import '../css/login.css';
 import Swal from 'sweetalert2';
+import '../../css/login.css';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -69,7 +69,7 @@ function Login() {
     <div className="App">
     <form onSubmit={handleSubmit} style={{ flexDirection:"Column"}}>
     <div className="input-container">
-          <input type="text" placeholder="아이디" value={username} onChange={handleUsernameChange}/>
+          <input type="text" placeholder="아이디"  value={username} onChange={handleUsernameChange}/>
       
         </div>
         

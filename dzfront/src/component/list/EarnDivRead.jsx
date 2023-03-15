@@ -38,7 +38,7 @@ const EarnDivRead = () => {
     { field: "artist_cost", headerName: "예술인경비", resizable: true },
     { field: "ins_cost", headerName: "고용보험료", resizable: true },
     { field: "", headerName: "계", resizable: true },
-  ]);
+  ];
 
   const defaultColDef = useMemo(() => ({
     sortable: true,
@@ -75,7 +75,7 @@ const EarnDivRead = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch("http://localhost:8080/earner_list", {
+    fetch("http://localhost:8080/search_div_code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -131,7 +131,7 @@ const EarnDivRead = () => {
           <option value="payment_ym">3.지급년월순</option>
           <option value="personal_no">4.주민(사업자)번호순</option>
         </select>
-        <button type="submit">조회</button>
+        <button type="submit" style={{marginLeft:"650px"}}>조회</button>
       </form>
       <div
         className="ag-theme-alpine"
