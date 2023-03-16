@@ -6,7 +6,8 @@ import ReactModal, { contextType } from "react-modal";
 import DivCodeButton from "../util/DivCodeButton";
 import Registration from "./Registration";
 import MyContext from "../util/Context";
-  const EarnerGrid = () => {
+import Model from "./Model";
+  const EarnerGrid = ({model}) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const gridRef = useRef();
     const gridRef2 = useRef();
@@ -50,9 +51,7 @@ import MyContext from "../util/Context";
                     
         ];
 
-      const emptyRowData = { code: "000001", name: "", number: "", div: "" };
-      
-    const [rowData, setRowData] = useState();
+    //const [rowData, setRowData] = useState();
     const [divRowData, setDivRowData] = useState();
  
   const onGridReady = useCallback((params) => {
@@ -65,10 +64,11 @@ import MyContext from "../util/Context";
         fetch(`http://localhost:8080/get_count`)
           .then((response) => response.json())
           .then((data) => {
-            const newRowData = { ...data, name: data.name || data.code };
-            const newData = [...rowData];
-            newData[data.rowIndex] = newRowData;
-            setRowData(newData);
+            //const newRowData = { ...data, name: data.name || data.code };
+            //const newData = [...rowData];
+            //newData[data.rowIndex] = newRowData;
+            //setRowData(newData);
+            model.onUpdateEarner({ ...data, name: data.name || data.code });
             createNewRow();
           })
           .catch((error) => {
@@ -77,69 +77,70 @@ import MyContext from "../util/Context";
       }
     };
     useEffect(() => {
-      fetch(`http://localhost:8080/earner_list/yuchan2`)
-      .then(result => result.json())
-      .then((rowData) =>{ 
-        setRowData(rowData.earner_list);   
+      model.onLoadFromServer();
+      // fetch(`http://localhost:8080/earner_list/yuchan2`)
+      // .then(result => result.json())
+      // .then((rowData) =>{ 
+      //   setRowData(rowData.earner_list);   
        
-       }
-        )
+      //  }
+      //   )
    }, []);
    
     const createNewRow = () => {
-      const lastRowData = rowData[rowData.length - 1];
-      const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
-      if (isLastRowFilled) {
-        setRowData([...rowData, emptyRowData]);
-      }
+      // const lastRowData = rowData[rowData.length - 1];
+      // const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
+      // if (isLastRowFilled) {
+      //   setRowData([...rowData, emptyRowData]);
+      // }
     };
   
     const handleSubmit = () => {
       
-      const lastRowData = rowData[rowData.length - 1];
-      const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
-      if (isLastRowFilled) {
-        // 모든 값이 입력되었는지 확인
-        const isAllFilled = rowData.every((data) =>
-          Object.values(data).every((val) => val !== "")
-        );
+    //   const lastRowData = rowData[rowData.length - 1];
+    //   const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
+    //   if (isLastRowFilled) {
+    //     // 모든 값이 입력되었는지 확인
+    //     const isAllFilled = rowData.every((data) =>
+    //       Object.values(data).every((val) => val !== "")
+    //     );
   
-        if (isAllFilled) {
-          // 서버로 데이터 전송
-          fetch("http://example.com/api/data", {
-            method: "POST",
-            body: JSON.stringify(rowData),
-            headers: {
-              "Content-Type": "application/json"
-            }
-          })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Failed to send data to server.");
-              }
-              return response.json();
-            })
-            .then((data) => {
-              console.log("Data sent to server:", data);
-            })
-            .catch((error) => {
-              console.error("Error sending data to server:", error);
-            });
+    //     if (isAllFilled) {
+    //       // 서버로 데이터 전송
+    //       fetch("http://example.com/api/data", {
+    //         method: "POST",
+    //         body: JSON.stringify(rowData),
+    //         headers: {
+    //           "Content-Type": "application/json"
+    //         }
+    //       })
+    //         .then((response) => {
+    //           if (!response.ok) {
+    //             throw new Error("Failed to send data to server.");
+    //           }
+    //           return response.json();
+    //         })
+    //         .then((data) => {
+    //           console.log("Data sent to server:", data);
+    //         })
+    //         .catch((error) => {
+    //           console.error("Error sending data to server:", error);
+    //         });
   
-          // 새로운 행 생성
-          setRowData([emptyRowData]);
-        }
-      }
+    //       // 새로운 행 생성
+    //       setRowData([emptyRowData]);
+    //     }
+    //   }
     };
    
     
-    const DivModalDoubleClicked=useCallback(() => {
+    const DivModalDoubleClicked = useCallback(() => {
       const selectedRows = gridRef.current.api.getSelectedRows();
 
       setIsModalOpen(false);
       
-      console.log("selectValue->", selectedRows[0]);
-      setRowData([{...rowData[0], name : selectedRows[0].div_code, number: "aaaaaa"}]);
+      //console.log("selectValue->", selectedRows[0]);
+      //setRowData([{...rowData[0], name : selectedRows[0].div_code, number: "aaaaaa"}]);
       gridRef2.current.api.applyTransaction({ add: [{ code: "", name: "", number: "", div: "" }] });
       
     }, []);
@@ -190,7 +191,7 @@ import MyContext from "../util/Context";
       <div className="ag-theme-alpine" style={{ float:"left" ,height: 800, width: 600 }}>
         <AgGridReact
           columnDefs={columnDefs}
-          rowData={rowData}
+          rowData={model.earnerList}
           onSelectionChanged={onSelectionChanged2}
           rowSelection={'single'}
           onCellEditingStopped={handleCellEditingStopped}

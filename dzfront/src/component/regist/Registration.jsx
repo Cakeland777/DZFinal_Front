@@ -4,27 +4,12 @@ import '../../css/registration.css';
 import EarnerGrid from "./EarnerGrid";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-
-const  Registration=()=>{
-
-
-  const [rowData, setRowData] = useState([{ code:"", name: "", personal_no: "", div:""}]);
+import Model from "./Model";
+const  Registration=({model})=>{
   const [postcode, setPostcode] = useState("");
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [earnerCode,setEarnerCode]=useState("");
-
-  
-  async function getCode() {
-    setEarnerCode(sessionStorage.getItem("code"));
-  }
-   
-
-  useEffect(() => {
-    getCode();
-  }, []);
-
  
   const handlePostcode = (data) => {
     setPostcode(data.zonecode);
@@ -183,7 +168,7 @@ const handleBlur = (event) => {
       <option value="Y" >1.여</option>
       </select>
       <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={deduction_amount} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
-      <br/> 비고<input type="text" name="etc" value={earnerCode} onBlur={handleBlur} onChange={onChange}  />
+      <br/> 비고<input type="text" name="etc" value={etc} onBlur={handleBlur} onChange={onChange}  />
       </>
     },
   
@@ -233,8 +218,7 @@ const handleBlur = (event) => {
           </button>
         ))}
      {currentItem.content}</div>
-     <button onClick={getCode}>코드 가져오기</button>
-     <p>{earnerCode}</p>
+     
     </div>
   );
 }
