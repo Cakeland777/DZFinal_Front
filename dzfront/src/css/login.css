@@ -11,15 +11,17 @@ form {
   }
   
   input {
-    padding: 10px;
-    margin:10px;
+    padding: 5px;
+    margin:7px;
+    margin-left:10px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
   }
 
   select{
-    padding: 10px;
+    padding: 7px;
+    margin:7px;
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
@@ -28,6 +30,7 @@ form {
   button {
     padding: 10px;
     border: none;
+    text-align: center;
     border-radius: 5px;
     font-size: 16px;
     background-color: #6273D9;

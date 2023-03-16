@@ -5,7 +5,7 @@ import { AgGridReact } from 'ag-grid-react';
 
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-alpine.css';
-const CodeModal = (props) => {
+const DivCodeModal = (props) => {
   const [rowData] = useState([
     {make: "Toyota", model: "Celica", price: 35000},
     {make: "Ford", model: "Mondeo", price: 32000},
@@ -73,4 +73,4 @@ const handleChange = (event) => {
 };
 
 
-export default CodeModal;
+export default DivCodeModal;
