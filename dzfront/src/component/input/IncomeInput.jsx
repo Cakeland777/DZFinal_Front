@@ -16,18 +16,10 @@ const data = [
   { make: 'Porsche', model: 'Boxter', price: 72000 }
 ];
 
-// const columnDefs = [
-//   { headerName: "v", field: "v",editable:true,width:100 },
-//   { headerName: "소득자명", field: "name", editable: true,width:90 },
-//   { headerName: "주민(외국인)번호", field: "number", editable: true},
-//   { headerName: "소득구분", field: "div", editable: true }
-// ];
-
 const columnDefs = [
   { headerName: "v", field: "v"},
   { headerName: "Code", field: "Code"},
-  { headerName: "소득자명", field: "name"},
-  
+  { headerName: "소득자명", field: "name"}, 
   {
     headerName: '주민(외국인)번호',
     marryChildren: true,
@@ -44,6 +36,20 @@ const columnDefs = [
       { field: '배우', colId: 'div_name' }
     ],
   },
+];
+
+const columnDefs2 = [
+  { headerName: "귀속년월", field: "accrual_ym", resizable: true },
+  { headerName: "지급년월일", field: "payment_ym", resizable: true },
+  { headerName: "지급총액", field: "total_payment", resizable: true },
+  { headerName: "세율(%)", field: "tax_rate", resizable: true },
+  { headerName: "학자금상환액", field: "tuition_amount", resizable: true },
+  { headerName: "소득세", field: "tax_income", resizable: true },
+  { headerName: "지방소득세", field: "tax_local", resizable: true },
+  { headerName: "세액계", field: "tax_total", resizable: true },
+  { headerName: "예술인경비", field: "artist_cost", resizable: true },
+  { headerName: "고용보험료", field: "ins_cost", resizable: true },
+  { headerName: "차인지급액", field: "real_payment", resizable: true }
 ];
 
 const gridOptions = {
@@ -86,8 +92,8 @@ registerLocale("ko", ko);
     <div> 
       
       <form style={{padding:"10"}}>
-      지급년월<DatePicker
-      
+        
+        지급년월<DatePicker
           showIcon
           selected={startDate}
           onChange={(date) => setStartDate(date)}
@@ -97,19 +103,18 @@ registerLocale("ko", ko);
         />
         <button>조회</button>
       </form>
+      
       <div style={{ float: "left"}}>
         <input type="text" value={code} onChange={handleInputChange} readOnly></input>
-      <button onClick={openModal}>C</button>
-       
+        <button onClick={openModal}>C</button>
         <CodeModal open={modalOpen} close={closeModal} onInputChange={handleInputChange} header="사업소득자 코드도움">
-       
         </CodeModal>
+
       <div className="ag-theme-alpine" style={{ height: 500, width: 200 }}>
           <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
-        </div>
+      </div>
       <table style={{ border: "1px solid" ,width:200 }}>
         <thead></thead>
-
         <tbody>
           <tr>
             <th scope="row">인원[건수]</th>
@@ -149,10 +154,11 @@ registerLocale("ko", ko);
         </tbody>
       </table>
       </div>
+      
       <div style={{ float: "left",marginLeft:"50px" }}>
         소득지급내역
         <div className="ag-theme-alpine" style={{ height: 700, width: 1000  }}>
-          <AgGridReact columnDefs={columnDefs} rowData={data}></AgGridReact>
+          <AgGridReact columnDefs={columnDefs2} rowData={data}></AgGridReact>
         </div>
       </div>
     </div>
