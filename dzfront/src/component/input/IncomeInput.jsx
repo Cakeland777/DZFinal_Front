@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 
 import { AgGridReact } from 'ag-grid-react';
+
 
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -38,11 +39,12 @@ const columnDefs = [
   },
 ];
 
+
 const columnDefs2 = [
   { headerName: "귀속년월", field: "accrual_ym", resizable: true },
   { headerName: "지급년월일", field: "payment_ym", resizable: true },
   { headerName: "지급총액", field: "total_payment", resizable: true },
-  { headerName: "세율(%)", field: "tax_rate", resizable: true },
+  { headerName: "세율", field: "tax_rate", resizable: true },
   { headerName: "학자금상환액", field: "tuition_amount", resizable: true },
   { headerName: "소득세", field: "tax_income", resizable: true },
   { headerName: "지방소득세", field: "tax_local", resizable: true },
@@ -52,6 +54,63 @@ const columnDefs2 = [
   { headerName: "차인지급액", field: "real_payment", resizable: true }
 ];
 
+const dataForBottomGrid = [
+  {
+    귀속년월: '합계',
+    지급년월일: '',
+    지급총액: '2,000,000',
+    세율: '',
+    학자금상환액: '',
+    소득세: '60,000',
+    지방소득세: '6,000',
+    세액계: '66,000',
+    예술인경비: '',
+    고용보험료: '',
+    차인지급액: '1,934,000',
+  },
+];
+
+const gridOptionsTop = {
+  defaultColDef: {
+    editable: true,
+    sortable: true,
+    resizable: true,
+    filter: true,
+    flex: 1,
+    minWidth: 100,
+  },
+  columnDefs2,
+  rowData: null,
+  // debug: true,
+  // don't show the horizontal scrollbar on the top grid
+  suppressHorizontalScroll: true,
+  alignedGrids: [],
+};
+
+// this is the grid options for the bottom grid
+const gridOptionsBottom = {
+  defaultColDef: {
+    editable: true,
+    sortable: true,
+    resizable: true,
+    filter: true,
+    flex: 1,
+    minWidth: 100,
+  },
+  columnDefs: columnDefs2,
+  // we are hard coding the data here, it's just for demo purposes
+  rowData: dataForBottomGrid,
+  // debug: true,
+  rowClass: 'bold-row',
+  // hide the header on the bottom grid
+  headerHeight: 0,
+  alignedGrids: [],
+};
+
+gridOptionsTop.alignedGrids.push(gridOptionsBottom);
+gridOptionsBottom.alignedGrids.push(gridOptionsTop);
+
+
 const gridOptions = {
   defaultColDef: {
     resizable: true,
@@ -60,9 +119,8 @@ const gridOptions = {
   columnDefs: columnDefs,
   rowData: null,
 };
-document.addEventListener('DOMContentLoaded', () => {
-  const gridDiv = document.querySelector('#myGrid');
 
+document.addEventListener('DOMContentLoaded', () => {
   fetch('https://www.ag-grid.com/example-assets/olympic-winners.json')
     .then((response) => response.json())
     .then((data) => gridOptions.api.setRowData(data));
@@ -157,10 +215,11 @@ registerLocale("ko", ko);
       
       <div style={{ float: "left",marginLeft:"50px" }}>
         소득지급내역
-        <div className="ag-theme-alpine" style={{ height: 700, width: 1000  }}>
-          <AgGridReact columnDefs={columnDefs2} rowData={data}></AgGridReact>
+        <div className="ag-theme-alpine" style={{ height: 700, width: 1500  }}>
+          <AgGridReact columnDefs={columnDefs2}  rowData={data}></AgGridReact>
         </div>
       </div>
+
     </div>
   );
 };

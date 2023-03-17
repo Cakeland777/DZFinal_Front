@@ -12,7 +12,7 @@ import EarnDivRead from './component/list/EarnDivRead';
 import IncomeInput from './component/input/IncomeInput';
 import Test from './component/test';
 import Home from './component/Home';
-
+import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
 
   return (
@@ -29,7 +29,7 @@ function App() {
         <Route path="/test" element={<Test/>} />
         <Route path="/test2" element={<EarnerGrid/>} />
         <Route path="/incomeInput" element={<IncomeInput/>}/>
-       
+        <Route path="/incomeInput2" element={<IncomeInput2/>}/>
       </Routes>
     </div>
 
