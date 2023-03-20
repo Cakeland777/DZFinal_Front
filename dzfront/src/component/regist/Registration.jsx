@@ -1,39 +1,73 @@
-import React, {useEffect, useState,useReducer } from "react";
+import React, {useEffect,useRef, useState,useReducer,useCallback} from "react";
 import DaumPostcode from "react-daum-postcode";
 import '../../css/registration.css';
 import EarnerGrid from "./EarnerGrid";
+import { AgGridReact,AgGridColumn } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
+import ReactModal, { contextType } from "react-modal";
 
-const  Registration=()=>{
+const  Registration=(props)=>{
 
-
+  const [preCode,setPreCode]=useState(props.value);
+  const [earner,setEarner]=useState('');
+  useEffect(()=>{
+    if(preCode!==props.value){
+      fetch('http://localhost:8080/regist/get_earner',{
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          worker_id:"yuchan2",
+          earner_code: props.value
+        }),
+      })
+      .then(result => result.json())
+      .then(data => {
+        
+        setEarner(data.earner_info);
+        
+      });
+    
+    }
+    setPreCode(props.value);
+  },[props.value, preCode, earner])
+  const divColumn = [
+    { headerName: "소득구분코드", field: "div_code",width:180 },
+    { headerName: "소득구분명", field: "div_name", width:160 },
+              
+  ];
+  const [divRowData, setDivRowData] = useState();
+  const onGridReady = useCallback((params) => {
+    fetch('http://localhost:8080/regist/list_divcode')
+      .then((resp) => resp.json())
+      .then((data) => setDivRowData(data.div_list));
+  }, []);
   const [rowData, setRowData] = useState([{ code:"", name: "", personal_no: "", div:""}]);
   const [postcode, setPostcode] = useState("");
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [earnerCode,setEarnerCode]=useState("");
-
-  
-  async function getCode() {
-    setEarnerCode(sessionStorage.getItem("code"));
-  }
-   
-
-  useEffect(() => {
-    getCode();
+  const [PostModalOpen,setPostModalOpen]=useState(false);
+  const[selectValue, setSelectValue]=useState("");
+  const onSelectionChanged = useCallback(() => {
+    const selectedRows = gridRef.current.api.getSelectedRows();
+    setSelectValue(selectedRows[0]);
+    document.querySelector('#div_name').innerHTML =
+      selectedRows.length === 1 ? selectedRows[0].div_code : '';
+      
   }, []);
-
+  const gridRef = useRef();
  
   const handlePostcode = (data) => {
     setPostcode(data.zonecode);
     setAddress(`${data.address} ${data.buildingName}`);
-    setIsModalOpen(false);
+    setPostModalOpen(false);
   };
 
   const handlePostcodeClick = () => {
-    setIsModalOpen(true);
+    setPostModalOpen(true);
   };
  
 
@@ -85,14 +119,14 @@ const{ residenceSelect,
 const onChange=e=>{dispatch(e.target);
   const { name, value } = e.target;
   if (value.trim() !== '') {
-    fetch('http://localhost:8080/earner_update', {
+    fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         param_value: value,
         param_name:name,
         worker_id:"yuchan2",
-        earner_code:"000001"
+        earner_code:props.value
       
       }),
     })  
@@ -102,17 +136,22 @@ const onChange=e=>{dispatch(e.target);
       });
   }
 };
+const selectDivCode=()=>{
+
+   
+
+}
 const handleBlur = (event) => {
   const { name, value } = event.target;
   if (value.trim() !== '') {
-    fetch('http://localhost:8080/earner_update', {
+    fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
         param_value: value,
         param_name :name,
         worker_id:"yuchan2",
-        earner_code:"000001"
+        earner_code:props.value
       
       }),
     })
@@ -124,7 +163,9 @@ const handleBlur = (event) => {
       });
   }
 };
-
+const handleClick = () => {
+  setIsModalOpen(true);
+};
 
   const Tab = [
     {
@@ -137,7 +178,7 @@ const handleBlur = (event) => {
       <option value="비거주">1.비거주</option>
       </select>
        
-      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={div} onBlur={handleBlur} onChange={onChange}  /><br/>
+      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={div} onBlur={handleBlur} onChange={onChange} onClick={handleClick} /><br/>
       내/외국인 <select value={isNative} name="is_native" onBlur={handleBlur} onChange={onChange}>
       <option value="내" >0.내국인</option>
       <option value="외">1.외국인</option>
@@ -160,17 +201,18 @@ const handleBlur = (event) => {
       </div>
       <DaumPostcode onComplete={handlePostcode} autoClose={true}
       style={{
-          display: isModalOpen ? "block" : "none",
+          display: PostModalOpen ? "block" : "none",
           position: "absolute",
           top: 0,
           left: 0,
-          width: "100%",
-          height: "100%",
+          width: "50%",
+          
+          height: "50%",
         }}
         className="daum-postcode"
       />
     </div>
-      전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={tel1} size="3" maxlength="3"/>-
+      전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={tel1}  size="3" maxlength="3"/>-
               <input type="text" name="tel2" onBlur={handleBlur} onChange={onChange} value={tel2}  size="4" maxlength="4"/>-
               <input type="text" name="tel3"  onBlur={handleBlur} onChange={onChange} value={tel3}  size="4" maxlength="4"/><br/>
       핸드폰번호 <input type="text" name="phone1" onBlur={handleBlur} onChange={onChange} value={phone1} size="3" maxlength="3"/>-
@@ -183,7 +225,7 @@ const handleBlur = (event) => {
       <option value="Y" >1.여</option>
       </select>
       <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={deduction_amount} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
-      <br/> 비고<input type="text" name="etc" value={earnerCode} onBlur={handleBlur} onChange={onChange}  />
+      <br/> 비고<input type="text" name="etc" value={etc} onBlur={handleBlur} onChange={onChange}  />
       </>
     },
   
@@ -210,7 +252,16 @@ const handleBlur = (event) => {
       </>
     }
   ];
-  
+  const customStyles = {
+    content: {
+      top: '50%',
+      left: '50%',
+      right: 'auto',
+      bottom: 'auto',
+      marginRight: '-50%',
+      transform: 'translate(-50%, -50%)',
+    },
+  };
   const useTab = (idx, Tabs) => {
     if (!Tabs || !Array.isArray(Tabs)) {
       return null;
@@ -233,8 +284,36 @@ const handleBlur = (event) => {
           </button>
         ))}
      {currentItem.content}</div>
-     <button onClick={getCode}>코드 가져오기</button>
-     <p>{earnerCode}</p>
+     <ReactModal style={customStyles} isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} >
+  {
+    
+    <>  
+    <h4>소득구분코드 도움</h4>
+    <div className="ag-theme-alpine" style={{ float:"left" ,height: 400, width: 400 }}>
+        <AgGridReact
+          columnDefs={divColumn}
+          rowData={divRowData}
+          onGridReady={onGridReady}
+          rowSelection={'single'}
+          onCellDoubleClicked
+          onSelectionChanged={onSelectionChanged}
+          
+          ref={gridRef}
+
+        />
+        </div>
+       
+    <>
+    <br/>   <div style={{textAlign:"center"}}>
+    <h5>선택 코드: {selectValue.div_code}</h5>
+    <h5>구분명:{selectValue.div_name}</h5>
+            <button onClick={{}}>확인</button>
+            <button onClick={()=>setIsModalOpen(false)}>취소</button>
+            </div>
+          </></>
+          }
+</ReactModal>;
+     <p>{props.value}</p>
     </div>
   );
 }

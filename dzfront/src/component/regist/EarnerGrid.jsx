@@ -1,18 +1,42 @@
 import React, {  useCallback, useContext, useRef,useState,useEffect } from "react";
-import { AgGridReact } from "ag-grid-react";
+import { AgGridReact,AgGridColumn } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import ReactModal, { contextType } from "react-modal";
 import DivCodeButton from "../util/DivCodeButton";
 import Registration from "./Registration";
 import MyContext from "../util/Context";
-  const EarnerGrid = () => {
+
+
+
+  const EarnerGrid = (props) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const gridRef = useRef();
     const gridRef2 = useRef();
+    const [gridApi, setGridApi] = useState(null);
+    const [gridColumnApi, setGridColumnApi] = useState(null);
+    const CodeCellValueChanged = params => {
+      const newValue = params.newValue;
+    
+      fetch(`/api/check-duplicate?value=${newValue}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.duplicate) {
+            alert('중복된 값입니다.');
+            params.node.setDataValue(params.colDef.field, params.oldValue);
+          } else {
+            params.node.setDataValue(params.colDef.field, newValue);
+            gridApi.refreshCells({ rowNodes: [params.node], force: true });
+          }
+        })
+        .catch(error => {
+          console.error(error);
+          alert('중복 확인에 실패했습니다.');
+        });
+    };
     const columnDefs = [ 
       
-      { headerName: "Code", field: "earner_code",editable:true,width:90 },
+      { headerName: "Code", field: "earner_code",editable:true,width:90,onCellValueChanged: CodeCellValueChanged  },
       { headerName: "소득자명", field: "earner_name", editable: true,width:90 },
 
       {
@@ -26,8 +50,8 @@ import MyContext from "../util/Context";
 
       headerName: '소득구분',
       children: [
-          { headerName: "구분코드",field: 'div_code' ,width:90},
-          { headerName: "구분명",field: 'div_name',width:100,colspan:2},
+          { headerName: "구분코드",field: 'div_code' ,editable:true,width:90},
+          { headerName: "구분명",field: 'div_name',width:100,editable:true,colspan:2},
           {
             headerName: "",
             field: "buttonColumn",
@@ -54,15 +78,22 @@ import MyContext from "../util/Context";
       
     const [rowData, setRowData] = useState();
     const [divRowData, setDivRowData] = useState();
- 
+    const onEarnerGridReady = params => {
+      setGridApi(params.api);
+      setGridColumnApi(params.columnApi);
+    };
+  
   const onGridReady = useCallback((params) => {
-    fetch('http://localhost:8080/list_divcode')
+    fetch('http://localhost:8080/regist/list_divcode')
       .then((resp) => resp.json())
-      .then((data) => setDivRowData(data.div_list));
+      .then((data) => 
+      setDivRowData(data.div_list));
   }, []);
+
+  
     const handleCellEditingStopped = ({ data, colDef }) => {
       if (colDef.field === "name") {
-        fetch(`http://localhost:8080/get_count`)
+        fetch(`http://localhost:8080/regist/get_count`)
           .then((response) => response.json())
           .then((data) => {
             const newRowData = { ...data, name: data.name || data.code };
@@ -77,13 +108,15 @@ import MyContext from "../util/Context";
       }
     };
     useEffect(() => {
-      fetch(`http://localhost:8080/earner_list/yuchan2`)
+      fetch(`http://localhost:8080/regist/earner_list/yuchan2`)
       .then(result => result.json())
       .then((rowData) =>{ 
+    
+        rowData.earner_list.push({});
         setRowData(rowData.earner_list);   
        
        }
-        )
+        );
    }, []);
    
     const createNewRow = () => {
@@ -93,7 +126,9 @@ import MyContext from "../util/Context";
         setRowData([...rowData, emptyRowData]);
       }
     };
-  
+    const gridOptions = {
+      suppressScrollOnNewData: true,
+    };
     const handleSubmit = () => {
       
       const lastRowData = rowData[rowData.length - 1];
@@ -106,7 +141,7 @@ import MyContext from "../util/Context";
   
         if (isAllFilled) {
           // 서버로 데이터 전송
-          fetch("http://example.com/api/data", {
+          fetch("http://localhost:8080/regist", {
             method: "POST",
             body: JSON.stringify(rowData),
             headers: {
@@ -152,11 +187,25 @@ import MyContext from "../util/Context";
         selectedRows.length === 1 ? selectedRows[0].div_code : '';
         
     }, []);
-
-    const onSelectionChanged2 = useCallback(() => {
+    const [value,setValue]=useState(props.value);
+   const [selectedEarnRow,setSelectedEarnRow]=useState({
+      div_code:'',
+      div_name:'',
+      earner_code:'',
+      earner_name:'',
+      personal_no:'',
+      is_nation:'',
+      is_default:''
+   });
+  const onSelectionChanged2 = useCallback(() => {
       const selectedRows2 = gridRef2.current.api.getSelectedRows();
+      setSelectedEarnRow(selectedRows2[0]);
+
+     console.log(selectedEarnRow);
       sessionStorage.setItem("code",selectedRows2[0].earner_code);
-        
+      const newValue=selectedRows2[0].earner_code;
+      setValue(newValue);
+      props.onValueChange(newValue);
     }, []);
     const customStyles = {
       content: {
@@ -168,22 +217,48 @@ import MyContext from "../util/Context";
         transform: 'translate(-50%, -50%)',
       },
     };
-
-    // const fetchData = (code) => {
-    //   fetch(`http://localhost:8080/get_earner?earner_code=${code}&worker_id=yuchan2`, {
-    //         method: "GET",
+    const handleDataChange = (event) => {
+      const lastRowIndex = rowData.length - 1;
+      const lastRow = rowData[lastRowIndex];
+      const lastRowData = Object.values(lastRow);
+    
+      // Check if last row is fully filled with data
+      if (lastRowData.every(cellData => cellData !== '')) {
+        // Send last row's data to server
+        fetch('http://localhost:8080/regist/earner_insert', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...rowData[lastRowIndex],
+            worker_id: 'yuchan2',
+          }),
+        })
+          .then((response )=> {response.json();
+            rowData.earner_list.push({});
+            setRowData(rowData.earner_list); 
+          
+          })
+          .then((rowData) =>{ 
+  
+           
+           });
+      }
+    };
+    // const cellChanged=()=>{
+    //   const selectedRows2 = gridRef2.current.api.getSelectedRows();
+    //   const lastRowData = rowData[rowData.length - 1];
+    //   const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
+    //   fetch("http://localhost:8080/regist/earner_insert", {
+    //         method: "POST",
+    //         body: JSON.stringify(selectedRows2[0]),
     //         headers: {
     //           "Content-Type": "application/json"
     //         }
-    //       })
-    //       .then((res) => {
-    //         return res.json(); 
-    //     })
-    //     .then((json) => {
-    //         console.log(json); 
-    //     });
-      
-   
+    //       }).then((res)=>{return res.json();})
+    //       .then((json)=>{console.log(json)});
+
     // };
     return (
       
@@ -191,12 +266,19 @@ import MyContext from "../util/Context";
         <AgGridReact
           columnDefs={columnDefs}
           rowData={rowData}
+          onGridReady={onEarnerGridReady}
           onSelectionChanged={onSelectionChanged2}
-          rowSelection={'single'}
+          rowSelection={'single'}        
+          singleClickEdit={'false'}
+          onCellValueChanged={handleDataChange}
           onCellEditingStopped={handleCellEditingStopped}
-          ref={gridRef2}
+          ref={gridRef2}    
+        
+          gridOptions={gridOptions} 
+               
         />
-        <span id="selectedRows"></span>
+        
+        {selectedEarnRow.earner_name}
         
         <button onClick={handleSubmit}>Submit</button>
        
