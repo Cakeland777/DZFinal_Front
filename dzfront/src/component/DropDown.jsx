@@ -49,6 +49,8 @@ if(isLogin){
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/test2">테스트2</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/register">회원가입</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/registPage">사업소득자등록</Link></li>
+    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/incomeInput2">사업소득자료입력2</Link></li> 
+
     </div>
   )
 }

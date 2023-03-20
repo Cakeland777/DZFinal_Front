@@ -14,6 +14,7 @@ import Test from './component/test';
 import Home from './component/Home';
 import RegistPage from './component/regist/RegistPage';
 
+import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
 
   return (
@@ -32,6 +33,7 @@ function App() {
         <Route path="/incomeInput" element={<IncomeInput/>}/>
         <Route path="/registPage" element={<RegistPage/>}/>
        
+        <Route path="/incomeInput2" element={<IncomeInput2/>}/>
       </Routes>
     </div>
 
