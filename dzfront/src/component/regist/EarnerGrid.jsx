@@ -36,13 +36,16 @@ import MyContext from "../util/Context";
     };
     const columnDefs = [ 
       
-      { headerName: "Code", field: "earner_code",editable:true,width:90,onCellValueChanged: CodeCellValueChanged  },
-      { headerName: "소득자명", field: "earner_name", editable: true,width:90 },
+      { headerName: "Code", field: "earner_code",editable:true,width:90 },
+      { headerName: "소득자명", field: "earner_name", editable: true,width:90,onCellValueChanged:()=>getCode()},
 
       {
         headerName: "주민(외국인)번호",
         children: [
-            { headerName: "구분",field: 'is_native' ,editable:true,width:60},
+            { headerName: "구분",field: 'is_native' ,editable:true,width:60,
+            cellEditor: 'agSelectCellEditor',
+            cellEditorParams: {
+                values: ['내','외'],}},
             { headerName: "번호",field: 'personal_no',width:150,editable:true,colspan:2},
         ]
     },
@@ -50,13 +53,14 @@ import MyContext from "../util/Context";
 
       headerName: '소득구분',
       children: [
-          { headerName: "구분코드",field: 'div_code' ,editable:true,width:90},
+          { headerName: "구분코드",field: 'div_code' ,editable:true,width:90,onCellClicked: () => setIsModalOpen(true)},
           { headerName: "구분명",field: 'div_name',width:100,editable:true,colspan:2},
           {
             headerName: "",
             field: "buttonColumn",
             editable:true,
             width:100,
+
             cellRenderer: (params) => {
               const handleClick = () => {
                 setIsModalOpen(true);
@@ -74,10 +78,30 @@ import MyContext from "../util/Context";
                     
         ];
 
-      const emptyRowData = { code: "000001", name: "", number: "", div: "" };
       
     const [rowData, setRowData] = useState();
     const [divRowData, setDivRowData] = useState();
+    const getCode=()=>{
+      
+      const selectedRows = gridRef2.current.api.getSelectedRows();
+      console.log(selectedRows[0]);
+      const code='555555';
+      
+      
+      setRowData(rowData.earner_list);   
+      //setRowData([{...rowData.earner_list, earner_code: code, is_native:'내',earner_name:'',personal_no:'',div_code:'',div_name:''}]);
+     // gridRef2.current.api.applyTransaction({ add: [{ earner_code: code, is_native:'내'}] });
+     fetch(`http://localhost:8080/regist/earner_list/yuchan2`)
+     .then(result => result.json())
+     .then((rowData) =>{ 
+      rowData.earner_list.push({ earner_code: code,earner_name:selectedRows[0].earner_name, is_native:'내'});
+       rowData.earner_list.push({});
+       setRowData(rowData.earner_list);   
+      
+      });
+    }
+   
+    
     const onEarnerGridReady = params => {
       setGridApi(params.api);
       setGridColumnApi(params.columnApi);
@@ -100,7 +124,7 @@ import MyContext from "../util/Context";
             const newData = [...rowData];
             newData[data.rowIndex] = newRowData;
             setRowData(newData);
-            createNewRow();
+          
           })
           .catch((error) => {
             console.error("Error fetching code:", error);
@@ -119,63 +143,89 @@ import MyContext from "../util/Context";
         );
    }, []);
    
-    const createNewRow = () => {
-      const lastRowData = rowData[rowData.length - 1];
-      const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
-      if (isLastRowFilled) {
-        setRowData([...rowData, emptyRowData]);
-      }
-    };
+    // const createNewRow = () => {
+    //   const lastRowData = rowData[rowData.length - 1];
+    //   const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
+    //   if (isLastRowFilled) {
+    //     setRowData([...rowData, emptyRowData]);
+    //   }
+    // };
     const gridOptions = {
       suppressScrollOnNewData: true,
-    };
-    const handleSubmit = () => {
       
-      const lastRowData = rowData[rowData.length - 1];
-      const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
-      if (isLastRowFilled) {
-        // 모든 값이 입력되었는지 확인
-        const isAllFilled = rowData.every((data) =>
-          Object.values(data).every((val) => val !== "")
-        );
-  
-        if (isAllFilled) {
-          // 서버로 데이터 전송
-          fetch("http://localhost:8080/regist", {
-            method: "POST",
-            body: JSON.stringify(rowData),
-            headers: {
-              "Content-Type": "application/json"
-            }
-          })
-            .then((response) => {
-              if (!response.ok) {
-                throw new Error("Failed to send data to server.");
-              }
-              return response.json();
-            })
-            .then((data) => {
-              console.log("Data sent to server:", data);
-            })
-            .catch((error) => {
-              console.error("Error sending data to server:", error);
-            });
-  
-          // 새로운 행 생성
-          setRowData([emptyRowData]);
-        }
-      }
+
     };
+    // const handleSubmit = () => {
+      
+    //   const lastRowData = rowData[rowData.length - 1];
+    //   const isLastRowFilled = Object.values(lastRowData).every((val) => val !== "");
+    //   if (isLastRowFilled) {
+    //     // 모든 값이 입력되었는지 확인
+    //     const isAllFilled = rowData.every((data) =>
+    //       Object.values(data).every((val) => val !== "")
+    //     );
+  
+    //     if (isAllFilled) {
+    //       // 서버로 데이터 전송
+    //       fetch("http://localhost:8080/regist", {
+    //         method: "POST",
+    //         body: JSON.stringify(rowData),
+    //         headers: {
+    //           "Content-Type": "application/json"
+    //         }
+    //       })
+    //         .then((response) => {
+    //           if (!response.ok) {
+    //             throw new Error("Failed to send data to server.");
+    //           }
+    //           return response.json();
+    //         })
+    //         .then((data) => {
+    //           console.log("Data sent to server:", data);
+    //         })
+    //         .catch((error) => {
+    //           console.error("Error sending data to server:", error);
+    //         });
+  
+    //       // 새로운 행 생성
+    //       //setRowData([emptyRowData]);
+    //     }
+    //   }
+    // };
    
     
     const DivModalDoubleClicked=useCallback(() => {
       const selectedRows = gridRef.current.api.getSelectedRows();
-
+      const earnerRows=gridRef2.current.api.getSelectedRows();
       setIsModalOpen(false);
       
       console.log("selectValue->", selectedRows[0]);
-      setRowData([{...rowData[0], name : selectedRows[0].div_code, number: "aaaaaa"}]);
-      gridRef2.current.api.applyTransaction({ add: [{ code: "", name: "", number: "", div: "" }] });
+      fetch('http://localhost:8080/regist/earner_update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          param_value: selectedRows[0].div_code,
+          param_name :'div_code',
+          worker_id:"yuchan2",
+          earner_code:sessionStorage.getItem('code')
+        
+        }),
+      });
+      fetch('http://localhost:8080/regist/earner_update', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          param_value: selectedRows[0].div_name,
+          param_name :'div_name',
+          worker_id:"yuchan2",
+          earner_code:sessionStorage.getItem('code')
+        
+        }),
+      });
+      
+      
+      // setRowData([{...rowData[0], name : selectedRows[0].div_code, number: "aaaaaa"}]);
+      // gridRef2.current.api.applyTransaction({ add: [{ code: "", name: "", number: "", div: "" }] });
       
     }, []);
     const[selectValue, setSelectValue]=useState("");
@@ -280,7 +330,7 @@ import MyContext from "../util/Context";
         
         {selectedEarnRow.earner_name}
         
-        <button onClick={handleSubmit}>Submit</button>
+      
        
         <ReactModal style={customStyles} isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} >
   {
@@ -306,12 +356,12 @@ import MyContext from "../util/Context";
     <br/>   <div style={{textAlign:"center"}}>
     <h5>선택 코드: {selectValue.div_code}</h5>
     <h5>구분명:{selectValue.div_name}</h5>
-            <button onClick={{}}>확인</button>
+            <button onClick={DivModalDoubleClicked}>확인</button>
             <button onClick={()=>setIsModalOpen(false)}>취소</button>
             </div>
           </></>
           }
-</ReactModal>;
+</ReactModal>
       </div>
     );
   };

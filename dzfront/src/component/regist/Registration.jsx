@@ -166,13 +166,34 @@ const handleBlur = (event) => {
 const handleClick = () => {
   setIsModalOpen(true);
 };
-
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+  },
+};
+const customPostStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    width:'700px',
+   height:'500px',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+  },
+};
   const Tab = [
     {
       title: "기본사항",
       content: <>
       <h3>소득자 등록</h3>
-      
+      <div style={{border:"1px solid black"}}>
       거주구분 <select value={residenceSelect} name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
       <option value="거주" >0.거주</option>
       <option value="비거주">1.비거주</option>
@@ -199,18 +220,18 @@ const handleClick = () => {
         <input type="text" name="address_detail" value={detailAddress} onChange={(e) => setDetailAddress(e.target.value)} onBlur={handleBlur}
         />
       </div>
-      <DaumPostcode onComplete={handlePostcode} autoClose={true}
-      style={{
-          display: PostModalOpen ? "block" : "none",
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "50%",
-          
-          height: "50%",
-        }}
+      <ReactModal style={customPostStyles} isOpen={PostModalOpen} onRequestClose={() => setPostModalOpen(false)} >
+  {
+    
+    <>  
+   <DaumPostcode onComplete={handlePostcode} autoClose={true}
+    
         className="daum-postcode"
       />
+       
+   </>
+          }
+</ReactModal>
     </div>
       전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={tel1}  size="3" maxlength="3"/>-
               <input type="text" name="tel2" onBlur={handleBlur} onChange={onChange} value={tel2}  size="4" maxlength="4"/>-
@@ -226,12 +247,14 @@ const handleClick = () => {
       </select>
       <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={deduction_amount} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
       <br/> 비고<input type="text" name="etc" value={etc} onBlur={handleBlur} onChange={onChange}  />
+      </div>
       </>
     },
   
     {
       title: "예술인",
       content:    <><h3>예술인 해당 사업소득자 등록</h3>
+      <div style={{border:"1px solid black"}}>
      예술인여부 <select name="is_artist" value={isArtist} onBlur={handleBlur} onChange={handleArtistChange}>
   <option value="N" >0.부</option>
   <option value="Y" >1.여</option>
@@ -249,19 +272,11 @@ const handleClick = () => {
   </select>
 
   <p style={{color:"blue"}}>※고용보험료를 징수하는 예술인일 경우 예술인 여부를 '여' 체크합니다.</p>
+  </div>
       </>
     }
   ];
-  const customStyles = {
-    content: {
-      top: '50%',
-      left: '50%',
-      right: 'auto',
-      bottom: 'auto',
-      marginRight: '-50%',
-      transform: 'translate(-50%, -50%)',
-    },
-  };
+ 
   const useTab = (idx, Tabs) => {
     if (!Tabs || !Array.isArray(Tabs)) {
       return null;

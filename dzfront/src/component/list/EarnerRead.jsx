@@ -73,12 +73,7 @@ const EarnerRead = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch(`http://localhost:8080/search_earner_code?
-            param1=${selectedOption}
-           &param2=${format(startDate, "yyyyMM")}
-           &param3=${format(endDate, "yyyyMM")}
-           &param4=${earner}
-           &param5=${selected}`, {
+    fetch(`http://localhost:8080/search_earner_code?param1=${selectedOption}&param2=${format(startDate, "yyyyMM")}&param3=${format(endDate, "yyyyMM")}&param4=${earner}&param5=${selected}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
