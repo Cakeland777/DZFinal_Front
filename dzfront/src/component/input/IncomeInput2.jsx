@@ -1,7 +1,7 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import React, { useMemo, useRef, useState } from 'react';
-
+import '../../css/IncomeInput2.css';
 import { AgGridReact } from 'ag-grid-react';
 import DatePicker, { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
@@ -26,27 +26,43 @@ const data = [
     { make: 'Porsche', model: 'Boxter', price: 72000 }
   ];
 
+  
 const LeftColumnDefs = [
-    { headerName: "v", field: "v"},
-    { headerName: "Code", field: "Code"},
-    { headerName: "소득자명", field: "name"}, 
+   // { headerName: "v", field: "v", height: 100, width: 50},
+   // { headerName: "소득자명", field: "name", height: 100, width: 90}, 
     {
-      headerName: '주민(외국인)번호',
+    headerName: 'v', height: 100, width: 50,
+    marryChildren: true,
+    children: [
+      { field: '', colId: '' ,height: 100, width: 50}
+    ],
+   },
+    {
+      headerName: '소득자명', height: 100, width: 90,
       marryChildren: true,
       children: [
-        { field: '내', colId: 'is_native' },
-        { field: '990909-1099999', colId: 'number' },
+        { field: '', colId: '',height: 100, width: 90 }
       ],
     },
     {
-      headerName: '소득구분',
+      headerName: '주민(외국인)번호', height: 100, width: 150,
       marryChildren: true,
       children: [
-        { field: '940302', colId: 'div_code' },
-        { field: '배우', colId: 'div_name' }
+        { field: '내', colId: 'is_native' , height: 100, width: 50},
+        { field: '990909-1099999', colId: 'number' , height: 100, width: 150},
+      ],
+    },
+    {
+      headerName: '소득구분', height: 100, width: 90,
+      marryChildren: true,
+      children: [
+        { field: '940302', colId: 'div_code' , height: 100, width: 90},
+        { field: '배우', colId: 'div_name' , height: 100, width: 70}
       ],
     },
   ];
+ 
+
 const IncomeInput2 = () => {
   const [rowData, setRowData] = useState();
 
@@ -85,57 +101,40 @@ const IncomeInput2 = () => {
 
   const [startDate, setStartDate] = useState(new Date());
   return (
-    <><div>
-          <form style={{ padding: "10" }}>
+    <div id="container">
+      <form style={{ padding: "10"}}>
 
-              지급년월<DatePicker
-                  showIcon
-                  selected={startDate}
-                  onChange={(date) => setStartDate(date)}
-                  dateFormat="yyyyMM"
-                  showMonthYearPicker
-                  locale="ko" />
-              <button>조회</button>
-          </form>
+<span>지급년월<DatePicker
+    showIcon
+    selected={startDate}
+    onChange={(date) => setStartDate(date)}
+    dateFormat="yyyyMM"
+    showMonthYearPicker
+    locale="ko" /></span>
+<button> 조회</button>
+</form>
+      <div id="header" >
+          
       </div>
-      <div className="ag-theme-alpine" style={{ height: 500, width: 200 ,float:"left"}}>
+
+    <div id="content" >
+      <div id="left">
+
+      <div id="leftTop" className="ag-theme-alpine" style={{ 
+        // height: 500, width: 400 
+        }}>
           <AgGridReact columnDefs={LeftColumnDefs} rowData={data}></AgGridReact>
       </div>
-     
-     
-      <div
-          style={{ display: 'flex', flexDirection: 'column', height: '500px',width:'1000px',float:"left"  }}
-          className="ag-theme-alpine"
-      >
-              <div style={{ flex: '1 1 auto' }}>
-                  <AgGridReact
-                      ref={topGrid}
-                      alignedGrids={bottomGrid.current ? [bottomGrid.current] : undefined}
-                      rowData={rowData}
-                      defaultColDef={defaultColDef}
-                      columnDefs={columnDefs}
-                      suppressHorizontalScroll />
-              </div>
 
-              <div style={{ flex: 'none', height: '100px' }}>
-                  <AgGridReact
-                      ref={bottomGrid}
-                      alignedGrids={topGrid.current ? [topGrid.current] : undefined}
-                      rowData={bottomData}
-                      defaultColDef={defaultColDef}
-                      columnDefs={columnDefs}
-                      headerHeight="0"
-                      rowStyle={{ fontWeight: 'bold' }} />
-              </div>
-          </div>
-          
-
-          
-      <table style={{ border: "3px solid black" ,width:200,  }}>
+      <div id="leftBottom">
+      <table style={{ border: "1px solid black" }}>
         <thead>
-           
         </thead>
         <tbody>
+         <tr>
+            <td rowSpan="8" >총 계</td>
+         </tr>
+
           <tr>
             <th scope="row">인원[건수]</th>
             <td>1</td>
@@ -173,7 +172,41 @@ const IncomeInput2 = () => {
           </tr>
         </tbody>
       </table>
-          </>
+    </div>
+  </div>
+      
+      <div id="right"
+          style={{ display: 'flex', flexDirection: 'column',flexWrap:"wrap" }}
+          className="ag-theme-alpine">
+      
+              <div style={{ flex: '1 1 auto' }}>
+                  <AgGridReact
+                      ref={topGrid}
+                      alignedGrids={bottomGrid.current ? [bottomGrid.current] : undefined}
+                      rowData={rowData}
+                      defaultColDef={defaultColDef}
+                      columnDefs={columnDefs}
+                      suppressHorizontalScroll />
+              </div>
+
+              <div style={{ flex: 'none', height: '100px' }}>
+                  <AgGridReact
+                      ref={bottomGrid}
+                      alignedGrids={topGrid.current ? [topGrid.current] : undefined}
+                      rowData={bottomData}
+                      defaultColDef={defaultColDef}
+                      columnDefs={columnDefs}
+                      headerHeight="0"
+                      rowStyle={{ fontWeight: 'bold' }} />
+              </div>
+      </div>
+     </div>
+     
+      
+   
+    
+      </div>
+          
   );
 };
 export default IncomeInput2;
