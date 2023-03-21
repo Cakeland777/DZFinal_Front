@@ -28,8 +28,6 @@ const data = [
 
   
 const LeftColumnDefs = [
-   // { headerName: "v", field: "v", height: 100, width: 50},
-   // { headerName: "소득자명", field: "name", height: 100, width: 90}, 
     {
     headerName: 'v', height: 100, width: 50,
     marryChildren: true,
@@ -102,94 +100,87 @@ const IncomeInput2 = () => {
   const [startDate, setStartDate] = useState(new Date());
   return (
     <div id="container">
-      <form style={{ padding: "10"}}>
-
-<span>지급년월<DatePicker
-    showIcon
-    selected={startDate}
-    onChange={(date) => setStartDate(date)}
-    dateFormat="yyyyMM"
-    showMonthYearPicker
-    locale="ko" /></span>
-<button> 조회</button>
-</form>
       <div id="header" >
-          
+        <form style={{ padding: "10",border: "1px solid black"}}>
+          <span style={{width:"150px"}}>지급년월</span>
+            <DatePicker showIcon
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        dateFormat="yyyyMM"
+                        showMonthYearPicker
+                        locale="ko" />
+            <button> 조회</button>
+        </form>
       </div>
 
-    <div id="content" >
-      <div id="left">
-
-      <div id="leftTop" className="ag-theme-alpine" style={{ 
-        // height: 500, width: 400 
-        }}>
-          <AgGridReact columnDefs={LeftColumnDefs} rowData={data}></AgGridReact>
-      </div>
-
-      <div id="leftBottom">
-      <table style={{ border: "1px solid black" }}>
-        <thead>
-        </thead>
-        <tbody>
-         <tr>
-            <td rowSpan="8" >총 계</td>
-         </tr>
-
-          <tr>
-            <th scope="row">인원[건수]</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-          <tr>
-            <th scope="row">지급액</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-          <tr>
-            <th scope="row">학자금상환액</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-          <tr>
-            <th scope="row">소득세</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-          <tr>
-            <th scope="row">지방소득세</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-          <tr>
-            <th scope="row">고용보험료</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-          <tr>
-            <th scope="row">차인지급액</th>
-            <td>1</td>
-            <td>원</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
+      <div id="content" >
+        <div id="left">
+           <div id="leftTop" className="ag-theme-alpine">
+              <AgGridReact columnDefs={LeftColumnDefs} rowData={data}></AgGridReact>
+           </div>
+           <div id="leftBottom">
+              <table>
+                <thead>
+                </thead>
+                
+                <tbody>
+                  <tr>
+                    <td rowSpan="8" >총 계</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">인원[건수]</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">지급액</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">학자금상환액</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">소득세</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">지방소득세</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">고용보험료</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">차인지급액</th>
+                    <td>1</td>
+                    <td>원</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+         </div>
       
       <div id="right"
-          style={{ display: 'flex', flexDirection: 'column',flexWrap:"wrap" }}
-          className="ag-theme-alpine">
-      
-              <div style={{ flex: '1 1 auto' }}>
+           style={{display: 'flex', flexDirection: 'column',flexWrap:"wrap"}}
+           className="ag-theme-alpine">
+          <div style={{ flex: '1 1 auto' }}>
                   <AgGridReact
                       ref={topGrid}
                       alignedGrids={bottomGrid.current ? [bottomGrid.current] : undefined}
                       rowData={rowData}
                       defaultColDef={defaultColDef}
                       columnDefs={columnDefs}
-                      suppressHorizontalScroll />
-              </div>
+                     />
+          </div>
 
-              <div style={{ flex: 'none', height: '100px' }}>
+           <div style={{height: '100px'}}>
                   <AgGridReact
                       ref={bottomGrid}
                       alignedGrids={topGrid.current ? [topGrid.current] : undefined}
@@ -198,14 +189,10 @@ const IncomeInput2 = () => {
                       columnDefs={columnDefs}
                       headerHeight="0"
                       rowStyle={{ fontWeight: 'bold' }} />
-              </div>
-      </div>
+           </div>
+       </div> 
      </div>
-     
-      
-   
-    
-      </div>
+   </div>
           
   );
 };
