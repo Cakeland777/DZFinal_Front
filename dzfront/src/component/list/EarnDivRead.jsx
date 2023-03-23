@@ -20,7 +20,7 @@ const EarnDivRead = () => {
   const gridRef = useRef();
 
   const columnDefs = [
-    { field: "worker_id", headerName: "소득구분", resizable: true },
+    { field: "div_code", headerName: "소득구분", resizable: true },
     { field: "earner_name", headerName: "소득자명(상호)", resizable: true },
     {
       field: "personal_no",
@@ -28,7 +28,7 @@ const EarnDivRead = () => {
       resizable: true,
     },
     { field: "is_native", headerName: "내/외국인", resizable: true },
-    { field: "", headerName: "건수", resizable: true },
+    { field: "count", headerName: "건수", resizable: true },
 
     { field: "total_payment", headerName: "연간총지급액", resizable: true },
     { field: "tax_rate", headerName: "세율(%)", resizable: true },
@@ -49,7 +49,7 @@ const EarnDivRead = () => {
   const cellClickedListener = useCallback((event) => {
     console.log("cellClicked", event);
   }, []);
-  const [selectedOption, setSelectedOption] = useState("");
+  const [selectedOption, setSelectedOption] = useState("accrual_ym");
 
   function handleChange(event) {
     setSelectedOption(event.target.value);
@@ -58,7 +58,7 @@ const EarnDivRead = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selected, setSelected] = useState("");
-  const [selected2, setSelected2] = useState("");
+  const [selected2, setSelected2] = useState("earner_name");
 
   const [earner, setEarner] = useState("");
   function handleSelect2(event) {
@@ -81,17 +81,19 @@ const EarnDivRead = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        param1: selectedOption,
-        param2: format(startDate, "yyyyMM"),
-        param3: format(endDate, "yyyyMM"),
-        param4: earner,
-        param5: selected2,
+        worker_id:"yuchan2",
+        read_by:selectedOption,
+        start_date:parseInt(format(startDate, "yyyyMM")),
+        code_name:"earner_code",
+        end_date:parseInt(format(endDate, "yyyyMM")),
+        code_value:earner,
+        order_by:selected2
       }),
     })
       .then((result) => result.json())
       .then((rowData) => {
-        const wrappedData = [rowData.earnerInfo];
-        setRowData(wrappedData);
+        console.log(rowData);
+        setRowData(rowData.earnerInfo);
       });
   }
 
@@ -102,7 +104,7 @@ const EarnDivRead = () => {
       <form style={{ border: "1px solid black" }} onSubmit={handleSubmit}>
         기준
         <select value={selectedOption} onChange={handleChange}>
-          <option value="accural_ym">1.귀속년월</option>
+        <option value="accrual_ym">1.귀속년월</option>
           <option value="payment_ym">2.지급년월</option>
         </select>
         <div style={{ position: "relative", zIndex: 800 }}>

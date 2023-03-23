@@ -10,7 +10,7 @@ import ReactModal, { contextType } from "react-modal";
 const  Registration=(props)=>{
 
   const [preCode,setPreCode]=useState(props.value);
-  const [earner,setEarner]=useState('');
+  const [earner,setEarner]=useState({});
   useEffect(()=>{
     if(preCode!==props.value){
       fetch('http://localhost:8080/regist/get_earner',{
@@ -27,7 +27,7 @@ const  Registration=(props)=>{
       .then(data => {
         
         setEarner(data.earner_info);
-        
+        console.log(data.earner_info);
       });
     
     }
@@ -77,19 +77,25 @@ function reducer(state,action){
     [action.name]:action.value
   };
 }
-const [state,dispatch]=useReducer(reducer,{
-  residenceSelect:'',
-  div:'',
-  isNative:'',
-  personal_no:'',
-  tel1:'',tel2:'',tel3:'',
-  phone1:'',phone2:'',phone3:'',
-  email1:'',email2:'',
-  deduction_amount:'',
-  etc:'',
-  artist_type:'',
-  ins_reduce:'',
-});
+const earnerInfo = {
+  residenceSelect: '',
+  div: '',
+  isNative: '',
+  personal_no: '',
+  tel1: '',
+  tel2: '',
+  tel3: '',
+  phone1: '',
+  phone2: '',
+  phone3: '',
+  email1: '',
+  email2: '',
+  deduction_amount: '',
+  etc: '',
+  artist_type: '',
+  ins_reduce: ''
+};
+const [state,dispatch]=useReducer(reducer,earnerInfo);
 const{ residenceSelect,
   div,
   isNative,
@@ -130,7 +136,11 @@ const onChange=e=>{dispatch(e.target);
       
       }),
     })  
-    .then((response) => response.json())
+    .then(response => response.json())
+    .then(jsonData => {
+      setEarner({...earner, [name] : value });
+      
+    })
       .catch((error) => {
         // handle error
       });
@@ -152,11 +162,13 @@ const handleBlur = (event) => {
         param_name :name,
         worker_id:"yuchan2",
         earner_code:props.value
-      
       }),
     })
       .then((response) => {
     
+      })
+      .then(jsonData => {
+        setEarner({...earner, [name] : value });
       })
       .catch((error) => {
     
@@ -194,17 +206,17 @@ const customPostStyles = {
       content: <>
       <h3>소득자 등록</h3>
       <div style={{border:"1px solid black"}}>
-      거주구분 <select value={residenceSelect} name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
+      거주구분 <select value={earner.residence_status} name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
       <option value="거주" >0.거주</option>
       <option value="비거주">1.비거주</option>
       </select>
        
-      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={div} onBlur={handleBlur} onChange={onChange} onClick={handleClick} /><br/>
-      내/외국인 <select value={isNative} name="is_native" onBlur={handleBlur} onChange={onChange}>
+      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={earner.div_name} onBlur={handleBlur} onChange={onChange} onClick={handleClick} /><br/>
+      내/외국인 <select value={earner.is_native} name="is_native" onBlur={handleBlur} onChange={onChange}>
       <option value="내" >0.내국인</option>
       <option value="외">1.외국인</option>
       </select>
-      <br/> 주민(외국인)등록번호 <input type="text" onChange={onChange} value={personal_no} name="personal_no" onBlur={handleBlur}/><br/>
+      <br/> 주민(외국인)등록번호 <input type="text" onChange={onChange} value={earner.personal_no} name="personal_no" onBlur={handleBlur} /><br/>
       <br/>   <div className="address-form">
       <div>
         <label>우편번호</label>
@@ -217,7 +229,7 @@ const customPostStyles = {
       </div>
       <div>
         <label>상세주소</label>
-        <input type="text" name="address_detail" value={detailAddress} onChange={(e) => setDetailAddress(e.target.value)} onBlur={handleBlur}
+        <input type="text" name="address_detail" value={earner.address_detail} onChange={(e) => setDetailAddress(e.target.value)} onBlur={handleBlur}
         />
       </div>
       <ReactModal style={customPostStyles} isOpen={PostModalOpen} onRequestClose={() => setPostModalOpen(false)} >
@@ -233,20 +245,20 @@ const customPostStyles = {
           }
 </ReactModal>
     </div>
-      전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={tel1}  size="3" maxlength="3"/>-
-              <input type="text" name="tel2" onBlur={handleBlur} onChange={onChange} value={tel2}  size="4" maxlength="4"/>-
-              <input type="text" name="tel3"  onBlur={handleBlur} onChange={onChange} value={tel3}  size="4" maxlength="4"/><br/>
-      핸드폰번호 <input type="text" name="phone1" onBlur={handleBlur} onChange={onChange} value={phone1} size="3" maxlength="3"/>-
-              <input type="text" name="phone2" onBlur={handleBlur} onChange={onChange} value={phone2}size="4" maxlength="4"/>-
-              <input type="text" name="phone3" onBlur={handleBlur} onChange={onChange} value={phone3}size="4" maxlength="4"/><br/>
-      이메일 <input type="text" name="email1" onBlur={handleBlur} onChange={onChange} value={email1} />@
-      <input type="text" name="email2" onBlur={handleBlur} onChange={onChange} value={email2} /><br/>
-      학자금상환공제자여부 <select name="is_tuition" value={isTuition} onBlur={handleBlur} onChange={handleTuitionChange} >
+      전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={earner.tel1}  size="3" maxlength="3"/>-
+              <input type="text" name="tel2" onBlur={handleBlur} onChange={onChange} value={earner.tel2}  size="4" maxlength="4"/>-
+              <input type="text" name="tel3"  onBlur={handleBlur} onChange={onChange} value={earner.tel3}  size="4" maxlength="4"/><br/>
+      핸드폰번호 <input type="text" name="phone1" onBlur={handleBlur} onChange={onChange} value={earner.phone1} size="3" maxlength="3"/>-
+              <input type="text" name="phone2" onBlur={handleBlur} onChange={onChange} value={earner.phone2}size="4" maxlength="4"/>-
+              <input type="text" name="phone3" onBlur={handleBlur} onChange={onChange} value={earner.phone3}size="4" maxlength="4"/><br/>
+      이메일 <input type="text" name="email1" onBlur={handleBlur} onChange={onChange} value={earner.email1} />@
+      <input type="text" name="email2" onBlur={handleBlur} onChange={onChange} value={earner.email2} /><br/>
+      학자금상환공제자여부 <select name="is_tuition" value={earner.is_tuition} onBlur={handleBlur} onChange={handleTuitionChange} >
       <option value="N" >0.부</option>
       <option value="Y" >1.여</option>
       </select>
-      <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={deduction_amount} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
-      <br/> 비고<input type="text" name="etc" value={etc} onBlur={handleBlur} onChange={onChange}  />
+      <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={earner.deduction_amount} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
+      <br/> 비고<input type="text" name="etc" value={earner.etc} onBlur={handleBlur} onChange={onChange}  />
       </div>
       </>
     },
@@ -255,17 +267,17 @@ const customPostStyles = {
       title: "예술인",
       content:    <><h3>예술인 해당 사업소득자 등록</h3>
       <div style={{border:"1px solid black"}}>
-     예술인여부 <select name="is_artist" value={isArtist} onBlur={handleBlur} onChange={handleArtistChange}>
+     예술인여부 <select name="is_artist" value={earner.is_artist} onBlur={handleBlur} onChange={handleArtistChange}>
   <option value="N" >0.부</option>
   <option value="Y" >1.여</option>
   </select>
 
-  <br/> 예술인유형 <select name="artist_type" value={artist_type} disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange}>
+  <br/> 예술인유형 <select name="artist_type" value={earner.artist_type} disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange}>
   <option value=""> </option>
   <option value="일반" >1.일반예술인</option>
   </select>
 
-  <br/> 예술인 고용보험 경감 <select name="ins_reduce" value={ins_reduce} disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange}  >
+  <br/> 예술인 고용보험 경감 <select name="ins_reduce" value={earner.ins_reduce} disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange}  >
   <option value=""> </option>
   <option value="0" >0.0</option>
   <option value="0.8" >1.80</option>
@@ -292,7 +304,7 @@ const customPostStyles = {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (  
     <div>
-      <div style={{float:"left" ,marginLeft:"50px"}}>
+      <div style={{float:"left" ,marginLeft:"50px",marginTop:'40px'}}>
         {Tab.map((e, index) => (
           <button key={index} onClick={e => changeItem(index)}>
             {e.title}
@@ -327,8 +339,9 @@ const customPostStyles = {
             </div>
           </></>
           }
-</ReactModal>;
+</ReactModal>
      <p>{props.value}</p>
+     <p>{earner.personal_no}</p>
     </div>
   );
 }

@@ -59,7 +59,12 @@ function Login() {
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert('실패');
+        Swal.fire({
+          title:'로그인 실패',
+          text:'정보를 입력해주세요',
+          icon:'error',
+
+        });
       });
   }
 
