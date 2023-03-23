@@ -66,8 +66,9 @@ function Login() {
   return (
   
 
-    <div className="App">
+    <div className="box">
     <form onSubmit={handleSubmit} style={{ flexDirection:"Column"}}>
+      <div className="content-container">
     <div className="input-container">
           <input type="text" placeholder="아이디"  value={username} onChange={handleUsernameChange}/>
       
@@ -79,7 +80,7 @@ function Login() {
         </div>
         
         <button type="submit">로그인</button>
-   
+   </div>
       </form>
       </div>
    
