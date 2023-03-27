@@ -4,20 +4,64 @@ import React, {
   useEffect,
   useMemo,
   useCallback,
+  useReducer
 } from "react";
 import { FaFile } from 'react-icons/fa';
 import { BiCalendar } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { render } from "react-dom";
+import ReactModal from "react-modal";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import DatePicker from "react-datepicker";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-const EarnerRead = () => {
-  const [rowData, setRowData] = useState("");
 
+
+const customStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    width:'1000px',
+    height:'600px',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)',
+  },
+};
+const EarnerColumn = [
+  { headerName: "Code", field: "earner_code",width:150 },
+  { headerName: "소득자명", field: "earner_name", width:160 },
+  { headerName: "내/외", field: "is_native", width:80 },
+  { headerName: "주민등록번호", field: "personal_no", width:160 },
+  { headerName: "소득구분명", field: "div_name", width:120 },
+  { headerName: "구분코드", field: "div_code", width:130 },
+];
+const EarnerRead = () => {
+  useEffect(() => {
+    fetch('http://localhost:8080/input/earner_search', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        worker_id: 'yuchan2',
+      }),
+    })
+      .then((resp) => resp.json())
+      .then((data) => {
+      setEarnerRowData(data.earner_list);
+    
+    }
+      
+
+      );
+  }, []);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [rowData, setRowData] = useState("");
+  const [EarnerRowData, setEarnerRowData] = useState();
   const gridRef = useRef();
 
   const columnDefs =[
@@ -94,7 +138,38 @@ const EarnerRead = () => {
         setRowData(rowData.earnerInfo);
       });
   }
+  function reducer(state,action){
+    return{
+      ...state,
+      [action.name]:action.value
+    };
+  }
+  const [state,dispatch]=useReducer(reducer,{
+    search_value:''
+  });
+  const{ search_value}=state;
+  const onChange=(e)=>{
+    dispatch(e.target);
+    const { value } = e.target;
+    if (value.trim() !== '') {
+      fetch('http://localhost:8080/input/earner_search',{
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          worker_id: 'yuchan2',
+          search_value:value
+        }),
+      })
+      .then(response=>response.json())
+      .then((data) => {
+        setEarnerRowData(data.earner_list)}
+        
 
+        )
+    };
+  };
   return (
     <div>
       <Link to="/earnerRead">소득자별</Link> |{" "}
@@ -125,7 +200,7 @@ const EarnerRead = () => {
             showMonthYearPicker
           />
         </div>
-        소득자<input onChange={handleEarner} value={earner} type="text"></input>
+        소득자<input onChange={handleEarner} onClick={() => setIsModalOpen(true)} value={earner} type="text"></input>
         정렬
         <select onChange={handleSelect} value={selected}>
           <option value="earner_code">1.소득자명순</option>
@@ -150,7 +225,34 @@ const EarnerRead = () => {
           defaultColDef={defaultColDef}
         />
       </div>
+      <ReactModal style={customStyles} isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} >
+  {
+    
+    <>  
+    <h4 >사업소득자 코드도움</h4>
+    <div className="ag-theme-alpine" style={{ height: 400, width:'900px' }}>
+        <AgGridReact
+          columnDefs={EarnerColumn}
+          rowData={EarnerRowData}
+          rowSelection={'single'}
+          
+          ref={gridRef}/>
+        </div>
+       
+    <>
+     
+    <div style={{textAlign:"center"}}> 
+            
+          찾을 내용 <input type="text" name="search_value" style={{width:"500px",borderColor:'skyblue',outline:'none'}}value={search_value} onChange={onChange}></input>
+           <br/>
+            <button onClick={()=>setIsModalOpen(false)}>취소</button>
+           
+            </div>
+          </></>
+          }
+</ReactModal>
     </div>
+    
   );
 };
 export default EarnerRead;

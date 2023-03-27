@@ -27,12 +27,12 @@ const  Registration=(props)=>{
       .then(data => {
         
         setEarner(data.earner_info);
-        console.log(data.earner_info);
+        console.log("데이터가져옴:",data.earner_info);
       });
     
     }
     setPreCode(props.value);
-  },[props.value, preCode, earner])
+  },[props.value, preCode])
   const divColumn = [
     { headerName: "소득구분코드", field: "div_code",width:180 },
     { headerName: "소득구분명", field: "div_name", width:160 },
@@ -44,7 +44,6 @@ const  Registration=(props)=>{
       .then((resp) => resp.json())
       .then((data) => setDivRowData(data.div_list));
   }, []);
-  const [rowData, setRowData] = useState([{ code:"", name: "", personal_no: "", div:""}]);
   const [postcode, setPostcode] = useState("");
   const [address, setAddress] = useState("");
   const [detailAddress, setDetailAddress] = useState("");
@@ -78,7 +77,7 @@ function reducer(state,action){
   };
 }
 const earnerInfo = {
-  residenceSelect: '',
+  residence_status: '',
   div: '',
   isNative: '',
   personal_no: '',
@@ -96,17 +95,22 @@ const earnerInfo = {
   ins_reduce: ''
 };
 const [state,dispatch]=useReducer(reducer,earnerInfo);
-const{ residenceSelect,
-  div,
-  isNative,
-  personal_no,
-  tel1,tel2,tel3,
-  phone1,phone2,phone3,
-  email1,email2,
-  deduction_amount,
-  etc,
-  artist_type,
-  ins_reduce}=state;
+const{residence_status,
+div,
+isNative,
+personal_no,
+tel1,
+tel2,
+tel3,
+phone1,
+phone2,
+phone3,
+email1,
+email2,
+deduction_amount,
+etc,
+artist_type,
+ins_reduce}=state;
   const [ isTuition, setIsTuition] = useState('');
   const [inputEnabledT, setInputEnabledT] = useState(false);
   const [ isArtist, setIsArtist] = useState('');
@@ -139,6 +143,17 @@ const onChange=e=>{dispatch(e.target);
     .then(response => response.json())
     .then(jsonData => {
       setEarner({...earner, [name] : value });
+      if (name==="is_artist" && value==="Y"){
+        setEarner({...earner, [name] : value });
+        setInputEnabled(true);
+
+      }
+      else if(name==="is_artist"&& value==="N"){
+        setEarner({...earner, [name] : value });
+        setEarner({...earner,"artist_type":"","ins_reduce":""});
+
+      }
+
       
     })
       .catch((error) => {
@@ -146,11 +161,7 @@ const onChange=e=>{dispatch(e.target);
       });
   }
 };
-const selectDivCode=()=>{
 
-   
-
-}
 const handleBlur = (event) => {
   const { name, value } = event.target;
   if (value.trim() !== '') {
@@ -169,6 +180,18 @@ const handleBlur = (event) => {
       })
       .then(jsonData => {
         setEarner({...earner, [name] : value });
+        
+        if (name==="is_artist" && value==="Y"){
+          setEarner({...earner, [name] : value });
+          setInputEnabled(true);
+  
+        }
+        else if(name==="is_artist"&& value==="N"){
+          setEarner({...earner, [name] : value });
+          setEarner({...earner,"artist_type":"","ins_reduce":""});
+  
+        }
+  
       })
       .catch((error) => {
     
@@ -200,27 +223,28 @@ const customPostStyles = {
     transform: 'translate(-50%, -50%)',
   },
 };
+
   const Tab = [
     {
       title: "기본사항",
       content: <>
       <h3>소득자 등록</h3>
       <div style={{border:"1px solid black"}}>
-      거주구분 <select value={earner.residence_status} name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
+      거주구분 <select value={(earner && earner.residence_status) || ''} name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
       <option value="거주" >0.거주</option>
       <option value="비거주">1.비거주</option>
       </select>
        
-      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={earner.div_name} onBlur={handleBlur} onChange={onChange} onClick={handleClick} /><br/>
-      내/외국인 <select value={earner.is_native} name="is_native" onBlur={handleBlur} onChange={onChange}>
+      <br/> 소득구분 <input type="text"  id="div_name" name= "div_name"value={(earner && earner.div_name) || ''} onBlur={handleBlur} onChange={onChange} onClick={handleClick} /><br/>
+      내/외국인 <select value={(earner && earner.is_native) || ''} name="is_native" onBlur={handleBlur} onChange={onChange}>
       <option value="내" >0.내국인</option>
       <option value="외">1.외국인</option>
       </select>
-      <br/> 주민(외국인)등록번호 <input type="text" onChange={onChange} value={earner.personal_no} name="personal_no" onBlur={handleBlur} /><br/>
+      <br/> 주민(외국인)등록번호 <input type="text" onChange={onChange} value={(earner && earner.personal_no) || ''} name="personal_no" onBlur={handleBlur} /><br/>
       <br/>   <div className="address-form">
       <div>
         <label>우편번호</label>
-        <input type="text" name="zipcode"value={postcode}  onBlur={handleBlur} readOnly />
+        <input type="text" name="zipcode" value={postcode}  onBlur={handleBlur} readOnly />
         <button onClick={handlePostcodeClick}>주소 검색</button>
       </div>
       <div>
@@ -229,7 +253,7 @@ const customPostStyles = {
       </div>
       <div>
         <label>상세주소</label>
-        <input type="text" name="address_detail" value={earner.address_detail} onChange={(e) => setDetailAddress(e.target.value)} onBlur={handleBlur}
+        <input type="text" name="address_detail" value={(earner && earner.address_detail) || ''} onChange={(e) => setDetailAddress(e.target.value)} onBlur={handleBlur}
         />
       </div>
       <ReactModal style={customPostStyles} isOpen={PostModalOpen} onRequestClose={() => setPostModalOpen(false)} >
@@ -245,20 +269,20 @@ const customPostStyles = {
           }
 </ReactModal>
     </div>
-      전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={earner.tel1}  size="3" maxlength="3"/>-
-              <input type="text" name="tel2" onBlur={handleBlur} onChange={onChange} value={earner.tel2}  size="4" maxlength="4"/>-
-              <input type="text" name="tel3"  onBlur={handleBlur} onChange={onChange} value={earner.tel3}  size="4" maxlength="4"/><br/>
-      핸드폰번호 <input type="text" name="phone1" onBlur={handleBlur} onChange={onChange} value={earner.phone1} size="3" maxlength="3"/>-
-              <input type="text" name="phone2" onBlur={handleBlur} onChange={onChange} value={earner.phone2}size="4" maxlength="4"/>-
-              <input type="text" name="phone3" onBlur={handleBlur} onChange={onChange} value={earner.phone3}size="4" maxlength="4"/><br/>
-      이메일 <input type="text" name="email1" onBlur={handleBlur} onChange={onChange} value={earner.email1} />@
-      <input type="text" name="email2" onBlur={handleBlur} onChange={onChange} value={earner.email2} /><br/>
-      학자금상환공제자여부 <select name="is_tuition" value={earner.is_tuition} onBlur={handleBlur} onChange={handleTuitionChange} >
+      전화번호 <input type="text" name="tel1" onBlur={handleBlur} onChange={onChange} value={(earner && earner.tel1) || ''}  size="3" maxlength="3"/>-
+              <input type="text" name="tel2" onBlur={handleBlur} onChange={onChange} value={(earner && earner.tel2) || ''}  size="4" maxlength="4"/>-
+              <input type="text" name="tel3"  onBlur={handleBlur} onChange={onChange} value={(earner && earner.tel3) || ''}  size="4" maxlength="4"/><br/>
+      핸드폰번호 <input type="text" name="phone1" onBlur={handleBlur} onChange={onChange} value={(earner && earner.phone1) || ''} size="3" maxlength="3"/>-
+              <input type="text" name="phone2" onBlur={handleBlur} onChange={onChange} value={(earner && earner.phone2) || ''}size="4" maxlength="4"/>-
+              <input type="text" name="phone3" onBlur={handleBlur} onChange={onChange} value={(earner && earner.phone3) || ''}size="4" maxlength="4"/><br/>
+      이메일 <input type="text" name="email1" onBlur={handleBlur} onChange={onChange} value={(earner && earner.email1) || ''} />@
+      <input type="text" name="email2" onBlur={handleBlur} onChange={onChange} value={(earner && earner.email2) || ''} /><br/>
+      학자금상환공제자여부 <select name="is_tuition" value={(earner && earner.is_tuition) || ''} onBlur={handleBlur} onChange={onChange} >
       <option value="N" >0.부</option>
       <option value="Y" >1.여</option>
       </select>
-      <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={earner.deduction_amount} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
-      <br/> 비고<input type="text" name="etc" value={earner.etc} onBlur={handleBlur} onChange={onChange}  />
+      <br/> 학자금상환공제액<input type="number" name="deduction_amount" value={(earner && earner.deduction_amount) || ''} onBlur={handleBlur} onChange={onChange}  disabled={!inputEnabledT}  />원
+      <br/> 비고<input type="text" name="etc" value={(earner && earner.etc) || ''} onBlur={handleBlur} onChange={onChange}  />
       </div>
       </>
     },
@@ -267,17 +291,17 @@ const customPostStyles = {
       title: "예술인",
       content:    <><h3>예술인 해당 사업소득자 등록</h3>
       <div style={{border:"1px solid black"}}>
-     예술인여부 <select name="is_artist" value={earner.is_artist} onBlur={handleBlur} onChange={handleArtistChange}>
+     예술인여부 <select name="is_artist" value={(earner && earner.is_artist) || ''} onBlur={handleBlur} onChange={onChange}>
   <option value="N" >0.부</option>
   <option value="Y" >1.여</option>
   </select>
 
-  <br/> 예술인유형 <select name="artist_type" value={earner.artist_type} disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange}>
+  <br/> 예술인유형 <select name="artist_type" value={(earner && earner.artist_type) || ''} disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange} defaultValue={""}>
   <option value=""> </option>
   <option value="일반" >1.일반예술인</option>
   </select>
 
-  <br/> 예술인 고용보험 경감 <select name="ins_reduce" value={earner.ins_reduce} disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange}  >
+  <br/> 예술인 고용보험 경감 <select name="ins_reduce" value={(earner && earner.ins_reduce) || ''} disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange} defaultValue={""}>
   <option value=""> </option>
   <option value="0" >0.0</option>
   <option value="0.8" >1.80</option>
@@ -322,11 +346,8 @@ const customPostStyles = {
           rowData={divRowData}
           onGridReady={onGridReady}
           rowSelection={'single'}
-          onCellDoubleClicked
-          onSelectionChanged={onSelectionChanged}
-          
+          onSelectionChanged={onSelectionChanged}  
           ref={gridRef}
-
         />
         </div>
        
