@@ -19,20 +19,7 @@ const IncomeInput2 = () => {
   //datepicker관련
  
   registerLocale("ko", ko);
-  const bottomData = [
-    {
-      귀속년월: "합계",
-      지급년월일: "",
-      지급총액: "2,000,000",
-      세율: "",
-      소득세: "60,000",
-      지방소득세: "6,000",
-      세액계: "66,000",
-      예술인경비: "",
-      고용보험료: "",
-      차인지급액: "1,934,000",
-    },
-  ];
+  const [bottomData,setBottomData]= useState([]);
   const earnerGridRef = useRef();
   const [earnerData, setEarnerData] = useState([]);
   const EarnerColumn = [
@@ -112,7 +99,17 @@ const IncomeInput2 = () => {
   const startDate = useRef('');
   const selectedCode = useRef('');
   const taxId = useRef('');
+  const [earnerCount,setEarnerCount] = useState("");
+  const [taxCount,setTaxCount] = useState("");
+  const [sumInsCost,setSumInsCost]= useState("");
+  const [sumReal,setSumReal] =useState("");
+  const [sumTaxLocal,setSumTaxLocal]=useState("");
+  const [sumTaxIncome,setSumTaxIncome]=useState("");
+  const [sumTuition,setSumTuition]=useState("");
+  const [sumTotalPay,setSumTotalPay]=useState("");
   
+  
+
   const setDate = () => {
    
     console.log(startDate.current);
@@ -131,9 +128,43 @@ const IncomeInput2 = () => {
       .then((data) => {
         if (data.task_list != null) {
           data.task_list.push({});
+          setEarnerCount(data.task_count);
           setEarnerData(data.task_list);
           setRowData([]);
         }
+        fetch("http://localhost:8080/input/sum_task", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            worker_id: "yuchan2",
+            payment_ym: parseInt(format(startDate.current, "yyyyMM")),
+          }),
+        }).then((response) => response.json())
+        .then((data)=>{
+          if(data.sum_task!=null){
+          console.log(data.sum_task);
+          setTaxCount(data.sum_task.count);
+          setSumInsCost(data.sum_task.ins_cost);
+          setSumReal(data.sum_task.real_payment);
+          setSumTaxLocal(data.sum_task.tax_local);
+          setSumTaxIncome(data.sum_task.tax_income);
+          setSumTuition(data.sum_task.tuition_amount);
+          setSumTotalPay(data.sum_task.total_payment);
+        }
+
+        else{
+          setTaxCount(0);
+          setSumInsCost(0);
+          setSumReal(0);
+          setSumTaxLocal(0);
+          setSumTaxIncome(0);
+          setSumTuition(0);
+          setSumTotalPay(0);
+
+        }
+        })
       });
   };
   const gridRef = useRef();
@@ -223,7 +254,7 @@ const IncomeInput2 = () => {
     sortable: true,
     resizable: true,
     flex: 1,
-    minWidth: 100,
+    minWidth: 50,
   };
 
   const rightGridOptions = {
@@ -234,18 +265,19 @@ const IncomeInput2 = () => {
     onCellValueChanged: onRightCellValueChanged,
   };
   const columnDefs = [
-    { headerName: "귀속년월",field: "accrual_ym", width:180 },
-    { headerName: "지급년월", field: "payment_ym" ,width: 150  },
-    { headerName: "일", field: "payment_date" ,width: 50 },
-    { headerName: "지급총액", field: "total_payment",width: 150 },
-    { headerName: "세율",field: "tax_rate", width: 120 },
-    { headerName: "학자금상환액",field: "tuition_amount", width: 120 },
-    { headerName: "소득세",field: "tax_income", width: 150 },
-    { headerName: "지방소득세",field: "tax_local", width: 150 },
-    { headerName: "세액계",field: "tax_total", width: 100 },
-    { headerName: "예술인경비",field: "artist_cost", width: 100 },
-    { headerName: "고용보험료",field: "ins_cost", width: 100 },
-    { headerName: "차인지급액", field: "real_payment",width: 100 },
+    {headerName:"ID",field :"tax_id",width:50},
+    { headerName: "귀속년월",field: "accrual_ym", width:180 , cellStyle: { textAlign: 'right' }},
+    { headerName: "지급년월", field: "payment_ym" ,width: 150,editable:false, cellStyle: { textAlign: 'right' }  },
+    { headerName: "일", field: "payment_date" ,width: 50, cellStyle: { textAlign: 'right' } },
+    { headerName: "지급총액", field: "total_payment",width: 150 , cellStyle: { textAlign: 'right' }},
+    { headerName: "세율",field: "tax_rate", width: 120 , cellStyle: { textAlign: 'right' }},
+    { headerName: "학자금상환액",field: "tuition_amount", width: 120,cellStyle:getCellStyle},
+    { headerName: "소득세",field: "tax_income", width: 150 , cellStyle: { textAlign: 'right' }},
+    { headerName: "지방소득세",field: "tax_local", width: 150 , cellStyle: { textAlign: 'right' }},
+    { headerName: "세액계",field: "tax_total", width: 100 ,cellStyle: { textAlign: 'right' }},
+    { headerName: "예술인경비",field: "artist_cost", width: 100 ,cellStyle:getCellStyle},
+    { headerName: "고용보험료",field: "ins_cost", width: 100 ,cellStyle:getCellStyle},
+    { headerName: "차인지급액", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }},
   ];
  
   function reducer(state, action) {
@@ -254,6 +286,16 @@ const IncomeInput2 = () => {
       [action.name]: action.value,
     };
   }
+  function getCellStyle(params) {
+    if (params.value ===0) {
+      return { backgroundColor: '#eaeaea',color:"transparent" };
+    }
+    else{
+
+      return {textAlign: 'right' }
+    } 
+  }
+  
   const [state, dispatch] = useReducer(reducer, {
     search_value: "",
   });
@@ -298,6 +340,8 @@ const IncomeInput2 = () => {
       .then((data) => {
         data.tax_list.push({})
         setRowData(data.tax_list);
+        setBottomData(data.tax_list);
+        
       });
     
   }
@@ -310,8 +354,23 @@ const IncomeInput2 = () => {
       const newRowData = {};
       rightGridApi.applyTransaction({ add: [newRowData] });
     }
-    
-    if (field === "payment_date" && data.accrual_ym && data.payment_ym) {
+    if(field==="payment_date" && data.accrual_ym&&data.payment_ym){
+      fetch("http://localhost:8080/input/update_taxdate", {
+        method: "PATCH",
+        body: JSON.stringify({
+            tax_id:data.tax_id,
+            payment_date:parseInt(data.payment_date),
+            accrual_ym:data.accrual_ym
+          }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => response.json())
+
+
+    }
+    if (field === "payment_ym" && data.accrual_ym && data.payment_ym ) {
     
       fetch("http://localhost:8080/input/tax_insert", {
         method: "POST",
@@ -326,13 +385,15 @@ const IncomeInput2 = () => {
       .then((response) => response.json())
         .then((data) => {
           console.log(data.tax_id);
-          taxId.current = data.tax_id; })
-          .then(
+          event.node.setDataValue("tax_id", data.tax_id);
+          taxId.current = data.tax_id; 
+        })
+        .then(
       fetch("http://localhost:8080/input/update_taxdate", {
         method: "PATCH",
         body: JSON.stringify({
             tax_id:taxId.current,
-            payment_date:parseInt(data.payment_date),
+            payment_date:1,
             accrual_ym:data.accrual_ym
           }),
         headers: {
@@ -342,15 +403,14 @@ const IncomeInput2 = () => {
       .then((response) => response.json())
           )
     };
-    if (field === "total_payment" && data.total_payment){
+    if (field === "tax_rate" && data.total_payment&&data.tax_rate){
 
-      
       fetch("http://localhost:8080/input/update_taxinfo", {
         method: "PATCH",
         body: JSON.stringify({
-            tax_id:taxId.current,
+            tax_id:data.tax_id,
             total_payment:parseInt(data.total_payment),
-            tax_rate:3
+            tax_rate:parseFloat(data.tax_rate)
           }),
         headers: {
           "Content-Type": "application/json",
@@ -368,6 +428,44 @@ const IncomeInput2 = () => {
           event.node.setDataValue("ins_cost", data.earner_tax.insCost);
           event.node.setDataValue("real_payment", data.earner_tax.realPayment);
           event.node.setDataValue("tuition_amount", data.earner_tax.deductionAmount);
+          event.node.setDataValue("tax_id",data.earner_tax.taxId);
+         
+        })
+        .catch((error) => {
+          console.error(error);
+          // Show an error message to the user
+        });
+
+
+    }
+   
+    if (field === "total_payment" && data.total_payment){
+
+      
+      fetch("http://localhost:8080/input/update_taxinfo", {
+        method: "PATCH",
+        body: JSON.stringify({
+            tax_id:data.tax_id,
+            total_payment:parseInt(data.total_payment),
+            tax_rate:3.0
+          }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then((response) => response.json())
+        .then((data) => {
+          console.log(data.earner_tax);
+          event.node.setDataValue("tax_rate", data.earner_tax.taxRate);
+          event.node.setDataValue("tax_income", data.earner_tax.taxIncome);
+          event.node.setDataValue("total_payment", data.earner_tax.totalPayment);
+          event.node.setDataValue("tax_local", data.earner_tax.taxLocal);
+          event.node.setDataValue("tax_total", data.earner_tax.taxTotal);
+          event.node.setDataValue("artist_cost", data.earner_tax.artistCost);
+          event.node.setDataValue("ins_cost", data.earner_tax.insCost);
+          event.node.setDataValue("real_payment", data.earner_tax.realPayment);
+          event.node.setDataValue("tuition_amount", data.earner_tax.deductionAmount);
+          event.node.setDataValue("tax_id",data.earner_tax.taxId);
          
         })
         .catch((error) => {
@@ -391,30 +489,27 @@ const IncomeInput2 = () => {
 
   return (
     <div id="container">
-      <button>삭제</button>
+    
       <div id="header">
-        <div
-          style={{  border: "1px solid black" }}
-        >
-          <span style={{ width: "150px" }}>지급년월</span>
-        
-          <DatePicker
-            showIcon
-            placeholderText="2022."
-            selected={selectedDate}
-            onChange={(date) => {
-              startDate.current=date;
-              setSelectedDate(startDate.current);
-              console.log(startDate.current);
-            }}
-            minDate={new Date(2022, 0, 1)}
-            maxDate={new Date(2022, 11, 31)}
-            dateFormat="yyyy.MM"
-            showMonthYearPicker
-            locale={"ko"}
-          />
-          <button onClick={setDate}> 조회</button>
-        </div>
+      <div style={{ border: "1px solid black", display: "flex", alignItems: "center" ,marginTop:"10px"}}>
+  <span style={{ width: "150px",marginLeft:"1rem" }}>지급년월</span>
+  <DatePicker
+    showIcon
+    placeholderText="2022."
+    selected={selectedDate}
+    onChange={(date) => {
+      startDate.current=date;
+      setSelectedDate(startDate.current);
+      console.log(startDate.current);
+    }}
+    minDate={new Date(2022, 0, 1)}
+    maxDate={new Date(2022, 11, 31)}
+    dateFormat="yyyy.MM"
+    showMonthYearPicker
+    locale={"ko"}
+  />
+  <button onClick={setDate} style={{marginRight:"2rem"}}> 조회</button>
+</div>
       </div>
 
       <div id="content">
@@ -425,6 +520,7 @@ const IncomeInput2 = () => {
             style={{
               width: "600px",
               height: "700px",
+              padding:"10px"
             }}
           >
             <AgGridReact
@@ -441,7 +537,7 @@ const IncomeInput2 = () => {
           </div>
 
           <div id="leftBottom">
-            <table style={{ border: "1px solid black", width: "400px" }}>
+            <table style={{ border: "1px solid black", width: "480px" ,marginLeft:"60px"}}>
               <thead></thead>
               <tbody>
                 <tr>
@@ -450,37 +546,37 @@ const IncomeInput2 = () => {
 
                 <tr>
                   <th scope="row">인원[건수]</th>
-                  <td>1</td>
-                  <td>원</td>
+                  <td>{(earnerCount)||'0'}[{(taxCount)||'0'}]</td>
+                  <td>명</td>
                 </tr>
                 <tr>
                   <th scope="row">지급액</th>
-                  <td>1</td>
+                  <td>{sumTotalPay||0}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">학자금상환액</th>
-                  <td>1</td>
+                  <td>{sumTuition||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">소득세</th>
-                  <td>1</td>
+                  <td>{sumTaxIncome||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">지방소득세</th>
-                  <td>1</td>
+                  <td>{sumTaxLocal||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">고용보험료</th>
-                  <td>1</td>
+                  <td>{sumInsCost||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">차인지급액</th>
-                  <td>1</td>
+                  <td>{sumReal||'0'}</td>
                   <td>원</td>
                 </tr>
               </tbody>
@@ -495,6 +591,7 @@ const IncomeInput2 = () => {
             flexDirection: "column",
             flexWrap: "wrap",
             height: "800px",
+            marginLeft:"50px"
           }}
           className="ag-theme-alpine"
         >

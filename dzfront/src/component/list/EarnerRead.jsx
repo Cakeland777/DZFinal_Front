@@ -4,20 +4,44 @@ import React, {
   useEffect,
   useMemo,
   useCallback,
-  useReducer
+  useReducer,
 } from "react";
-import { FaFile } from 'react-icons/fa';
-import { BiCalendar } from "react-icons/bi";
 import { Link } from "react-router-dom";
-import { render } from "react-dom";
 import ReactModal from "react-modal";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { ko } from "date-fns/locale";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 
+
+const LinkStyle = {
+  display: "inline-block",
+  padding: "0.5rem",
+  margin: "0 1rem",
+  textDecoration: "none",
+  fontWeight: "bold",
+  color: "gray",
+  borderBottom: "2px solid transparent",
+  transition: "all 0.2s ease-in-out",
+};
+
+const ActiveLinkStyle = {
+  borderBottom: "2px solid black",
+  color: "black",
+};
+
+const NavLink = ({ to, children }) => (
+  <Link
+    to={to}
+    style={LinkStyle}
+    activeStyle={ActiveLinkStyle}
+  >
+    {children}
+  </Link>
+);
 
 const customStyles = {
   content: {
@@ -40,6 +64,7 @@ const EarnerColumn = [
   { headerName: "구분코드", field: "div_code", width:130 },
 ];
 const EarnerRead = () => {
+  registerLocale("ko", ko);
   useEffect(() => {
     fetch('http://localhost:8080/input/earner_search', {
       method: 'POST',
@@ -48,6 +73,7 @@ const EarnerRead = () => {
       },
       body: JSON.stringify({
         worker_id: 'yuchan2',
+        search_value:""
       }),
     })
       .then((resp) => resp.json())
@@ -114,10 +140,18 @@ const EarnerRead = () => {
   function handleEarner(event) {
     setEarner(event.target.value);
   }
+  const EarnerModalDoubleClicked = useCallback(() => {
+    const selectedRows = gridRef.current.api.getSelectedRows();
+    console.log(selectedRows[0].earner_code);
+    setEarner(selectedRows[0].earner_code);
+
+    setIsModalOpen(false);
+    //const{search_value}='';
+  }, []);
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch(`http://localhost:8080/search_earner_code`, {
+    fetch(`http://localhost:8080/list/search_earner_code`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -126,7 +160,6 @@ const EarnerRead = () => {
         worker_id:"yuchan2",
         read_by:selectedOption,
         start_date:parseInt(format(startDate, "yyyyMM")),
-        code_name:"earner_code",
         end_date:parseInt(format(endDate, "yyyyMM")),
         code_value:earner,
         order_by:selected
@@ -172,47 +205,56 @@ const EarnerRead = () => {
   };
   return (
     <div>
-      <Link to="/earnerRead">소득자별</Link> |{" "}
-      <Link to="/earnDivRead">소득구분별</Link>
-      <form style={{ border: "1px solid black" ,marginBottom:'20px'}} onSubmit={handleSubmit}>
-        기준
-        <select value={selectedOption} onChange={handleChange}>
-          <option value="accrual_ym">1.귀속년월</option>
-          <option value="payment_ym">2.지급년월</option>
-        </select>
-        <div style={{ position: "relative", zIndex: 800 }}>
-          <label>
-            <DatePicker
-              showIcon
-              selected={startDate}
-              onChange={(date) => setStartDate(date)}
-              dateFormat="yyyy.MM"
-              showMonthYearPicker
-            />
-          </label>
-        </div>{" "}
-        ~
-        <div style={{ position: "relative", zIndex: 800 }}>
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            dateFormat="yyyy.MM"
-            showMonthYearPicker
-          />
-        </div>
-        소득자<input onChange={handleEarner} onClick={() => setIsModalOpen(true)} value={earner} type="text"></input>
-        정렬
-        <select onChange={handleSelect} value={selected}>
-          <option value="earner_code">1.소득자명순</option>
-          <option value="div_name">2.소득구분순</option>
-          <option value="payment_ym">3.지급년월순</option>
-          <option value="personal_no">4.주민(사업자)번호순</option>
-        </select>
-        <button type="submit" style={{marginLeft:"650px"}}>조회</button>
-      </form>
+   <div>
+   <NavLink to="/earnerRead">소득자별</NavLink>
+      <NavLink to="/earnDivRead">소득구분별</NavLink>
+    </div>
+    <form style={{ display: "flex", flexWrap: "wrap", border: "1px solid grey"  }} onSubmit={handleSubmit}>
+  <label style={{ display: "flex", alignItems: "center",marginLeft:"2rem"}}>기준</label>
+  <select value={selectedOption} onChange={handleChange} style={{ marginRight: '1rem' }}>
+    <option value="accrual_ym">1.귀속년월</option>
+    <option value="payment_ym">2.지급년월</option>
+  </select>
+  <div style={{ position: "relative", zIndex: 800 }}>
+    <label>
+      <DatePicker
+        showIcon
+        selected={startDate}
+        onChange={(date) => setStartDate(date)}
+        minDate={new Date(2022, 0, 1)}
+        maxDate={new Date(2022, 11, 31)}
+        dateFormat="yyyy.MM"
+        locale={"ko"}
+        showMonthYearPicker
+      />
+    </label>
+  </div>{" "}
+  ~
+  <div style={{ position: "relative", zIndex: 800 }}>
+    <DatePicker
+      selected={endDate}
+      onChange={(date) => setEndDate(date)}
+      minDate={new Date(2022, 0, 1)}
+      maxDate={new Date(2022, 11, 31)}
+      dateFormat="yyyy.MM"
+      locale={"ko"}
+      showMonthYearPicker
+    />
+  </div>
+  <label style={{ marginLeft: '1rem' }}>소득자</label>
+  <input onChange={handleEarner} onClick={() => setIsModalOpen(true)} value={earner} type="text" style={{ marginRight: '1rem' }} />
+  <label style={{ marginRight: '1rem' }}>정렬</label>
+  <select onChange={handleSelect} value={selected} style={{ marginRight: '1rem' }}>
+    <option value="earner_code">1.소득자명순</option>
+    <option value="div_name">2.소득구분순</option>
+    <option value="payment_ym">3.지급년월순</option>
+    <option value="personal_no">4.주민(사업자)번호순</option>
+  </select>
+  <button style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "42rem" }} type="submit">조회</button>
+</form>
       <div
         className="ag-theme-alpine"
-        style={{ width: 2000, height: 800, zIndex: -100 }}
+        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px"}}
       >
         <AgGridReact
           ref={gridRef}
@@ -235,7 +277,7 @@ const EarnerRead = () => {
           columnDefs={EarnerColumn}
           rowData={EarnerRowData}
           rowSelection={'single'}
-          
+          onCellDoubleClicked={EarnerModalDoubleClicked}
           ref={gridRef}/>
         </div>
        

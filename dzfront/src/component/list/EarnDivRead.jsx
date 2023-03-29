@@ -1,16 +1,13 @@
 import React, {
   useState,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
+  useRef, useMemo,
+  useCallback
 } from "react";
 import ReactModal from "react-modal";
-import { FaFile } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { render } from "react-dom";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import DatePicker from "react-datepicker";
+import DatePicker, { registerLocale } from "react-datepicker";
+import { ko } from "date-fns/locale";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { format } from "date-fns";
@@ -24,9 +21,36 @@ const customStyles = {
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
+
   },
 };
+const LinkStyle = {
+  display: "inline-block",
+  padding: "0.5rem",
+  margin: "0 1rem",
+  textDecoration: "none",
+  fontWeight: "bold",
+  color: "gray",
+  borderBottom: "2px solid transparent",
+  transition: "all 0.2s ease-in-out",
+};
+
+const ActiveLinkStyle = {
+  borderBottom: "5px solid black",
+  color: "black",
+};
+
+const NavLink = ({ to, children }) => (
+  <Link
+    to={to}
+    style={LinkStyle}
+    activeStyle={ActiveLinkStyle}
+  >
+    {children}
+  </Link>
+);
 const EarnDivRead = () => {
+  registerLocale("ko", ko);
   const [rowData, setRowData] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const gridRef = useRef();
@@ -145,7 +169,7 @@ const EarnDivRead = () => {
 
   function handleSubmit(event) {
     event.preventDefault();
-    fetch("http://localhost:8080/search_div_code", {
+    fetch("http://localhost:8080/list/search_div_code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -154,7 +178,6 @@ const EarnDivRead = () => {
         worker_id: "yuchan2",
         read_by: selectedOption,
         start_date: parseInt(format(startDate, "yyyyMM")),
-        code_name: "earner_code",
         end_date: parseInt(format(endDate, "yyyyMM")),
         code_value: earner,
         order_by: selected2,
@@ -169,65 +192,84 @@ const EarnDivRead = () => {
 
   return (
     <div>
-      <Link to="/earnerRead">소득자별</Link> |{" "}
-      <Link to="/earnDivRead">소득구분별</Link>
-      <form style={{ border: "1px solid black" }} onSubmit={handleSubmit}>
-        기준
-        <select value={selectedOption} onChange={handleChange}>
-          <option value="accrual_ym">1.귀속년월</option>
-          <option value="payment_ym">2.지급년월</option>
-        </select>
-        <div style={{ position: "relative", zIndex: 800 }}>
-          <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
-            dateFormat="yyyy.MM"
-            showMonthYearPicker
-          />
-        </div>{" "}
-        ~
-        <div style={{ position: "relative", zIndex: 800 }}>
-          <DatePicker
-            selected={endDate}
-            onChange={(date) => setEndDate(date)}
-            dateFormat="yyyy.MM"
-            showMonthYearPicker
-          />
-        </div>
-        소득구분
-        <input
-          onChange={handleEarner}
-          value={earner}
-          type="text"
-          onClick={() => setIsModalOpen(true)}
-          readOnly
-        ></input>
-        현재소득구분
-        <button onClick={handleDoublePrevClick}>◀◀</button>
-        <button onClick={handlePrevClick}>◀</button>
-        <select value={earner} onChange={handleDivChange}>
-          {divOptions.map((option, index) => (
-            <option key={index} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <button onClick={handleNextClick}>▶</button>
-        <button onClick={handleDoubleNextClick}>▶▶</button>
-        정렬
-        <select onChange={handleSelect2} value={selected2}>
-          <option value="earner_name">1.소득자명순</option>
-          <option value="div">2.소득구분순</option>
-          <option value="payment_ym">3.지급년월순</option>
-          <option value="personal_no">4.주민(사업자)번호순</option>
-        </select>
-        <button type="submit" style={{ marginLeft: "650px" }}>
+   <div>
+   <NavLink to="/earnerRead">소득자별</NavLink>
+      <NavLink to="/earnDivRead">소득구분별</NavLink>
+    </div>
+    <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", border: "1px solid grey"  }}>
+  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" ,marginLeft:"2rem"}}>
+    기준
+    <select value={selectedOption} onChange={handleChange}>
+      <option value="accrual_ym">1.귀속년월</option>
+      <option value="payment_ym">2.지급년월</option>
+    </select>
+  </div>
+  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}>
+  <div style={{ position: "relative", zIndex: 800 }}>
+    <DatePicker
+      selected={startDate}
+      onChange={(date) => setStartDate(date)}
+      minDate={new Date(2022, 0, 1)}
+      maxDate={new Date(2022, 11, 31)}
+      dateFormat="yyyy.MM"
+      locale={"ko"}
+      showMonthYearPicker
+    />
+  </div>
+  ~
+  <div style={{ position: "relative", zIndex: 800 }}>
+    <DatePicker
+      selected={endDate}
+      onChange={(date) => setEndDate(date)}
+      minDate={new Date(2022, 0, 1)}
+      maxDate={new Date(2022, 11, 31)}
+      locale={"ko"}
+      dateFormat="yyyy.MM"
+      showMonthYearPicker
+    />
+  </div>
+</div>
+  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}>
+    소득구분
+    <input
+      onChange={handleEarner}
+      value={earner}
+      type="text"
+      onClick={() => setIsModalOpen(true)}
+      readOnly
+      style={{ width: "100px" }}
+    ></input>
+  </div>
+  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}>
+  현재소득구분
+  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handleDoublePrevClick}>
+    &lt;&lt;
+  </button>
+  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handlePrevClick}>
+    &lt;
+  </button>
+  <select value={earner} onChange={handleDivChange}>
+    {divOptions.map((option, index) => (
+      <option key={index} value={option}>
+        {option}
+      </option>
+    ))}
+  </select>
+  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handleNextClick}>
+    &gt;
+  </button>
+  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handleDoubleNextClick}>
+    &gt;&gt;
+  </button>
+</div>
+ 
+        <button type="submit" style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "37.5rem" }}>
           조회
         </button>
       </form>
       <div
         className="ag-theme-alpine"
-        style={{ width: 2000, height: 800, zIndex: -100 }}
+        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px"}}
       >
         <AgGridReact
           ref={gridRef}

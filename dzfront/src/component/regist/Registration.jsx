@@ -1,11 +1,10 @@
-import React, {useEffect,useRef, useState,useReducer,useCallback} from "react";
-import DaumPostcode from "react-daum-postcode";
-import '../../css/registration.css';
-import EarnerGrid from "./EarnerGrid";
-import { AgGridReact,AgGridColumn } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-import ReactModal, { contextType } from "react-modal";
+import { AgGridReact } from "ag-grid-react";
+import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import DaumPostcode from "react-daum-postcode";
+import ReactModal from "react-modal";
+import '../../css/registration.css';
 
 const  Registration=(props)=>{
 
@@ -60,13 +59,41 @@ const  Registration=(props)=>{
   const gridRef = useRef();
  
   const handlePostcode = (data) => {
-    setPostcode(data.zonecode);
-    setAddress(`${data.address} ${data.buildingName}`);
+    setEarner({...earner, zipcode : data.zonecode,address:`${data.address} ${data.buildingName}`});
+    fetch('http://localhost:8080/regist/earner_update', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        param_value: data.zonecode,
+        param_name: "zipcode",
+        worker_id:"yuchan2",
+        earner_code:props.value
+      
+      }),
+    })  
+    .then( fetch('http://localhost:8080/regist/earner_update', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        param_value: `${data.address} ${data.buildingName}`,
+        param_name: "address",
+        worker_id:"yuchan2",
+        earner_code:props.value
+      
+      }),
+    })  
+    .then(response => response.json()))
+
+
+    
+    //setPostcode(data.zonecode);
+    //setAddress(`${data.address} ${data.buildingName}`);
     setPostModalOpen(false);
   };
 
   const handlePostcodeClick = () => {
     setPostModalOpen(true);
+    
   };
  
 
@@ -128,7 +155,7 @@ ins_reduce}=state;
   }
 const onChange=e=>{dispatch(e.target);
   const { name, value } = e.target;
-  if (value.trim() !== '') {
+ 
     fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -159,12 +186,12 @@ const onChange=e=>{dispatch(e.target);
       .catch((error) => {
         // handle error
       });
-  }
+  
 };
 
 const handleBlur = (event) => {
   const { name, value } = event.target;
-  if (value.trim() !== '') {
+
     fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -196,7 +223,7 @@ const handleBlur = (event) => {
       .catch((error) => {
     
       });
-  }
+  
 };
 const handleClick = () => {
   setIsModalOpen(true);
@@ -229,7 +256,8 @@ const customPostStyles = {
       title: "기본사항",
       content: <>
       <h3>소득자 등록</h3>
-      <div style={{border:"1px solid black"}}>
+  
+        <div style={{border:"1px solid black",width:"800px"}}>
       거주구분 <select value={(earner && earner.residence_status) || ''} name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
       <option value="거주" >0.거주</option>
       <option value="비거주">1.비거주</option>
@@ -244,16 +272,16 @@ const customPostStyles = {
       <br/>   <div className="address-form">
       <div>
         <label>우편번호</label>
-        <input type="text" name="zipcode" value={postcode}  onBlur={handleBlur} readOnly />
+        <input type="text" name="zipcode" value={(earner && earner.zipcode) || ''} onChange={onChange} onBlur={handleBlur}  readOnly />
         <button onClick={handlePostcodeClick}>주소 검색</button>
       </div>
       <div>
         <label>주소</label>
-        <input type="text"name="address" value={address} readOnly />
+        <input type="text"name="address" value={(earner && earner.address) || ''} onChange={onChange}  onBlur={handleBlur}  readOnly />
       </div>
       <div>
         <label>상세주소</label>
-        <input type="text" name="address_detail" value={(earner && earner.address_detail) || ''} onChange={(e) => setDetailAddress(e.target.value)} onBlur={handleBlur}
+        <input type="text" name="address_detail" value={(earner && earner.address_detail) || ''} onChange={onChange} onBlur={handleBlur}
         />
       </div>
       <ReactModal style={customPostStyles} isOpen={PostModalOpen} onRequestClose={() => setPostModalOpen(false)} >
@@ -290,7 +318,7 @@ const customPostStyles = {
     {
       title: "예술인",
       content:    <><h3>예술인 해당 사업소득자 등록</h3>
-      <div style={{border:"1px solid black"}}>
+      <div style={{border:"1px solid black",width:"800px"}}>
      예술인여부 <select name="is_artist" value={(earner && earner.is_artist) || ''} onBlur={handleBlur} onChange={onChange}>
   <option value="N" >0.부</option>
   <option value="Y" >1.여</option>
@@ -361,8 +389,6 @@ const customPostStyles = {
           </></>
           }
 </ReactModal>
-     <p>{props.value}</p>
-     <p>{earner.personal_no}</p>
     </div>
   );
 }

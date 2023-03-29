@@ -1,15 +1,14 @@
 import './App.css';
 
 import { Route, Routes } from 'react-router-dom';
-import Login from './component/login/Login'
-import Model from './model/Model'
+import Login from './component/login/Login';
+import Calender from './component/Calendar';
 import Register from './component/Register';
 import Header from './component/Header';
 import EarnerGrid from './component/regist/EarnerGrid';
 import Registration from './component/regist/Registration';
 import EarnerRead from './component/list/EarnerRead';
 import EarnDivRead from './component/list/EarnDivRead';
-import IncomeInput from './component/input/IncomeInput';
 import Test from './component/test';
 import Home from './component/Home';
 import RegistPage from './component/regist/RegistPage';
@@ -30,9 +29,8 @@ function App() {
         <Route path="/earnDivRead" element={<EarnDivRead/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/test2" element={<EarnerGrid/>} />
-        <Route path="/incomeInput" element={<IncomeInput/>}/>
         <Route path="/registPage" element={<RegistPage/>}/>
-       
+        <Route path="/calendar" element={<Calender/>}/>
         <Route path="/incomeInput2" element={<IncomeInput2/>}/>
       </Routes>
     </div>
