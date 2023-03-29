@@ -1,4 +1,10 @@
+.selected-date {
+    background-color: blue;
+    color: white;
+  }
+
 .calendar {
+  justify-content : center;
     width: 60%;
     height: 90%;
   }
@@ -48,13 +54,13 @@
   
   .calendar .header .col.col-end svg:hover {
     transform: scale(1.15);
-    color: rgb(128, 128, 128)
+    color: rgb(21, 174, 80)
   }
   
   .calendar .days {
     width: 100%;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     font-weight: 600;
     font-size: 0.65em;
@@ -67,11 +73,12 @@
     height: 100%;
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    justify-content: center;
     align-items: flex-start;
     padding-left: 1%;
     background: transparentize(rgb(128, 128, 128));
     border-radius: 10px;
+    font-size: 1.3em;
   }
   
   .calendar .body {
@@ -93,11 +100,11 @@
     width: 13.5%;
     height: 93%;
     display: flex;
-    justify-content: flex-start;
+    justify-content : center;
     align-items: flex-start;
-    border: 0.4px solid transparentize(gray, 0.4);
+    border: 0.4px solid color(rgb(250, 254, 254), 0.4);
     border-radius: 3px;
-    font-size: 0.8em;
+    font-size: 1.3em;
   }
   
   .calendar .body .row .col span {
@@ -105,7 +112,7 @@
   }
   
   .calendar .body .row .col .not-valid {
-    color: rgb(128, 128, 128)
+    color: lightgray
   }
   
   .calendar .body .row .col img {
@@ -115,13 +122,13 @@
   .calendar .body .row .col.cell.valid:hover {
     transform: scale(1.01);
     border: none;
-    background: transparentize(rgb(128,128,128), 0.5);
+    background: transparentize(rgb(231, 208, 8), 0.5);
   }
   .calendar .body .row .col.cell.selected {
-    box-shadow: 1.5px 1.5px 2px rgba(0, 0, 0, 0.1), inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    box-shadow: 1.5px 1.5px 2px rgba(40, 15, 184, 0.1), inset 0 0 0 1px rgba(60, 5, 187, 0.1);
     transform: scale(1.02);
     border: none;
-    background: #f5f5f5;
-    color: #2f2f2f;
+    background: #A7BAF2;
+    color: white;
     font-weight: 600;
-    }
+}

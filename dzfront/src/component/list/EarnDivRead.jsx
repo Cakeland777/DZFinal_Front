@@ -131,7 +131,7 @@ const EarnDivRead = () => {
           <option value="payment_ym">3.지급년월순</option>
           <option value="personal_no">4.주민(사업자)번호순</option>
         </select>
-        <button type="submit" style={{marginLeft:"650px"}}>조회</button>
+        <button type="submit" style={{marginLeft:"25%"}}>조회</button>
       </form>
       <div
         className="ag-theme-alpine"

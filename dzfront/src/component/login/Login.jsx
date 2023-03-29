@@ -1,8 +1,8 @@
 import { Column } from "ag-grid-community";
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2';
 import '../../css/login.css';
+import Swal from 'sweetalert2';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -19,31 +19,31 @@ function Login() {
     event.preventDefault();
 
  
-    fetch("http://localhost:8080/login", {
+    fetch("http://localhost:8080/login.do", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        MEMBER_ID: username,
-        MEMBER_PW: password,
+        worker_id: username,
+        worker_pw: password,
       }),
+      
     })
       .then((response) => response.json())
       .then((data) => {
-        if(data.isLogOn===true){
+        if(data.isLogon===true){
 
           Swal.fire({
-            title:data.member.worker_id+"님 로그인되었습니다.",
+            title:data.member.memberVO.worker_id+"님 로그인되었습니다.",
             text:'환영합니다',
             icon:'success',
 
           });
          
-          localStorage.setItem("worker_id", data.member.worker_id);
-          localStorage.setItem("code_count", data.member.code_count);
+          localStorage.setItem("memberInfo", data.member);
           localStorage.setItem("isLogOn", 1);
-          navigate("/");
+          navigate("/earnerRead");
       
       }
         else{
@@ -63,13 +63,14 @@ function Login() {
       });
   }
 
+
   return (
   
 
     <div className="App">
     <form onSubmit={handleSubmit} style={{ flexDirection:"Column"}}>
     <div className="input-container">
-          <input type="text" placeholder="아이디"  value={username} onChange={handleUsernameChange}/>
+          <input type="text" placeholder="아이디" value={username} onChange={handleUsernameChange}/>
       
         </div>
         
