@@ -12,10 +12,22 @@ import EarnDivRead from './component/list/EarnDivRead';
 import Test from './component/test';
 import Home from './component/Home';
 import RegistPage from './component/regist/RegistPage';
-
+import CodeConversion from './component/util/CodeConversion';
 import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
+// const navigate = useNavigate();
 
+  // useEffect(() => {
+  //   let status = localStorage.getItem("isLogOn");
+  //   if (status === "1") {
+  //     const timeoutId = setTimeout(() => {
+  //       localStorage.clear();
+  //     }, 500 * 60 * 1000); // 5분 = 5 * 60 * 1000 밀리초
+  //     return () => clearTimeout(timeoutId);
+  //   } else {
+  //     navigate('/login');
+  //   }
+  // }, [navigate]);
   return (
   <>
    <div>
@@ -28,6 +40,7 @@ function App() {
         <Route path="/earnerRead" element={<EarnerRead/>} />
         <Route path="/earnDivRead" element={<EarnDivRead/>} />
         <Route path="/test" element={<Test/>} />
+        <Route path="/codeconversion" element={<CodeConversion/>} />
         <Route path="/test2" element={<EarnerGrid/>} />
         <Route path="/registPage" element={<RegistPage/>}/>
         <Route path="/calendar" element={<Calender/>}/>

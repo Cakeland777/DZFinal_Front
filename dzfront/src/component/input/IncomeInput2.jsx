@@ -279,6 +279,8 @@ const IncomeInput2 = () => {
     { headerName: "고용보험료",field: "ins_cost", width: 100 ,cellStyle:getCellStyle},
     { headerName: "차인지급액", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }},
   ];
+
+
  
   function reducer(state, action) {
     return {
@@ -288,7 +290,7 @@ const IncomeInput2 = () => {
   }
   function getCellStyle(params) {
     if (params.value ===0) {
-      return { backgroundColor: '#eaeaea',color:"transparent" };
+      return { backgroundColor: 'lightgrey',color:"transparent" };
     }
     else{
 
@@ -326,7 +328,7 @@ const IncomeInput2 = () => {
     console.log(selectedCode.current);
     console.log("Selected Row Data:", selectedRow);
     fetch("http://localhost:8080/input/get_tax", {
-      method: "POST",
+      method: "POST", 
       headers: {
         "Content-Type": "application/json",
       },
@@ -339,11 +341,26 @@ const IncomeInput2 = () => {
       .then((response) => response.json())
       .then((data) => {
         data.tax_list.push({})
-        setRowData(data.tax_list);
-        setBottomData(data.tax_list);
-        
-      });
+        setRowData(data.tax_list); 
+      })
     
+      fetch("http://localhost:8080/input/sum_tax", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          worker_id: "yuchan2",
+          earner_code:selectedRow.earner_code,
+          payment_ym:selectedRow.payment_ym
+        }),
+      })
+      .then((response) => response.json())
+      .then((data) => {
+        data.sum_tax.tax_id = "합계";
+        setBottomData([data.sum_tax]);
+       
+      });
   }
   function onRightCellValueChanged(event) {
     const { data, colDef } = event;
@@ -447,7 +464,7 @@ const IncomeInput2 = () => {
         body: JSON.stringify({
             tax_id:data.tax_id,
             total_payment:parseInt(data.total_payment),
-            tax_rate:3.0
+            tax_rate: "3.0"
           }),
         headers: {
           "Content-Type": "application/json",
@@ -520,7 +537,8 @@ const IncomeInput2 = () => {
             style={{
               width: "600px",
               height: "700px",
-              padding:"10px"
+              padding:"10px",
+             
             }}
           >
             <AgGridReact
@@ -530,6 +548,12 @@ const IncomeInput2 = () => {
               rowSelection={"multiple"}
               onSelectionChanged={onEarnerGridSelection}
               onCellClicked={onCellClicked}
+              overlayLoadingTemplate={
+                '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'
+              }
+              overlayNoRowsTemplate={
+                '<span style="padding: 10px;">데이터가 없습니다</span>'
+              }
               ref={earnerGridRef}
               onRowSelected={handleRowSelected}
               onRowDeselected={handleRowDeselected}
@@ -537,7 +561,7 @@ const IncomeInput2 = () => {
           </div>
 
           <div id="leftBottom">
-            <table style={{ border: "1px solid black", width: "480px" ,marginLeft:"60px"}}>
+            <table style={{ border: "1px solid black", width: "480px" ,marginLeft:"60px",height:"300px"}}>
               <thead></thead>
               <tbody>
                 <tr>
@@ -590,7 +614,7 @@ const IncomeInput2 = () => {
             display: "flex",
             flexDirection: "column",
             flexWrap: "wrap",
-            height: "800px",
+            height: "900px",
             marginLeft:"50px"
           }}
           className="ag-theme-alpine"
@@ -604,7 +628,12 @@ const IncomeInput2 = () => {
               gridOptions={rightGridOptions}
               rowData={rowData}
               onGridReady={onRightGridReady}
-              overlayLoadingTemplate="<b>데이터가 없습니다.</b>"
+              overlayLoadingTemplate={
+                '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'
+              }
+              overlayNoRowsTemplate={
+                '<span style="padding: 10px;">데이터가 없습니다</span>'
+              }
               defaultColDef={defaultColDef}
               columnDefs={columnDefs}
               suppressHorizontalScroll
@@ -618,8 +647,14 @@ const IncomeInput2 = () => {
               rowData={bottomData}
               defaultColDef={defaultColDef}
               columnDefs={columnDefs}
+              overlayLoadingTemplate={
+                '<span style="padding: 10px;"></span>'
+              }
+              overlayNoRowsTemplate={
+                '<span style="padding: 10px;"></span>'
+              }
               headerHeight="0"
-              rowStyle={{ fontWeight: "bold" }}
+              rowStyle={{ backgroundColor: "#ABCCF8", fontWeight: "bold" }}
             />
           </div>
         </div>

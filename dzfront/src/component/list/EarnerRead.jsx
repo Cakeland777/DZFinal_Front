@@ -223,6 +223,7 @@ const EarnerRead = () => {
         onChange={(date) => setStartDate(date)}
         minDate={new Date(2022, 0, 1)}
         maxDate={new Date(2022, 11, 31)}
+        placeholderText="2022."
         dateFormat="yyyy.MM"
         locale={"ko"}
         showMonthYearPicker
@@ -236,6 +237,7 @@ const EarnerRead = () => {
       onChange={(date) => setEndDate(date)}
       minDate={new Date(2022, 0, 1)}
       maxDate={new Date(2022, 11, 31)}
+      placeholderText="2022."
       dateFormat="yyyy.MM"
       locale={"ko"}
       showMonthYearPicker
@@ -250,7 +252,7 @@ const EarnerRead = () => {
     <option value="payment_ym">3.지급년월순</option>
     <option value="personal_no">4.주민(사업자)번호순</option>
   </select>
-  <button style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "42rem" }} type="submit">조회</button>
+  <button style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "30rem" }} type="submit">조회</button>
 </form>
       <div
         className="ag-theme-alpine"
@@ -261,7 +263,12 @@ const EarnerRead = () => {
           rowData={rowData}
           columnDefs={columnDefs}
           animateRows={true}
-          overlayLoadingTemplate="<FaFile /><b>데이터가 없습니다.</b>"
+          overlayLoadingTemplate={
+            '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'
+          }
+          overlayNoRowsTemplate={
+            '<span style="padding: 10px;">데이터가 없습니다</span>'
+          }
           rowSelection="multiple"
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}

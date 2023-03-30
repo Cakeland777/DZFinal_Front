@@ -3,6 +3,7 @@ import React, {
   useRef, useMemo,
   useCallback
 } from "react";
+import { TbFileX} from "react-icons/tb";
 import ReactModal from "react-modal";
 import { Link } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
@@ -213,6 +214,7 @@ const EarnDivRead = () => {
       maxDate={new Date(2022, 11, 31)}
       dateFormat="yyyy.MM"
       locale={"ko"}
+      placeholderText="2022."
       showMonthYearPicker
     />
   </div>
@@ -224,6 +226,7 @@ const EarnDivRead = () => {
       minDate={new Date(2022, 0, 1)}
       maxDate={new Date(2022, 11, 31)}
       locale={"ko"}
+      placeholderText="2022."
       dateFormat="yyyy.MM"
       showMonthYearPicker
     />
@@ -263,7 +266,7 @@ const EarnDivRead = () => {
   </button>
 </div>
  
-        <button type="submit" style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "37.5rem" }}>
+        <button type="submit" style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "30rem" }}>
           조회
         </button>
       </form>
@@ -277,7 +280,12 @@ const EarnDivRead = () => {
           columnDefs={columnDefs}
           animateRows={true}
           rowSelection="multiple"
-          overlayLoadingTemplate="<b>데이터가 없습니다.</b>"
+          overlayLoadingTemplate={
+            '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'
+          }
+          overlayNoRowsTemplate={
+            '<span style="padding: 10px;">데이터가 없습니다</span>'
+          }
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}
         />

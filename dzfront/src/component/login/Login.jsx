@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
-import "../../css/login.css";
-
-
+import { Column } from "ag-grid-community";
+import React, { useEffect,useState } from "react";
+import { useNavigate } from 'react-router-dom';
+import '../../css/login.css';
+import Swal from 'sweetalert2';
 function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -19,66 +18,81 @@ function Login() {
   function handleSubmit(event) {
     event.preventDefault();
 
-    fetch("http://localhost:8080/login", {
+ 
+    fetch("http://localhost:8080/login.do", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        MEMBER_ID: username,
-        MEMBER_PW: password,
+        worker_id: username,
+        worker_pw: password,
       }),
+      
     })
       .then((response) => response.json())
       .then((data) => {
-        if (data.isLogOn === true) {
-          Swal.fire({
-            title: data.member.worker_id + "님 로그인되었습니다.",
-            text: "환영합니다",
-            icon: "success",
-          });
+        if(data.isLogon===true){
 
-          localStorage.setItem("worker_id", data.member.worker_id);
-          localStorage.setItem("code_count", data.member.code_count);
-          localStorage.setItem("isLogOn", 1);
-          navigate("/");
-        } else {
           Swal.fire({
-            title: "로그인 실패",
-            text: "정보를 확인해주세요",
-            icon: "error",
+            title:data.MemberVO.worker_id+"님 로그인되었습니다.",
+            text:'환영합니다',
+            icon:'success',
+
           });
+         
+          localStorage.setItem("memberInfo", data.member);
+          localStorage.setItem("isLogon", 1);
+          navigate("/earnerRead");
+      
+      }
+        else{
+          Swal.fire({
+            title:'로그인 실패',
+            text:'정보를 확인해주세요',
+            icon:'error',
+
+          });
+        
+
         }
       })
       .catch((error) => {
         console.error("Error:", error);
-        alert("실패");
+        alert('실패');
       });
   }
+
 
   return (
     <div class="container"style={{backgroundImage:`url('/desk.jpg')`,backgroundRepeat:"no-repeat", 
    backgroundSize:"cover",backgroundAttachment:"fixed" }} >
+    
       <div class="display" style={{width:"500px",height:"1000px",marginLeft:"1500px"}}>
+      <form onSubmit={handleSubmit} style={{ flexDirection:"Column"}}>
         <div class="display_content">
           <div class="login_form">
             <div class="login_field">
               <input
                 type="text"
                 class="login_input"
+                value={username} onChange={handleUsernameChange}
                 placeholder="아이디"
               ></input>
             </div>
             <div class="login_field">
               <input
                 type="password"
+                value={password} onChange={handlePasswordChange}
                 class="login_input"
                 placeholder="비밀번호"
               ></input>
             </div>
-            <button class="login_submit">로그인</button>
-          </div>
+            <button  type="submit" class="login_submit">로그인</button>
+            </div>
+      
         </div>
+        </form>
         <div className="display_background">
        
           <span class="display_background_shape display_background_shape4"></span>
