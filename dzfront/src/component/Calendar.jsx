@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
-import { Icon } from '@iconify/react';
+import React, { useState} from 'react';
 import '../css/Calendar.css';
-import { format, toDate, addMonths, subMonths } from 'date-fns';
+import { format, addMonths} from 'date-fns';
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { isSameMonth, addDays, parse } from 'date-fns';
-import { AgCheckbox } from 'ag-grid-community';
+
+
 
 const RenderHeader = ({ Month }) => {
     return (
@@ -14,14 +14,10 @@ const RenderHeader = ({ Month }) => {
                     <span className="text month">
                         {format(Month, 'yyyy')}년  
                     </span>
-                    {format(Month, 'M')}월
+                    {format(Month, 'MM')}월
                 </span>
                 
             </div>
-            {/* <div className="col col-end">
-                <Icon icon="bi:arrow-left-circle-fill" onClick={prevMonth} />
-                <Icon icon="bi:arrow-right-circle-fill" onClick={nextMonth} />
-            </div> */}
         </div>
         
     );
@@ -33,9 +29,23 @@ const RenderDays = () => {
 
     
     for (let i = 0; i < 8; i++) {
-        if(i==0){
+        if(i===0){
             days.push(
                 <div className="col" key={i} style={{width:"50px"}}>
+                    {date[i]}
+                </div>,
+            );
+        }
+        else if(i===1){
+            days.push(
+                <div className="col" key={i} style={{color :"red"}} >
+                    {date[i]}
+                </div>,
+            );
+        }
+        else if(i===7){
+            days.push(
+                <div className="col" key={i} style={{color :"blue"}} >
                     {date[i]}
                 </div>,
             );
@@ -61,87 +71,131 @@ const ResetButton = ({ onReset }) => {
 
 
 
-const Rendercell = ({ currentMonth, onDateClick }) => {
+const Rendercell = ({ currentMonth, onDateClick, WorkDay, worker_id, earner_code, payment_ym}) => {
     const monthStart = startOfMonth(currentMonth);//해당 월의 첫 날짜 리턴
     const monthEnd = endOfMonth(monthStart);//해당 월의 마지막 날짜 리턴
     const startDate = startOfWeek(monthStart);//currentmonth의 첫번째 주 첫번쨰 날짜 리턴
     const endDate = endOfWeek(monthEnd);//currentmonth의 마지막 주 마지막 날짜 리턴
-    const [selectedList, setSelectedList] = useState([]);
+    const [selectedList, setSelectedList] = useState(WorkDay);
+   
+    let mapDate={};
+    //console.log(WorkDay);
+    WorkDay.forEach(item => 
+            mapDate[item] = item)
 
     const rows = [];
     let days = [];
     let day = startDate;
     let formattedDate = '';
 
+    const sendDate = divBody => {
+        const selectedDateList = divBody.querySelectorAll(".selected"); 
+        const dateList={};
+        // selectedDateList.forEach(item => {
+        //     const dataDate = item.getAttribute("data-date");
+        //     dateList[dataDate];
+        // });
+        const selectedDates = Array.from(selectedDateList, item => item.getAttribute("data-date"));
+        // console.log(divBody);
+        // console.log(selectedDateList.getAttribute);
+        console.log(selectedDates);
+        
+        fetch("http://localhost:8080/input/calendar_insert", {                         
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                worker_id: worker_id,
+                earner_code:earner_code,
+                payment_ym:payment_ym,
+                select_dates:selectedDates
+            }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+        });
+    
+    }
+
     const rowCheck = e => {
         let checkbox = e.target;
+        const selectedDates=[];
         if (checkbox.checked) {
            for(let i =0;i<7;i++) {
                 let arr = checkbox.parentNode.querySelector(".valid");
                 arr.classList.remove("valid");
                 arr.classList.add("selected");
             }
-        } else {
+            
+        } else {    
             for(let i =0;i<7;i++){
                 let arr = checkbox.parentNode.querySelector(".selected");
                 arr.classList.remove("selected");
                 arr.classList.add("valid");
             }
         }
-        //.;
+        sendDate(checkbox.parentNode.parentNode);
     }
+    const dateCheck = (e) => {
+        let dateClick = e.target;
+    
+        if (dateClick.classList.contains("valid")) {
+            dateClick.classList.remove("valid");
+            dateClick.classList.add("selected");
+        } else {    
+            dateClick.classList.remove("selected");
+            dateClick.classList.add("valid");
+        }
+        sendDate(dateClick.parentNode.parentNode)
+    }
+    
+    const holidays = [
+        "2022-01-01", // 신정
+        "2022-02-01", // 설날
+        "2022-02-02", // 설날
+        "2022-02-03", // 설날
+        "2022-03-01", // 삼일절
+        "2022-05-05", // 어린이날
+        "2022-06-06", // 현충일
+        "2022-08-15", // 광복절
+        "2022-09-09", // 추석
+        "2022-09-10", // 추석
+        "2022-09-11", // 추석
+        "2022-10-03", // 개천절
+        "2022-10-09", // 한글날
+        "2022-12-25" // 성탄절
+      ];
 
     while (day <= endDate) {
         for (let i = 1; i < 8; i++) {
-            
+          
             formattedDate = format(day, 'd');
             const cloneDay = day;
+            const accrual_date = format(day, 'yyyyMM');
+            const calendar_day = format(day,'yyyy-MM-dd');
             days.push(
                 <div
-                    className={`col cell ${
-                        !isSameMonth(day, monthStart)
-                            ? 'disabled'
-                            : selectedList.includes(format(day,'yyyy-MM-dd'))
-                            ? 'selected'
-                            : format(currentMonth, 'M') !== format(day, 'M')
-                            ? 'not-valid'
-                            : 'valid'
-                    }`}//달력에 현재 날짜 표시 여부
-                    key={day}
-                    onClick={() => {
-                    onDateClick(toDate(parse(cloneDay, 'yyyy-MM-dd', new Date())));//날짜 클릭시 해당 날짜를 파싱
-                    const selectedDateInput = format(toDate(cloneDay), 'yyyy-MM-dd');
-                    console.log(selectedDateInput); // 선택된 날짜를 콘솔에 출력
-                    setSelectedList(prevList => {
-                        const selectedDateInput = format(toDate(cloneDay), 'yyyy-MM-dd');
-                        if(!isSameMonth(cloneDay, monthStart)){
-                            return prevList
-                        } else{
-                            if (prevList.includes(selectedDateInput)) {
-                                const newList = prevList.filter(date => date !== selectedDateInput);
-                                console.log(newList);
-                                return newList; // 중복된 값이 있는 경우, 중복된 값을 제외한 새로운 배열 반환
-                            } else {
-                            const newList = [...prevList, selectedDateInput];
-                            console.log(newList);
-                            return newList; // 중복된 값이 없는 경우 새로운 값을 추가한 배열 반환
-                            }
-                        }
-                        });
-                  }}
+                className={`col cell ${
+                    !isSameMonth(day, monthStart)
+                        ? 'disabled'
+                        : selectedList.includes(calendar_day)
+                        ? 'selected'
+                        : format(currentMonth, 'M') !== format(day, 'M')
+                        ? 'not-valid'
+                        : 'valid'
+                        
+                } ${format(day, 'E')} ${holidays.includes(calendar_day) ? 'holiday' : ''}`}//달력에 현재 날짜 표시 여부
+                onClick= {dateCheck}
+                
+                data-date={calendar_day}
                 >
-                    <span
-                        className={
-                            format(currentMonth, 'M') !== format(day, 'M')
-                                ? 'text not-valid'
-                                : ''
-                        }//보고 있는 달을 텍스트에 저장
-                    >
                         {formattedDate}
-                    </span>
-                </div>,
+                    
+                </div>
             );
             day = addDays(day, 1);
+   
         }
         rows.push(
             <div className="row" key={day}>
@@ -151,16 +205,11 @@ const Rendercell = ({ currentMonth, onDateClick }) => {
         );
         days = [];
     }
+    
 
 
     const handleResetClick = () => {
         setSelectedList([]);
-      };
-      //<input type="checkbox">주말 포함</input>
-    const CheckWeekend =({ onCheckWeekend }) => {
-        return(
-            <AgCheckbox onClick={onCheckWeekend}>주말 포함</AgCheckbox>
-        );
       };
     //모든 날짜 선택
     const SelectAllButton = ({ onSelectAllClick }) => {
@@ -173,14 +222,13 @@ const Rendercell = ({ currentMonth, onDateClick }) => {
         const firstDayOfMonth = startOfMonth(currentMonth);
         const lastDayOfMonth = endOfMonth(currentMonth);
         let day = firstDayOfMonth;
-        const days = [];
         const selectedDates = [];
         
         // 해당 달의 날짜들을 모두 selectedDates에 추가
         //주말포함
         if(isChecked){
             while (day <= lastDayOfMonth) {
-                if (day.getDay() != 6 && day.getDay() != 0) {
+                if (day.getDay() !== 6 && day.getDay() !== 0) {
                     const selectedDate = format(day, 'yyyy-MM-dd');
                     selectedDates.push(selectedDate);
                   }
@@ -197,13 +245,29 @@ const Rendercell = ({ currentMonth, onDateClick }) => {
         }
         // 모든 날짜를 선택할 경우, selectedDates를 setSelectedList에 전달
         setSelectedList(selectedDates);
-        console.log(selectedDates);
+        //console.log(selectedDates);
+        fetch("http://localhost:8080/input/calendar_insert", {                         
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                worker_id: worker_id,
+                earner_code:earner_code,
+                payment_ym:payment_ym,
+                select_dates:selectedDates
+            }),
+            })
+            .then((response) => response.json())
+            .then((data) => {
+        });
   };
-  const [isChecked, setIsChecked] = useState(false);
+    const [isChecked, setIsChecked] = useState(false);
 
     const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
+        setIsChecked(!isChecked);
     };
+
     return(
     <div> 
         <div className="body">{rows}</div>
@@ -216,36 +280,56 @@ const Rendercell = ({ currentMonth, onDateClick }) => {
 };
 
 
-export const Calendar = () => {
-    const [currentMonth, setCurrentMonth] = useState(new Date());
-    const [commingMonth, setCommingMonth] = useState(addMonths(new Date(), 1));
+export const Calendar = ({payment_ym, workDate, worker_id, earner_code}) => {
+    //payment_ym="202202";
+    
+    const [currentMonth, setCurrentMonth] = useState(parse(payment_ym, "yyyyMM", new Date()));
+    const [commingMonth, setCommingMonth] = useState(addMonths(parse(payment_ym, "yyyyMM", new Date()), -1));
     const [selectedDate, setSelectedDate] = useState(new Date());
+    const [Workerid, setWorkerid] = useState(worker_id);
+    const [Earnercode, setEarnercode] = useState(earner_code);
 
     const onDateClick = (day) => {
         setSelectedDate(day);
     };
+
+    console.log("여기",worker_id);
+    console.log("여기",earner_code);
+   
     return (
-        <div className="calendar" style={{flexDirection:"row"}}>
-            <RenderHeader
-                Month={currentMonth}
-            />
-           <RenderDays />
-            <Rendercell
-                currentMonth={currentMonth}
-                selectedDate={selectedDate}
-                onDateClick={onDateClick}
-            />
-            <RenderHeader
-                Month={commingMonth}
-            />
-           <RenderDays />
-            <Rendercell
-                currentMonth={commingMonth}
-                selectedDate={selectedDate}
-                onDateClick={onDateClick}
-            />
-    
+        <div  style={{display:"flex"}}>
+            <div className="calendar" style={{flexDirection:"row", width:"20%"}}>
+                <RenderHeader
+                    Month={commingMonth}
+                />
+            <RenderDays />
+                <Rendercell
+                    currentMonth={commingMonth}
+                    selectedDate={selectedDate}
+                    onDateClick={onDateClick}
+                    worker_id={Workerid}
+                    earner_code={Earnercode}
+                    payment_ym={payment_ym}
+                    WorkDay={workDate}
+                />
+            </div>
+            <div className="calendar" style={{flexDirection:"row", width:"20%"}}>
+                <RenderHeader
+                        Month={currentMonth}
+                    />
+                <RenderDays />
+                <Rendercell
+                    currentMonth={currentMonth}
+                    selectedDate={selectedDate}
+                    onDateClick={onDateClick}
+                    worker_id={Workerid}
+                    earner_code={Earnercode}
+                    payment_ym={payment_ym}
+                    WorkDay={workDate}
+                />
+            </div>
         </div>
+
     );
 };
 

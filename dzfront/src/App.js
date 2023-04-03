@@ -1,25 +1,25 @@
 import './App.css';
 
-import { Route, Routes, useHistory, useNavigate  } from 'react-router-dom';
-import Login from './component/login/Login'
-import Model from './model/Model'
+import { Route, Routes } from 'react-router-dom';
+import Login from './component/login/Login';
+import Calender from './component/Calendar';
 import Register from './component/Register';
 import Header from './component/Header';
 import EarnerGrid from './component/regist/EarnerGrid';
 import Registration from './component/regist/Registration';
 import EarnerRead from './component/list/EarnerRead';
 import EarnDivRead from './component/list/EarnDivRead';
-import IncomeInput from './component/input/IncomeInput';
-import {useEffect} from 'react';
 import Test from './component/test';
 import Home from './component/Home';
-import Calender from './component/Calendar';
+import RegistPage from './component/regist/RegistPage';
 
+import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
-  const navigate = useNavigate();
+
+  // const navigate = useNavigate();
 
   // useEffect(() => {
-  //   let status = localStorage.getItem("isLogOn");
+  //   let status = localStorage.getItem("isLogon");
   //   if (status === "1") {
   //     const timeoutId = setTimeout(() => {
   //       localStorage.clear();
@@ -43,17 +43,16 @@ function App() {
         <Route path="/earnDivRead" element={<EarnDivRead/>} />
         <Route path="/test" element={<Test/>} />
         <Route path="/test2" element={<EarnerGrid/>} />
-        <Route path="/incomeInput" element={<IncomeInput/>}/>
+        <Route path="/registPage" element={<RegistPage/>}/>
         <Route path="/calendar" element={<Calender/>}/>
-       
+        <Route path="/incomeInput2" element={[<IncomeInput2/>]} />
       </Routes>
     </div>
 
   </>
   );
  
-}
-
+};
 
 export default App;
 

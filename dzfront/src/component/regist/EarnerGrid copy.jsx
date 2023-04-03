@@ -23,7 +23,6 @@ const EarnerGrid = (props) => {
       field: "earner_code",
       editable: true,
       width: 90,
-      sort:'desc',
       onCellValueChanged: () => checkCode(),
     },
     {
@@ -81,7 +80,7 @@ const EarnerGrid = (props) => {
     { headerName: "소득구분명", field: "div_name", width: 160 },
   ];
 
-  const [defaultCode, setDefaultCode] = useState(1);
+  const [defaultCode, setDefaultCode] = useState(false);
   const [rowData, setRowData] = useState();
   const [divRowData, setDivRowData] = useState();
   const checkCode = () => {
@@ -113,14 +112,14 @@ const EarnerGrid = (props) => {
             text: "..",
             icon: "success",
           });
-          setDefaultCode(0);
+          setDefaultCode(false);
         }
       });
   };
   const getCode = () => {
     const selectedRows = gridRef2.current.api.getSelectedRows();
     console.log(selectedRows[0]);
-    setDefaultCode(1);
+    setDefaultCode(true);
     fetch("http://localhost:8080/regist/get_count", {
       method: "POST",
       headers: {
@@ -142,7 +141,7 @@ const EarnerGrid = (props) => {
               earner_code: codeCount,
               earner_name: selectedRows[0].earner_name,
               is_native: "내",
-              is_default: 1,
+              is_default: defaultCode,
             });
             rowData.earner_list.push({});
             setRowData(rowData.earner_list);
@@ -216,11 +215,11 @@ const EarnerGrid = (props) => {
     setSelectValue(selectedRows[0]);
   }, []);
   const [value, setValue] = useState(props.value);
+ 
   const onSelectionChanged2 = useCallback(() => {
     const selectedRows2 = gridRef2.current.api.getSelectedRows();
     const newValue = selectedRows2[0].earner_code;
     setValue(newValue);
-    console.log(newValue);
     props.onValueChange(newValue);
   }, []);
   const customStyles = {
@@ -234,14 +233,14 @@ const EarnerGrid = (props) => {
     },
   };
   const handleDataChange = (event) => {
-    const { data, colDef } = event;
-    const { field } = colDef;
     const selectedRows2 = gridRef2.current.api.getSelectedRows();
     const lastRowIndex = rowData.length - 1;
     const lastRow = selectedRows2[0];
     const lastRowData = Object.values(lastRow);
-    if(data.earner_name)
-    if (data.earner_code&&data.earner_name&&data.div_code&&data.div_name) {
+
+    // Check if last row is fully filled with data
+    if (lastRowData.every((cellData) => cellData !== "")) {
+      // Send last row's data to server
       fetch("http://localhost:8080/regist/earner_insert", {
         method: "POST",
         headers: {
@@ -259,21 +258,7 @@ const EarnerGrid = (props) => {
         })
         .then((rowData) => {});
     }
-    if(field==="earner_name"||field==="is_native"||field==="personal_no"||field==="div_code"||field==="div_name"){
-      fetch("http://localhost:8080/regist/earner_update", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        param_name:field,
-        param_value:data[field],
-        earner_code:data.earner_code,
-        worker_id: "yuchan2",
-      }),
-    })
-    .then((response) => response.json())
-}};
+  };
 
   return (
     <div
