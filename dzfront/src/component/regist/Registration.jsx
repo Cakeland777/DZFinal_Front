@@ -38,8 +38,6 @@ const  Registration=(props)=>{
        document.querySelector("#email2").value = (info.current && info.current.email2) || "";
     
        document.querySelector("#etc").value = info.current && info.current.etc ? info.current.etc : "";       
-       document.querySelector("#address").value = (info.current && info.current.address) || "";
-       document.querySelector("#zipcode").value = (info.current && info.current.zipcode) || "";
        document.querySelector("#address_detail").value = (data.earner_info && data.earner_info.address_detail) || "";
        document.querySelector("#is_tuition").value = (info.current && info.current.is_tuition) || "";
        document.querySelector("#is_artist").value = (info.current && info.current.is_artist) || "";
@@ -92,6 +90,8 @@ const  Registration=(props)=>{
  
   const handlePostcode = (data) => {
     setEarner({...earner, zipcode : data.zonecode,address:`${data.address} ${data.buildingName}`});
+    document.querySelector("#zipcode").value =  data.zonecode;     
+    document.querySelector("#address").value = `${data.address} ${data.buildingName}`;
     fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -311,14 +311,14 @@ const specialStyles={
 </tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>우편번호</td>
-  <td colSpan={2} style={{textAlign:"left"}}> <input type="text" name="zipcode" id="zipcode" onChange={onChange} onBlur={handleBlur} />
+  <td colSpan={2} style={{textAlign:"left"}}> <input type="text" name="zipcode" id="zipcode" value={earner.zipcode||""} />
   <button onClick={handlePostcodeClick}>주소 검색</button>
 </td>
 
 </tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>주소</td>
-  <td style={{textAlign:"left"}}>  <input type="text" name="address" id="address" onChange={onChange}  onBlur={handleBlur} />
+  <td style={{textAlign:"left"}}>  <input type="text" name="address" id="address" value={earner.address||""} />
 </td>
 </tr>
 <tr>

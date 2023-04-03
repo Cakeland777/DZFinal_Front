@@ -56,8 +56,7 @@ function Menu(props) {
      }else{
        setIsLogin(false);
      }
-     }
-   );
+     },[]);
    const navigate = useNavigate();
    const handleLinkClick = () => {
     props.onMenuToggle(false); // 사이드바 닫기
@@ -71,7 +70,7 @@ function Menu(props) {
        icon: "success",
      });
  
-     navigate("/login");
+     navigate("/");
    };
      if(isLogin){
   return (

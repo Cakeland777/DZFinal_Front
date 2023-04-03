@@ -88,7 +88,8 @@ const EarnerGrid = (props) => {
         },
         {headerName:"타입",
         field:"div_type",
-        hide:true 
+        width: 100,
+       //hide:true 
       }
       ],
     },
@@ -307,7 +308,7 @@ const onCellEditingStopped=(event)=>{
     setIsModalOpen(false);
       selectedCell.setDataValue('div_code', selectValue.div_code);
       selectedCell.setDataValue('div_name', selectValue.div_name);
-   
+      selectedCell.setDataValue('div_type', selectValue.div_type);
   };
   const [selectValue, setSelectValue] = useState("");
   const [codeList,setCodeList] =useState([]);
