@@ -53,6 +53,7 @@ const customStyles = {
     bottom: 'auto',
     marginRight: '-50%',
     transform: 'translate(-50%, -50%)',
+    
   },
 };
 const EarnerColumn = [
@@ -63,7 +64,12 @@ const EarnerColumn = [
   { headerName: "소득구분명", field: "div_name", width:120 },
   { headerName: "구분코드", field: "div_code", width:130 },
 ];
-const EarnerRead = () => {
+const EarnerRead = (props) => {
+  const earnerGridRef =useRef();
+  props.setTitle("사업소득조회");
+  const onEarnerGridReady = (params) => {
+    earnerGridRef.current.api.sizeColumnsToFit();
+  };
   registerLocale("ko", ko);
   useEffect(() => {
     fetch('http://localhost:8080/input/earner_search', {
@@ -96,13 +102,14 @@ const EarnerRead = () => {
       field: "personal_no",
       headerName: "주민(외국인)등록번호",
       resizable: true,
+      minWidth:180
     },
     { field: "div_name", headerName: "소득구분", resizable: true },
     { field: "accrual_ym", headerName: "귀속년월", resizable: true },
     { field: "payment_ym", headerName: "지급년월일", resizable: true },
 
     { field: "total_payment", headerName: "지급액", resizable: true },
-    { field: "tax_rate", headerName: "세율(%)", resizable: true },
+    { field: "tax_rate", headerName: "세율(%)", resizable: true ,maxWidth:130},
     { field: "tuition_amount", headerName: "학자금상환액", resizable: true },
     { field: "tax_income", headerName: "소득세", resizable: true },
     { field: "tax_local", headerName: "지방소득세", resizable: true },
@@ -252,16 +259,17 @@ const EarnerRead = () => {
     <option value="payment_ym">3.지급년월순</option>
     <option value="personal_no">4.주민(사업자)번호순</option>
   </select>
-  <button style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "30rem" }} type="submit">조회</button>
+  <button style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "39rem" }} type="submit">조회</button>
 </form>
       <div
         className="ag-theme-alpine"
-        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px"}}
+        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px",marginLeft:"20px"}}
       >
         <AgGridReact
-          ref={gridRef}
+          ref={earnerGridRef}
           rowData={rowData}
           columnDefs={columnDefs}
+          onGridReady={onEarnerGridReady}
           animateRows={true}
           overlayLoadingTemplate={
             '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'

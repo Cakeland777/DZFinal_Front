@@ -8,9 +8,7 @@ function Home() {
   <span id="splash-overlay" class="splash"></span>
   <span id="welcome" class="z-depth-4"></span>
  
-  <header class="navbar-fixed"> 
 
-  </header>
 
   <main class="valign-wrapper">
     <span class="container grey-text text-lighten-1 ">

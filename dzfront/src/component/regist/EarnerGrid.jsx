@@ -2,7 +2,9 @@ import React, {
   useCallback,
   useRef,
   useState,
+  useEffect
 } from "react";
+
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -11,27 +13,31 @@ import Swal from "sweetalert2";
 
 const EarnerGrid = (props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const gridRef = useRef();
-  const gridRef2 = useRef();
+  const gridRef = useRef(null);
+  const gridRef2 = useRef(null);
   const [gridApi, setGridApi] = useState(null);
   const [gridColumnApi, setGridColumnApi] = useState(null);
 
   const columnDefs = [
-    { headerName: "V", checkboxSelection: true, width: 50 },
+    { headerName: "V", headerCheckboxSelection:true, checkboxSelection: true, width: 50 },
     {
-      headerName: "Code",
-      field: "earner_code",
-      editable: true,
+      headerName: "Code",field: "earner_code", editable: (params) => {
+        return !params.node.data.div_code&&params.node.data.earner_name;
+      },
       width: 90,
-      sort:'desc',
-      onCellValueChanged: () => checkCode(),
+      cellEditor: "agTextCellEditor", 
+      cellEditorParams: {
+        // 입력 제한 설정
+        maxLength: 6,
+        pattern: "\\d*", // 숫자만 입력할 수 있도록 정규식 설정
+      },
     },
     {
       headerName: "소득자명",
       field: "earner_name",
       editable: true,
-      width: 90,
-      onCellValueChanged: () => getCode(),
+      width: 100,
+     
     },
 
     {
@@ -53,6 +59,13 @@ const EarnerGrid = (props) => {
           width: 150,
           editable: true,
           colspan: 2,
+          cellEditor: "agTextCellEditor", 
+          cellEditorParams: {
+            // 입력 제한 설정
+            maxLength: 14,
+            pattern: "\\d*" 
+          },
+         
         },
       ],
     },
@@ -62,17 +75,21 @@ const EarnerGrid = (props) => {
         {
           headerName: "구분코드",
           field: "div_code",
-          editable: true,
+          editable: false,
           width: 90,
-          onCellClicked: () => setIsModalOpen(true),
+        
         },
         {
           headerName: "구분명",
           field: "div_name",
           width: 100,
-          editable: true,
+          editable: false,
           colspan: 2,
         },
+        {headerName:"타입",
+        field:"div_type",
+        hide:true 
+      }
       ],
     },
   ];
@@ -80,78 +97,196 @@ const EarnerGrid = (props) => {
     { headerName: "소득구분코드", field: "div_code", width: 180 },
     { headerName: "소득구분명", field: "div_name", width: 160 },
   ];
+  const selectedCode=useRef();
+  const [selectedCell,setSelectedCell]=useState(null);
+  const earnerCellClicked=(event)=>{
+    const { data, colDef } = event;
+    const { field } = colDef;
+    if(field==="div_code"){
+      if(!event.data.div_name){
+        setSelectedCell(event.node);
+        setIsModalOpen(true);
+      }
+      if (!event.data.earner_name){
+        setIsModalOpen(false);
+        Swal.fire('이름을 먼저 입력해주세요','','info');
+      }
+            
+    }
+    const selectedCell=event.data;
+    if(selectedCell.earner_code&&selectedCell.div_code&&selectedCell.is_native){
+    selectedCode.current=selectedCell.earner_code;
+    console.log(selectedCode.current);
+    setValue(selectedCode.current);
+    props.onValueChange(selectedCode.current);}
+    else{
+      setValue("");
 
-  const [defaultCode, setDefaultCode] = useState(1);
-  const [rowData, setRowData] = useState();
+    }
+    event.node.setDataValue("earner_code",selectedCell.earner_code);
+
+  };
+
+let earnerGridApi ;
+const onEarnerGridReady=(params)=> {
+  earnerGridApi = params.api;
+  const gridColumnApi = params.columnApi;
+}
+
+const onCellValueChanged=(event)=>{
+
+  const { data, colDef } = event;
+  const { field } = colDef;
+  //이름 작성시
+  if(field==="earner_name"){
+    if (event.data.earner_code) {
+      fetch("http://localhost:8080/regist/earner_update", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          worker_id: localStorage.getItem("worker_id"),
+          earner_code:event.data.earner_code,
+          param_name:"earner_name",
+          param_value:event.data.earner_name
+    
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          // if(data.status===true){
+          //   Swal.fire('변경성공','','success');
+          // }
+         
+        });
+      
+    } else {
+      defaultCode.current=1;
+      fetch("http://localhost:8080/regist/get_count", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          code_count: localStorage.getItem("code_count"),
+          worker_id: localStorage.getItem("worker_id"),
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          const codeCount = data.code_count.toString().padStart(6, "0");
+          event.node.setDataValue("earner_code",codeCount);
+          event.node.setDataValue("is_native",'내');
+          const newRowData = {};
+          gridRef2.current.api.applyTransaction({ add: [newRowData] });
+
+        });
+    }
+  }
+if((field ==="personal_no"||field==="is_native")&& event.data.div_code){
+  fetch("http://localhost:8080/regist/earner_update", {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      worker_id: localStorage.getItem("worker_id"),
+      earner_code:event.data.earner_code,
+      param_value:data[field],
+      param_name:field
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if(data.status===true){
+        Swal.fire('변경성공','','success');
+      }
+    });
+
+
+}
+if(field==="div_code"&&event.data.earner_code&&event.data.earner_name){
+  fetch("http://localhost:8080/regist/earner_insert", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      worker_id: localStorage.getItem("worker_id"),
+      earner_code:event.data.earner_code,
+      earner_name:event.data.earner_name,
+      div_code:event.data.div_code,
+      div_name:event.data.div_name,
+      is_default:defaultCode.current,
+      is_native:event.data.is_native,
+      personal_no:event.data.personal_no
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      console.log(data.code_count);
+      if(data.code_count!==0){
+      localStorage.setItem("code_count",data.code_count);}
+    });
+
+
+}
+
+}
+
+const onCellEditingStopped=(event)=>{
+  const { data, colDef } = event;
+  const { field } = colDef;
+
+  if(field==="earner_code"){
+    console.log('코드입력');
+    const inputCode = event.data.earner_code;
+   fetch("http://localhost:8080/regist/check_code", {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+     },
+     body: JSON.stringify({
+       custom_code: inputCode,
+       worker_id: localStorage.getItem("worker_id"),
+     }),
+   })
+     .then((response) => response.json())
+     .then((data) => {
+       console.log(data.code_count);
+       if (data.code_count >= 1) {
+         Swal.fire({
+           title: "이미 존재하는 코드입니다",
+           text: "다른코드를 입력하세요",
+           icon: "error",
+         });
+       } else {
+         Swal.fire({
+           title: "사용가능한 코드입니다",
+           text: "..",
+           icon: "success",
+         });
+         defaultCode.current=0;
+       }
+     });
+ };
+
+}
+  useEffect(() => {
+    
+      fetch(`http://localhost:8080/regist/earner_list/${localStorage.getItem("worker_id")}`)
+        .then((resp) => resp.json())
+        .then((rowData) => {
+          rowData.earner_list.push({});
+          setRowData(rowData.earner_list);});
+
+  }, []);
+  const defaultCode= useRef(1);
+  const [rowData, setRowData] = useState([]);
   const [divRowData, setDivRowData] = useState();
-  const checkCode = () => {
-    const selectedRows = gridRef2.current.api.getSelectedRows();
-    const inputCode = selectedRows[0].earner_code;
-
-    fetch("http://localhost:8080/regist/check_code", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        custom_code: inputCode,
-        worker_id: "yuchan2",
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data.code_count);
-        if (data.code_count >= 1) {
-          Swal.fire({
-            title: "이미 존재하는 코드입니다",
-            text: "다른코드를 입력하세요",
-            icon: "error",
-          });
-        } else {
-          Swal.fire({
-            title: "사용가능한 코드입니다",
-            text: "..",
-            icon: "success",
-          });
-          setDefaultCode(0);
-        }
-      });
-  };
-  const getCode = () => {
-    const selectedRows = gridRef2.current.api.getSelectedRows();
-    console.log(selectedRows[0]);
-    setDefaultCode(1);
-    fetch("http://localhost:8080/regist/get_count", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        code_count: 5,
-        worker_id: "yuchan2",
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const codeCount = data.code_count.toString().padStart(6, "0");
-        fetch(`http://localhost:8080/regist/earner_list/yuchan2`)
-          .then((result) => result.json())
-          .then((rowData) => {
-            rowData.earner_list.push({
-              ...selectedRows[0],
-              earner_code: codeCount,
-              earner_name: selectedRows[0].earner_name,
-              is_native: "내",
-              is_default: 1,
-            });
-            rowData.earner_list.push({});
-            setRowData(rowData.earner_list);
-          });
-      });
-    //setRowData(rowData.earner_list);
-    //setRowData([{...rowData.earner_list, earner_code: code, is_native:'내',earner_name:'',personal_no:'',div_code:'',div_name:''}]);
-    // gridRef2.current.api.applyTransaction({ add: [{ earner_code: code, is_native:'내'}] });
-  };
+ 
+ 
 
   const onGridReady = useCallback((params) => {
     fetch("http://localhost:8080/regist/list_divcode")
@@ -159,70 +294,46 @@ const EarnerGrid = (props) => {
       .then((data) => setDivRowData(data.div_list));
   }, []);
 
-  const onEarnerGridReady = useCallback((params) => {
-    setGridApi(params.api);
-    setGridColumnApi(params.columnApi);
-    fetch(`http://localhost:8080/regist/earner_list/yuchan2`)
-      .then((resp) => resp.json())
-      .then((rowData) => {
-        rowData.earner_list.push({});
-        setRowData(rowData.earner_list);
-      });
-  }, []);
  
-
 
   const gridOptions = {
     suppressScrollOnNewData: true,
+    //onCellClicked: onCellClicked,
+    onCellValueChanged: onCellValueChanged,
+
   };
 
-  const DivModalDoubleClicked = useCallback(() => {
-    const selectedRows = gridRef.current.api.getSelectedRows();
-    const earnerRows = gridRef2.current.api.getSelectedRows();
+  const DivModalDoubleClicked =() => {
     setIsModalOpen(false);
-
-    fetch(`http://localhost:8080/regist/earner_list/yuchan2`)
-      .then((result) => result.json())
-      .then((rowData) => {
-        rowData.earner_list.push({
-          ...earnerRows[0],
-          div_code: selectedRows[0].div_code,
-          div_name: selectedRows[0].div_name,
-        });
-        //setRowData({ ...earnerRows[0],div_code:selectedRows[0].div_code,div_name:selectedRows[0].div_name});
-        rowData.earner_list.push({});
-        setRowData(rowData.earner_list);
-      });
-
-    fetch("http://localhost:8080/regist/earner_insert", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        ...earnerRows[0],
-        worker_id: "yuchan2",
-      }),
-    }).then((response) => {
-      response.json();
-      rowData.earner_list.push({});
-      setRowData(rowData.earner_list);
-    });
-  }, []);
+      selectedCell.setDataValue('div_code', selectValue.div_code);
+      selectedCell.setDataValue('div_name', selectValue.div_name);
+   
+  };
   const [selectValue, setSelectValue] = useState("");
-
+  const [codeList,setCodeList] =useState([]);
   const onSelectionChanged = useCallback(() => {
     const selectedRows = gridRef.current.api.getSelectedRows();
     setSelectValue(selectedRows[0]);
+    console.log(selectedRows[0])
   }, []);
   const [value, setValue] = useState(props.value);
-  const onSelectionChanged2 = useCallback(() => {
+  
+  const onSelectionChanged2 = () => {
     const selectedRows2 = gridRef2.current.api.getSelectedRows();
     const newValue = selectedRows2[0].earner_code;
-    setValue(newValue);
-    console.log(newValue);
-    props.onValueChange(newValue);
-  }, []);
+    var selectedRowsString = '';
+   
+    selectedRows2.forEach(function (selectedRow) {
+      selectedRowsString += selectedRow.earner_code;
+      setCodeList((prev) => [...prev, selectedRow.earner_code]);
+      
+    });
+    const set=new Set(codeList);
+    const newArr=[...set];
+    //document.querySelector('#selectedRows').innerHTML =newArr;
+  
+  };
+  
   const customStyles = {
     content: {
       top: "50%",
@@ -233,69 +344,34 @@ const EarnerGrid = (props) => {
       transform: "translate(-50%, -50%)",
     },
   };
-  const handleDataChange = (event) => {
-    const { data, colDef } = event;
-    const { field } = colDef;
-    const selectedRows2 = gridRef2.current.api.getSelectedRows();
-    const lastRowIndex = rowData.length - 1;
-    const lastRow = selectedRows2[0];
-    const lastRowData = Object.values(lastRow);
-    if(data.earner_name)
-    if (data.earner_code&&data.earner_name&&data.div_code&&data.div_name) {
-      fetch("http://localhost:8080/regist/earner_insert", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...selectedRows2[0],
-          worker_id: "yuchan2",
-        }),
-      })
-        .then((response) => {
-          response.json();
-          rowData.earner_list.push({});
-          setRowData(rowData.earner_list);
-        })
-        .then((rowData) => {});
-    }
-    if(field==="earner_name"||field==="is_native"||field==="personal_no"||field==="div_code"||field==="div_name"){
-      fetch("http://localhost:8080/regist/earner_update", {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        param_name:field,
-        param_value:data[field],
-        earner_code:data.earner_code,
-        worker_id: "yuchan2",
-      }),
-    })
-    .then((response) => response.json())
-}};
+
+
 
   return (
+    
     <div
       className="ag-theme-alpine"
-      style={{ float: "left", height: 800, width: 600, marginTop: "40px" }}
+      style={{ float: "left", height: 800, width: 700, marginTop: "40px" }}
     >
       <AgGridReact
         columnDefs={columnDefs}
         rowData={rowData}
-        onGridReady={onEarnerGridReady}
+      
         onSelectionChanged={onSelectionChanged2}
         rowSelection={"multiple"}
         singleClickEdit={"false"}
-        suppressRowClickSelection = {false}
-        onCellValueChanged={handleDataChange}
-        onCellEditingStopped={handleDataChange}
-        onCellClicked={handleDataChange}
+        suppressRowClickSelection = {'true'}
+        //onCellValueChanged={handleDataChange}
+        onCellEditingStopped={onCellEditingStopped}
+        onCellClicked={earnerCellClicked}
         ref={gridRef2}
+        
+        onGridReady={onEarnerGridReady}
         gridOptions={gridOptions}
       />
 
-    
+Selection:
+          <span id="selectedRows"></span>
 
       <ReactModal
         style={customStyles}
@@ -316,6 +392,7 @@ const EarnerGrid = (props) => {
                 rowSelection={"single"}
                 onCellDoubleClicked={DivModalDoubleClicked}
                 onSelectionChanged={onSelectionChanged}
+          
                 ref={gridRef}
               />
             </div>
@@ -325,6 +402,7 @@ const EarnerGrid = (props) => {
               <div style={{ textAlign: "center" }}>
                 <h5>선택 코드: {selectValue.div_code}</h5>
                 <h5>구분명:{selectValue.div_name}</h5>
+                <h5>타입:{selectValue.div_type}</h5>
                 <button onClick={DivModalDoubleClicked}>확인</button>
                 <button onClick={() => setIsModalOpen(false)}>취소</button>
               </div>

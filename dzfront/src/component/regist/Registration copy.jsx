@@ -10,53 +10,51 @@ const  Registration=(props)=>{
 
   const [preCode,setPreCode]=useState(props.value||"");
   const [earner,setEarner]=useState({});
-  const info =useRef();
   useEffect(()=>{
     console.log(props.value);
-    if(preCode!==props.value&&props.value!==""){
+    if(preCode!==props.value){
       fetch('http://localhost:8080/regist/get_earner',{
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          worker_id:localStorage.getItem("worker_id"),
+          worker_id:"yuchan2",
           earner_code: props.value
         }),
       })
       .then(result => result.json())
       .then(data => {
-        info.current=data.earner_info;
+        
         setEarner(data.earner_info);
         console.log("데이터가져옴:",data.earner_info);
-       console.log("ref", info.current);
-       document.querySelector("#div_name").value = (info.current && info.current.div_name) || "";
-       document.querySelector("#residence_status").value = (info.current && info.current.residence_status) || "";
-       document.querySelector("#is_native").value = (info.current && info.current.is_native) || "";
-       document.querySelector("#personal_no").value = (info.current && info.current.personal_no) || "";
-       document.querySelector("#email1").value = (info.current && info.current.email1) || "";
-       document.querySelector("#email2").value = (info.current && info.current.email2) || "";
-    
-       document.querySelector("#etc").value = info.current && info.current.etc ? info.current.etc : "";       
-       document.querySelector("#address").value = (info.current && info.current.address) || "";
-       document.querySelector("#zipcode").value = (info.current && info.current.zipcode) || "";
-       document.querySelector("#address_detail").value = (data.earner_info && data.earner_info.address_detail) || "";
-       document.querySelector("#is_tuition").value = (info.current && info.current.is_tuition) || "";
-       document.querySelector("#is_artist").value = (info.current && info.current.is_artist) || "";
-       document.querySelector("#artist_type").value = (info.current && info.current.artist_type) || "";
-       document.querySelector("#occupation_code").value = (info.current && info.current.occupation_code) || "";
-       document.querySelector("#rate_coefficient").value = (info.current && info.current.rate_coefficient) || "";
-       document.querySelector("#sworker_reduce").value = (info.current && info.current.sworker_reduce) || "";
-       document.querySelector("#workinjury_reduce").value = (info.current && info.current.workinjury_reduce) || "";
-       
+        document.querySelector("#div_name").value = (data.earner_info && data.earner_info.div_name) ? data.earner_info.div_name : "";
+        document.querySelector("#residence_status").value = (data.earner_info && data.earner_info.residence_status) ? data.earner_info.residence_status : "";
+        document.querySelector("#is_native").value = (data.earner_info && data.earner_info.is_native) ? data.earner_info.is_native : "";
+        document.querySelector("#personal_no").value = (data.earner_info && data.earner_info.personal_no) ? data.earner_info.personal_no : "";
+        document.querySelector("#email1").value = (data.earner_info && data.earner_info.email1) ? data.earner_info.email1 : "";
+        document.querySelector("#email2").value = (data.earner_info && data.earner_info.email2) ? data.earner_info.email2 : "";
+        document.querySelector("#tel1").value = (data.earner_info && data.earner_info.tel1) ? data.earner_info.tel1 : "";
+        document.querySelector("#tel2").value = (data.earner_info && data.earner_info.tel2) ? data.earner_info.tel2 : "";
+        document.querySelector("#tel3").value = (data.earner_info && data.earner_info.tel3) ? data.earner_info.tel3 : "";
+        document.querySelector("#phone1").value = (data.earner_info && data.earner_info.phone1) ? data.earner_info.phone1 : "";
+        document.querySelector("#phone2").value = (data.earner_info && data.earner_info.phone2) ? data.earner_info.phone2 : "";
+        document.querySelector("#phone3").value = (data.earner_info && data.earner_info.phone3) ? data.earner_info.phone3 : "";
+        document.querySelector("#etc").value = (data.earner_info && data.earner_info.etc) ? data.earner_info.etc : "";       
+        document.querySelector("#address").value = (data.earner_info && data.earner_info.address) ? data.earner_info.address : "";
+        document.querySelector("#zipcode").value = (data.earner_info && data.earner_info.zipcode) ? data.earner_info.zipcode : "";
+        document.querySelector("#address_detail").value = (data.earner_info && data.earner_info.address_detail) ? data.earner_info.address_detail : "";
+        document.querySelector("#is_tuition").value = (data.earner_info && data.earner_info.is_tuition) ? data.earner_info.is_tuition : "";
+        document.querySelector("#is_artist").value = (data.earner_info && data.earner_info.is_artist) ? data.earner_info.is_artist : "";
+        document.querySelector("#artist_type").value = (data.earner_info && data.earner_info.artist_type) ? data.earner_info.artist_type : "";
+        document.querySelector("#occupation_code").value = (data.earner_info && data.earner_info.occupation_code) ? data.earner_info.occupation_code : "";
+        document.querySelector("#rate_coefficient").value = (data.earner_info && data.earner_info.rate_coefficient) ? data.earner_info.rate_coefficient : "";
+        document.querySelector("#sworker_reduce").value = (data.earner_info && data.earner_info.sworker_reduce) ? data.earner_info.sworker:"";
+        
+        
         
       });
     
-    }
-
-    else{
-        setEarner({});
-
     }
     setPreCode(props.value);
   },[props.value, preCode])
@@ -87,7 +85,14 @@ const  Registration=(props)=>{
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [PostModalOpen,setPostModalOpen]=useState(false);
   const [specialModalOpen,setSpecialModalOpen] =useState(false);
-  
+  const[selectValue, setSelectValue]=useState("");
+  const onSelectionChanged = useCallback(() => {
+    const selectedRows = gridRef.current.api.getSelectedRows();
+    setSelectValue(selectedRows[0]);
+    document.querySelector('#div_name').innerHTML =
+      selectedRows.length === 1 ? selectedRows[0].div_code : '';
+      
+  }, []);
   const gridRef = useRef();
  
   const handlePostcode = (data) => {
@@ -98,7 +103,7 @@ const  Registration=(props)=>{
       body: JSON.stringify({ 
         param_value: data.zonecode,
         param_name: "zipcode",
-        worker_id:localStorage.getItem("worker_id"),
+        worker_id:"yuchan2",
         earner_code:props.value
       
       }),
@@ -109,7 +114,7 @@ const  Registration=(props)=>{
       body: JSON.stringify({ 
         param_value: `${data.address} ${data.buildingName}`,
         param_name: "address",
-        worker_id:localStorage.getItem("worker_id"),
+        worker_id:"yuchan2",
         earner_code:props.value
       
       }),
@@ -198,7 +203,7 @@ const onChange=e=>{
       body: JSON.stringify({ 
         param_value: value,
         param_name:name,
-        worker_id:localStorage.getItem("worker_id"),
+        worker_id:"yuchan2",
         earner_code:props.value
       
       }),
@@ -222,7 +227,7 @@ const handleBlur = (event) => {
       body: JSON.stringify({ 
         param_value: value,
         param_name :name,
-        worker_id:localStorage.getItem("worker_id"),
+        worker_id:"yuchan2",
         earner_code:props.value
       }),
     })
@@ -241,6 +246,9 @@ const handleBlur = (event) => {
   
 };
 
+const handleClick = () => {
+  setIsModalOpen(true);
+};
 const customStyles = {
   content: {
     top: '50%',
@@ -294,7 +302,7 @@ const specialStyles={
         </tr>
         <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>소득구분</td>
-<td style={{textAlign:"left"}}> <input type="text"  id="div_name" name= "div_name" onBlur={handleBlur} onChange={onChange}/><br/>
+<td style={{textAlign:"left"}}> <input type="text"  id="div_name" name= "div_name" onBlur={handleBlur} onChange={onChange} onClick={handleClick} /><br/>
 </td>
         </tr>
         <tr>
@@ -323,28 +331,28 @@ const specialStyles={
 </tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>상세주소</td>
-<td style={{textAlign:"left"}}> <input type="text" name="address_detail" id="address_detail"  onChange={onChange} onBlur={handleBlur}/></td>
+<td style={{textAlign:"left"}}> <input type="text" name="address_detail" id="address_detail" onChange={onChange} onBlur={handleBlur}/></td>
 </tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>전화번호</td>
 <td style={{textAlign:"left"}} colSpan={3}>
-<input type="text" name="tel1" id="tel1" onBlur={handleBlur} onChange={onChange} value={earner.tel1||''} style={{width:"40px"}} size="3"maxLength="3"/>-
-<input type="text" name="tel2" id="tel2" onBlur={handleBlur} onChange={onChange}   value={earner.tel2||''}  style={{width:"40px"}} size="4" maxLength="4"/>-
- <input type="text" name="tel3" id="tel3" onBlur={handleBlur} onChange={onChange}   value={earner.tel3||''}   style={{width:"40px"}} size="4" maxLength="4"/>
+<input type="number" name="tel1" id="tel1" onBlur={handleBlur} onChange={onChange} style={{width:"40px"}} size="3" maxlength="3"/>-
+<input type="number" name="tel2" id="tel2" onBlur={handleBlur} onChange={onChange}   style={{width:"40px"}} size="4" maxlength="4"/>-
+ <input type="number" name="tel3" id="tel3" onBlur={handleBlur} onChange={onChange}   style={{width:"40px"}} size="4" maxlength="4"/>
 
 </td>
 </tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>핸드폰번호 </td>
   <td style={{textAlign:"left"}} colSpan={3}>
-    <input type="number" name="phone1" id="phone1" onBlur={handleBlur} onChange={onChange}  value={earner.phone1||''} style={{width:"40px"}} size="3" maxLength="3"/>-
-<input type="number" name="phone2" id="phone2" onBlur={handleBlur} onChange={onChange}   value={earner.phone2||''} style={{width:"40px"}} size="4" maxLength="4"/>-
-  <input type="number" name="phone3" id="phone3" onBlur={handleBlur} onChange={onChange}  value={earner.phone3||''} style={{width:"40px"}} size="4" maxLength="4"/></td>
+    <input type="number" name="phone1" id="phone1" onBlur={handleBlur} onChange={onChange} style={{width:"40px"}} size="3" maxlength="3"/>-
+<input type="number" name="phone2" id="phone2" onBlur={handleBlur} onChange={onChange} style={{width:"40px"}} size="4" maxlength="4"/>-
+  <input type="number" name="phone3" id="phone3" onBlur={handleBlur} onChange={onChange} style={{width:"40px"}} size="4" maxlength="4"/></td>
 </tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>이메일</td>
-<td style={{textAlign:"left"}} colSpan={2}><input type="text" name="email1" id="email1"  value={earner.email1||''} onBlur={handleBlur} onChange={onChange}  />@
-      <input type="text" name="email2" onBlur={handleBlur} onChange={onChange}  value={earner.email2||''} /></td>
+<td style={{textAlign:"left"}} colSpan={2}><input type="text" name="email1" id="email1" onBlur={handleBlur} onChange={onChange}  />@
+      <input type="text" name="email2" onBlur={handleBlur} onChange={onChange}  /></td>
 
 </tr>
 <tr>
@@ -500,6 +508,32 @@ const specialStyles={
           </button>
         ))}
      {currentItem.content}</div>
+     <ReactModal style={customStyles} isOpen={isModalOpen} onRequestClose={() => setIsModalOpen(false)} >
+  {
+    
+    <>  
+    <h4>소득구분코드 도움</h4>
+    <div className="ag-theme-alpine" style={{ float:"left" ,height: 400, width: 400 }}>
+        <AgGridReact
+          columnDefs={divColumn}
+          rowData={divRowData}
+          onGridReady={onGridReady}
+          rowSelection={'single'}
+          onSelectionChanged={onSelectionChanged}  
+          ref={gridRef}
+        />
+        </div>
+       
+    <>
+    <br/>   <div style={{textAlign:"center"}}>
+    <h5>선택 코드: {selectValue.div_code}</h5>
+    <h5>구분명:{selectValue.div_name}</h5>
+            <button onClick={{}}>확인</button>
+            <button onClick={()=>setIsModalOpen(false)}>취소</button>
+            </div>
+          </></>
+          }
+</ReactModal>
 <ReactModal style={specialStyles} isOpen={specialModalOpen} onRequestClose={() => setSpecialModalOpen(false)} >
   {
     

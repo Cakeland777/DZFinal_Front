@@ -15,9 +15,9 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
-const IncomeInput2 = () => {
+const IncomeInput2 = (props) => {
   //datepicker관련
- 
+  props.setTitle("사업소득자료입력");
   registerLocale("ko", ko);
   const [bottomData,setBottomData]= useState([]);
   const earnerGridRef = useRef();
@@ -49,9 +49,11 @@ const IncomeInput2 = () => {
     {
       headerName: "소득자명",
       field: "earner_name",
-      editable: true,
+      editable:false,
       width: 100,
-      onCellClicked: () => setIsModalOpen(true),
+      onCellClicked: (event) => {
+        if(!event.data.earner_name){
+        setIsModalOpen(true)}},
     },
 
     {
@@ -60,8 +62,8 @@ const IncomeInput2 = () => {
         {
           headerName: "구분",
           field: "is_native",
-          editable: true,
-          width: 70,
+          editable: false,
+          width: 60,
           cellEditor: "agSelectCellEditor",
           cellEditorParams: {
             values: ["내", "외"],
@@ -71,7 +73,7 @@ const IncomeInput2 = () => {
           headerName: "번호",
           field: "personal_no",
           width: 130,
-          editable: true,
+          editable: false,
           colspan: 2,
         },
       ],
@@ -82,14 +84,14 @@ const IncomeInput2 = () => {
         {
           headerName: "구분코드",
           field: "div_code",
-          editable: true,
+          editable: false,
           width: 90,
         },
         {
           headerName: "구분명",
           field: "div_name",
           width: 100,
-          editable: true,
+          editable: false,
           colspan: 2,
         },
       ],
@@ -99,14 +101,9 @@ const IncomeInput2 = () => {
   const startDate = useRef('');
   const selectedCode = useRef('');
   const taxId = useRef('');
+  const [sumTask,setSumTask] = useState({});
   const [earnerCount,setEarnerCount] = useState("");
-  const [taxCount,setTaxCount] = useState("");
-  const [sumInsCost,setSumInsCost]= useState("");
-  const [sumReal,setSumReal] =useState("");
-  const [sumTaxLocal,setSumTaxLocal]=useState("");
-  const [sumTaxIncome,setSumTaxIncome]=useState("");
-  const [sumTuition,setSumTuition]=useState("");
-  const [sumTotalPay,setSumTotalPay]=useState("");
+  
   
   
 
@@ -145,29 +142,19 @@ const IncomeInput2 = () => {
         .then((data)=>{
           if(data.sum_task!=null){
           console.log(data.sum_task);
-          setTaxCount(data.sum_task.count);
-          setSumInsCost(data.sum_task.ins_cost);
-          setSumReal(data.sum_task.real_payment);
-          setSumTaxLocal(data.sum_task.tax_local);
-          setSumTaxIncome(data.sum_task.tax_income);
-          setSumTuition(data.sum_task.tuition_amount);
-          setSumTotalPay(data.sum_task.total_payment);
+          setSumTask(data.sum_task);
+          
         }
 
         else{
-          setTaxCount(0);
-          setSumInsCost(0);
-          setSumReal(0);
-          setSumTaxLocal(0);
-          setSumTaxIncome(0);
-          setSumTuition(0);
-          setSumTotalPay(0);
+          setSumTask({});
 
         }
         })
       });
   };
   const gridRef = useRef();
+  const taxGridRef =useRef();
   const [earnerList, setEarnerList] = useState(
     JSON.parse(localStorage.getItem("earnerList")) || []
   );
@@ -252,9 +239,9 @@ const IncomeInput2 = () => {
   const defaultColDef = {
     editable: true,
     sortable: true,
-    resizable: true,
+    resizable: false,
     flex: 1,
-    minWidth: 50,
+  
   };
 
   const rightGridOptions = {
@@ -265,18 +252,20 @@ const IncomeInput2 = () => {
     onCellValueChanged: onRightCellValueChanged,
   };
   const columnDefs = [
-    {headerName:"ID",field :"tax_id",width:50},
-    { headerName: "귀속년월",field: "accrual_ym", width:180 , cellStyle: { textAlign: 'right' }},
-    { headerName: "지급년월", field: "payment_ym" ,width: 150,editable:false, cellStyle: { textAlign: 'right' }  },
-    { headerName: "일", field: "payment_date" ,width: 50, cellStyle: { textAlign: 'right' } },
+    {headerName:"ID",field :"tax_id",width:50,hide:true},
+    { headerName: "귀속년월",field: "accrual_ym", maxWidth:140 , cellStyle: { textAlign: 'right' }},
+    { headerName: "지급년월", field: "payment_ym" ,maxWidth: 140,editable:false, cellStyle: { textAlign: 'right' }  },
+    { headerName: "일", field: "payment_date" ,maxWidth: 60, cellStyle: { textAlign: 'right' } },
     { headerName: "지급총액", field: "total_payment",width: 150 , cellStyle: { textAlign: 'right' }},
-    { headerName: "세율",field: "tax_rate", width: 120 , cellStyle: { textAlign: 'right' }},
-    { headerName: "학자금상환액",field: "tuition_amount", width: 120,cellStyle:getCellStyle},
+    { headerName: "세율",field: "tax_rate", maxWidth: 70 , cellStyle: { textAlign: 'right' }},
+    { headerName: "학자금상환액",field: "tuition_amount", minWidth: 130,cellStyle:getCellStyle},
     { headerName: "소득세",field: "tax_income", width: 150 , cellStyle: { textAlign: 'right' }},
     { headerName: "지방소득세",field: "tax_local", width: 150 , cellStyle: { textAlign: 'right' }},
     { headerName: "세액계",field: "tax_total", width: 100 ,cellStyle: { textAlign: 'right' }},
-    { headerName: "예술인경비",field: "artist_cost", width: 100 ,cellStyle:getCellStyle},
+    { headerName: "예술인/특고인경비",field: "artist_cost", minWidth: 150 ,cellStyle:getCellStyle},
     { headerName: "고용보험료",field: "ins_cost", width: 100 ,cellStyle:getCellStyle},
+    { headerName: "산재요율(%)", field: "real_payment",minWidth: 130, cellStyle: { textAlign: 'right' }},
+    { headerName: "산재보험료", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }},
     { headerName: "차인지급액", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }},
   ];
 
@@ -357,33 +346,64 @@ const IncomeInput2 = () => {
       })
       .then((response) => response.json())
       .then((data) => {
-        data.sum_tax.tax_id = "합계";
-        setBottomData([data.sum_tax]);
+       
+        console.log(data);
+        if(data.sum_tax!==null){
+          data.sum_tax.accrual_ym = "합계";
+        setBottomData([data.sum_tax]);}
+        else{
+          setBottomData([]);
+        }
        
       });
   }
   function onRightCellValueChanged(event) {
     const { data, colDef } = event;
     const { field } = colDef;
-  
-    if (field === "payment_date" && data.payment_date) {
-      console.log(data.payment_date);
+   
+    if(field==="payment_date" && event.data.accrual_ym&&event.data.payment_ym){
       const newRowData = {};
-      rightGridApi.applyTransaction({ add: [newRowData] });
-    }
-    if(field==="payment_date" && data.accrual_ym&&data.payment_ym){
+      topGrid.current.api.applyTransaction({ add: [newRowData] });
       fetch("http://localhost:8080/input/update_taxdate", {
         method: "PATCH",
         body: JSON.stringify({
-            tax_id:data.tax_id,
+            tax_id:event.data.tax_id,
             payment_date:parseInt(data.payment_date),
-            accrual_ym:data.accrual_ym
+            accrual_ym:event.data.accrual_ym
           }),
         headers: {
           "Content-Type": "application/json",
         },
       })
       .then((response) => response.json())
+      .then((datas)=>{ 
+        event.node.setDataValue("payment_date", parseInt(data.payment_date));
+        
+    fetch("http://localhost:8080/input/sum_tax", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: localStorage.getItem("worker_id"),
+        earner_code:selectedCode.current,
+        payment_ym:data.payment_ym
+      }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+     
+      console.log(data);
+      if(data.sum_tax!==null){
+        data.sum_tax.accrual_ym = "합계";
+      setBottomData([data.sum_tax]);}
+      else{
+        setBottomData([]);
+      }
+     
+    });
+
+       })
 
 
     }
@@ -404,6 +424,7 @@ const IncomeInput2 = () => {
           console.log(data.tax_id);
           event.node.setDataValue("tax_id", data.tax_id);
           taxId.current = data.tax_id; 
+
         })
         .then(
       fetch("http://localhost:8080/input/update_taxdate", {
@@ -446,7 +467,31 @@ const IncomeInput2 = () => {
           event.node.setDataValue("real_payment", data.earner_tax.realPayment);
           event.node.setDataValue("tuition_amount", data.earner_tax.deductionAmount);
           event.node.setDataValue("tax_id",data.earner_tax.taxId);
-         
+          
+    fetch("http://localhost:8080/input/sum_tax", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: localStorage.getItem("worker_id"),
+        earner_code:selectedCode.current,
+        payment_ym:data.payment_ym
+      }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+     
+      console.log(data);
+      if(data.sum_tax!==null){
+        data.sum_tax.accrual_ym = "합계";
+      setBottomData([data.sum_tax]);}
+      else{
+        setBottomData([]);
+      }
+     
+    });
+
         })
         .catch((error) => {
           console.error(error);
@@ -464,7 +509,7 @@ const IncomeInput2 = () => {
         body: JSON.stringify({
             tax_id:data.tax_id,
             total_payment:parseInt(data.total_payment),
-            tax_rate: "3.0"
+            tax_rate: 3
           }),
         headers: {
           "Content-Type": "application/json",
@@ -483,7 +528,31 @@ const IncomeInput2 = () => {
           event.node.setDataValue("real_payment", data.earner_tax.realPayment);
           event.node.setDataValue("tuition_amount", data.earner_tax.deductionAmount);
           event.node.setDataValue("tax_id",data.earner_tax.taxId);
-         
+          
+    fetch("http://localhost:8080/input/sum_tax", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: localStorage.getItem("worker_id"),
+        earner_code:selectedCode.current,
+        payment_ym:data.payment_ym
+      }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+     
+      console.log(data);
+      if(data.sum_tax!==null){
+        data.sum_tax.accrual_ym = "합계";
+      setBottomData([data.sum_tax]);}
+      else{
+        setBottomData([]);
+      }
+     
+    });
+
         })
         .catch((error) => {
           console.error(error);
@@ -570,44 +639,44 @@ const IncomeInput2 = () => {
 
                 <tr>
                   <th scope="row">인원[건수]</th>
-                  <td>{(earnerCount)||'0'}[{(taxCount)||'0'}]</td>
+                  <td>{(earnerCount)||'0'}[{(sumTask.count)||'0'}]</td>
                   <td>명</td>
                 </tr>
                 <tr>
                   <th scope="row">지급액</th>
-                  <td>{sumTotalPay||0}</td>
+                  <td>{sumTask.total_payment||0}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">학자금상환액</th>
-                  <td>{sumTuition||'0'}</td>
+                  <td>{sumTask.tuition_amount||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">소득세</th>
-                  <td>{sumTaxIncome||'0'}</td>
+                  <td>{sumTask.tax_income||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">지방소득세</th>
-                  <td>{sumTaxLocal||'0'}</td>
+                  <td>{sumTask.tax_local||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">고용보험료</th>
-                  <td>{sumInsCost||'0'}</td>
+                  <td>{sumTask.ins_cost||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
                   <th scope="row">차인지급액</th>
-                  <td>{sumReal||'0'}</td>
+                  <td>{sumTask.real_payment||'0'}</td>
                   <td>원</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
-
+              
         <div
           id="right"
           style={{
@@ -619,12 +688,14 @@ const IncomeInput2 = () => {
           }}
           className="ag-theme-alpine"
         >
+          
           <div style={{ flex: "1 1 auto" }}>
             <AgGridReact
               ref={topGrid}
               alignedGrids={
                 bottomGrid.current ? [bottomGrid.current] : undefined
               }
+             
               gridOptions={rightGridOptions}
               rowData={rowData}
               onGridReady={onRightGridReady}
@@ -636,11 +707,11 @@ const IncomeInput2 = () => {
               }
               defaultColDef={defaultColDef}
               columnDefs={columnDefs}
-              suppressHorizontalScroll
+             
             />
           </div>
 
-          <div style={{ height: "100px" }}>
+          <div style={{ height: "45px" }}>
             <AgGridReact
               ref={bottomGrid}
               alignedGrids={topGrid.current ? [topGrid.current] : undefined}

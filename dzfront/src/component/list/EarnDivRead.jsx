@@ -16,7 +16,7 @@ const customStyles = {
   content: {
     top: "50%",
     left: "50%",
-    width: "500px",
+    width: "400px",
     height: "600px",
     right: "auto",
     bottom: "auto",
@@ -50,7 +50,9 @@ const NavLink = ({ to, children }) => (
     {children}
   </Link>
 );
-const EarnDivRead = () => {
+const EarnDivRead = (props) => {
+  const earnerGridRef=useRef();
+  props.setTitle("사업소득조회");
   registerLocale("ko", ko);
   const [rowData, setRowData] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,14 +65,15 @@ const EarnDivRead = () => {
       field: "personal_no",
       headerName: "주민(사업자)등록번호",
       resizable: true,
+      minWidth:180
     },
-    { field: "is_native", headerName: "내/외국인", resizable: true },
-    { field: "count", headerName: "건수", resizable: true },
+    { field: "is_native", headerName: "내/외국인", resizable: true,maxWidth:130 },
+    { field: "count", headerName: "건수", resizable: true ,maxWidth:100},
 
     { field: "total_payment", headerName: "연간총지급액", resizable: true },
-    { field: "tax_rate", headerName: "세율(%)", resizable: true },
+    { field: "tax_rate", headerName: "세율(%)", resizable: true ,maxWidth:130},
     { field: "tax_income", headerName: "소득세", resizable: true },
-    { field: "tax_income", headerName: "소득세", resizable: true },
+
     { field: "tax_local", headerName: "지방소득세", resizable: true },
     { field: "artist_cost", headerName: "예술인경비", resizable: true },
     { field: "ins_cost", headerName: "고용보험료", resizable: true },
@@ -96,6 +99,10 @@ const EarnDivRead = () => {
     "940903",
     "940910",
     "940912",
+    "940913",
+    "940918",
+    "940919",
+    "940926",
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const handlePrevClick = () => {
@@ -106,7 +113,7 @@ const EarnDivRead = () => {
   };
   const handleDoublePrevClick = () => {
  
-      setSelectedIndex(1);
+      setSelectedIndex(0);
       setEarner(divOptions[selectedIndex]);
     };
   const handleNextClick = () => {
@@ -190,7 +197,9 @@ const EarnDivRead = () => {
         setRowData(rowData.earnerInfo);
       });
   }
-
+  const onEarnerGridReady = (params) => {
+    earnerGridRef.current.api.sizeColumnsToFit();
+  };
   return (
     <div>
    <div>
@@ -266,16 +275,16 @@ const EarnDivRead = () => {
   </button>
 </div>
  
-        <button type="submit" style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "30rem" }}>
+        <button type="submit" style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "35rem" }}>
           조회
         </button>
       </form>
       <div
         className="ag-theme-alpine"
-        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px"}}
+        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px",marginLeft:"20px"}}
       >
         <AgGridReact
-          ref={gridRef}
+          ref={earnerGridRef}
           rowData={rowData}
           columnDefs={columnDefs}
           animateRows={true}
@@ -288,6 +297,7 @@ const EarnDivRead = () => {
           }
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}
+          onGridReady={onEarnerGridReady}
         />
       </div>
       <ReactModal
@@ -300,7 +310,7 @@ const EarnDivRead = () => {
             <h4>소득구분코드 도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ float: "left", height: 400, width: 400 }}
+              style={{ height: 400, width: 400 }}
             >
               <AgGridReact
                 columnDefs={divColumn}
@@ -314,10 +324,7 @@ const EarnDivRead = () => {
             </div>
 
             <>
-              <br />{" "}
-              <div style={{ textAlign: "center" }}>
-                <h5>선택 코드: {selectValue.div_code}</h5>
-                <h5>구분명:{selectValue.div_name}</h5>
+              <div style={{ textAlign: "center",marginTop:50 }}>
                 <button onClick={DivModalDoubleClicked}>확인</button>
                 <button onClick={() => setIsModalOpen(false)}>취소</button>
               </div>

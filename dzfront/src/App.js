@@ -1,5 +1,6 @@
 import './App.css';
-
+import {withRouter} from "react-router-dom";
+import {useEffect,useState} from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from './component/login/Login';
 import Calender from './component/Calendar';
@@ -28,23 +29,24 @@ function App() {
   //     navigate('/login');
   //   }
   // }, [navigate]);
+const [title,setTitle] =useState();
   return (
   <>
    <div>
-      <Header/>
+      <Header title={title}/>
       <Routes>
-        <Route path="/" element={<Home/>}/>
-        <Route path ="/login" element={<Login />} />  
-        <Route path="/register" element={<Register/>} />
+        <Route path="/" element={<Home setTitle={setTitle}/>} />
+        <Route path ="/login" element={<Login setTitle={setTitle}/>} />  
+        <Route path="/register" element={<Register />} />
         <Route path="/registration" element={<Registration/>} />
-        <Route path="/earnerRead" element={<EarnerRead/>} />
-        <Route path="/earnDivRead" element={<EarnDivRead/>} />
+        <Route path="/earnerRead" element={<EarnerRead setTitle={setTitle}/>}  />
+        <Route path="/earnDivRead" element={<EarnDivRead setTitle={setTitle}/>} />  
         <Route path="/test" element={<Test/>} />
-        <Route path="/codeconversion" element={<CodeConversion/>} />
-        <Route path="/test2" element={<EarnerGrid/>} />
-        <Route path="/registPage" element={<RegistPage/>}/>
+        <Route path="/codeconversion" element={<CodeConversion setTitle={setTitle}/>} />
+        <Route path="/test2" element={<EarnerGrid />} />
+        <Route path="/registPage" element={<RegistPage setTitle={setTitle}/>}/>
         <Route path="/calendar" element={<Calender/>}/>
-        <Route path="/incomeInput2" element={<IncomeInput2/>}/>
+        <Route path="/incomeInput2" element={<IncomeInput2 setTitle={setTitle}/>}/>
       </Routes>
     </div>
 

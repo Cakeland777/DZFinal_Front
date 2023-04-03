@@ -3,7 +3,8 @@ import React, { useEffect,useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import '../../css/login.css';
 import Swal from 'sweetalert2';
-function Login() {
+function Login(props) {
+  props.setTitle("로그인");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
@@ -42,6 +43,8 @@ function Login() {
           });
          
           localStorage.setItem("memberInfo", data.member);
+          localStorage.setItem("worker_id", data.MemberVO.worker_id);
+          localStorage.setItem("code_count", data.MemberVO.code_count);
           localStorage.setItem("isLogon", 1);
           navigate("/earnerRead");
       
@@ -57,21 +60,21 @@ function Login() {
 
         }
       })
-      .catch((error) => {
-        console.error("Error:", error);
-        alert('실패');
-      });
+    
   }
 
 
   return (
     <div class="container"style={{backgroundImage:`url('/desk.jpg')`,backgroundRepeat:"no-repeat", 
    backgroundSize:"cover",backgroundAttachment:"fixed" }} >
-    
-      <div class="display" style={{width:"500px",height:"1000px",marginLeft:"1500px"}}>
+ 
+      <div class="display" style={{width:"500px",height:"1000px",marginLeft:"1500px",float:"right"}}>
       <form onSubmit={handleSubmit} style={{ flexDirection:"Column"}}>
         <div class="display_content">
+          
           <div class="login_form">
+          <img src="/BizLogo.png" style={{width:"300px",float:"left",height:"200px"}}></img>
+
             <div class="login_field">
               <input
                 type="text"
@@ -88,7 +91,7 @@ function Login() {
                 placeholder="비밀번호"
               ></input>
             </div>
-            <button  type="submit" class="login_submit">로그인</button>
+            <button  type="submit" className="login_submit">로그인</button>
             </div>
       
         </div>

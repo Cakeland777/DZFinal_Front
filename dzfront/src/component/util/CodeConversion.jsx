@@ -9,8 +9,8 @@ import React, {
   import ReactModal from "react-modal";
  
   
-  const CodeConversion= () => {
-   
+  const CodeConversion= (props) => {
+   props.setTitle("소득구분코드변환");
   
     const columnDefs = [
      
