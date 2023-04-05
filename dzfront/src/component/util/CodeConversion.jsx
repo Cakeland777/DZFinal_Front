@@ -18,6 +18,7 @@ import React, {
     const div_name     = useRef();
     const div_type     = useRef();
     const old_div_type = useRef();
+    const old_div_code = useRef();
     const [selectedCell,setSelectedCell] =useState(null);
     const onEarnerSelection = (event) => {
   
@@ -25,7 +26,7 @@ import React, {
       earnerCode.current = selectedRows[0].earner_code;
       console.log(selectedRows[0].earner_code);
       setSelectedCell(event.node);
-      old_div_type.current = selectedRows[0].div_type;
+      old_div_code.current = selectedRows[0].div_code;
       console.log("onEarnerSelection", event.node);
     };
     let gridApi;
@@ -62,12 +63,14 @@ import React, {
         ],
       },
       { headerName: "변환전 소득구분", field: "div_code", width: 150,},
-      { headerName: "변환전 소득타입", field: "div_type", width: 150},
-      { headerName: "변환후 소득구분", field: "new_div_type",width: 150,
+     // { headerName: "변환전 소득타입", field: "div_type", width: 150},
+      { headerName: "변환후 소득구분", field: "new_div_code",width: 150,
       onCellClicked: (event) => setIsModalOpen(true),
       
     },
-      { headerName: "최종작업시간", field: "modified_date" ,width: 150,},
+      { headerName: "최종작업시간", field: "modified_date" ,width: 150,
+      
+    },
     ];
  
     const divColumn = [
@@ -135,7 +138,7 @@ import React, {
         }),
       }).then(response => {
         response.json();
-        selectedCell.setDataValue("new_div_type",div_type.current);
+        selectedCell.setDataValue("new_div_code",div_code.current);
       })
       
     };

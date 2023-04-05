@@ -41,6 +41,7 @@ if(isLogin){
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/registPage">사업소득자등록</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/incomeInput2">사업소득자료입력2</Link></li> 
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/calendar">캘린더</Link></li>
+    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/codeconversion">코드변환</Link></li>
 
     </div>
   );}
@@ -55,6 +56,9 @@ if(isLogin){
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/registPage">사업소득자등록</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/incomeInput2">사업소득자료입력2</Link></li> 
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/calendar">캘린더</Link></li>
+    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/codeconversion">코드변환</Link></li>
+
+    
     </div>
   )
 }
