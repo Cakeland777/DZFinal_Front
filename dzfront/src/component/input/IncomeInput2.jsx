@@ -8,6 +8,7 @@ import React, {
   useReducer,
   useEffect,
 } from "react";
+import Calendar from "../Calendar";
 import "../../css/IncomeInput2.css";
 import ReactModal from "react-modal";
 import { AgGridReact } from "ag-grid-react";
@@ -19,6 +20,7 @@ const IncomeInput2 = (props) => {
   //datepicker관련
   props.setTitle("사업소득자료입력");
   registerLocale("ko", ko);
+  const [workDate,setWorkDate] = useState([]);
   const [bottomData,setBottomData]= useState([]);
   const earnerGridRef = useRef();
   const [earnerData, setEarnerData] = useState([]);
@@ -63,7 +65,7 @@ const IncomeInput2 = (props) => {
           headerName: "구분",
           field: "is_native",
           editable: false,
-          width: 60,
+          width: 70,
           cellEditor: "agSelectCellEditor",
           cellEditorParams: {
             values: ["내", "외"],
@@ -129,6 +131,8 @@ const IncomeInput2 = (props) => {
           setEarnerData(data.task_list);
           setRowData([]);
         }
+
+        else{setBottomData([]);}
         fetch("http://localhost:8080/input/sum_task", {
           method: "POST",
           headers: {
@@ -217,6 +221,8 @@ const IncomeInput2 = (props) => {
 
   }, []);
   function onRightCellClicked(event) {
+    const { data, colDef } = event;
+    const { field } = colDef;
     if (event.colDef.field === "accrual_ym") {
       console.log(selectedDate);
       
@@ -243,7 +249,25 @@ const IncomeInput2 = (props) => {
     flex: 1,
   
   };
-
+  const totalValueGetter = (params) => {
+      let total=0;
+    if(params.data.artist_cost + params.data.sworker_cost>0){
+        total=params.data.artist_cost + params.data.sworker_cost;
+    }
+    else{
+      total = null;}
+    return total;
+  };
+  const totalInsValueGetter = (params) => {
+    let insTotal=0;
+  if((params.data.ins_cost + params.data.sworker_ins)>0){
+      insTotal=params.data.ins_cost + params.data.sworker_ins;
+  }
+  else{
+    insTotal = null;
+  }
+  return insTotal;
+};
   const rightGridOptions = {
  
 
@@ -262,11 +286,14 @@ const IncomeInput2 = (props) => {
     { headerName: "소득세",field: "tax_income", width: 150 , cellStyle: { textAlign: 'right' }},
     { headerName: "지방소득세",field: "tax_local", width: 150 , cellStyle: { textAlign: 'right' }},
     { headerName: "세액계",field: "tax_total", width: 100 ,cellStyle: { textAlign: 'right' }},
-    { headerName: "예술인/특고인경비",field: "artist_cost", minWidth: 150 ,cellStyle:getCellStyle},
-    { headerName: "고용보험료",field: "ins_cost", width: 100 ,cellStyle:getCellStyle},
-    { headerName: "산재요율(%)", field: "real_payment",minWidth: 130, cellStyle: { textAlign: 'right' }},
-    { headerName: "산재보험료", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }},
-    { headerName: "차인지급액", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }},
+    {field:"artist_cost",hide:true},
+    {field:"sworker_cost",hide:true},
+    {field:"ins_cost",hide:true},
+    {field:"sworker_ins",hide:true},
+    { headerName: "예술인/특고인경비", field: "total", minWidth: 150,valueGetter: totalValueGetter ,cellStyle:getCellStyle},
+    { headerName: "고용보험료",field: "ins_total", width: 100 ,valueGetter: totalInsValueGetter,cellStyle:getCellStyle},
+    { headerName: "산재보험료", field: "workinjury_ins",width: 100 , cellStyle: { textAlign: 'right' }},
+    { headerName: "차인지급액", field: "real_payment",width: 100 , cellStyle: { textAlign: 'right' }}
   ];
 
 
@@ -316,6 +343,10 @@ const IncomeInput2 = (props) => {
     selectedCode.current=selectedRow.earner_code;
     console.log(selectedCode.current);
     console.log("Selected Row Data:", selectedRow);
+    if(selectedCode.current===undefined){
+
+      setBottomData([]);
+    }
     fetch("http://localhost:8080/input/get_tax", {
       method: "POST", 
       headers: {
@@ -329,7 +360,8 @@ const IncomeInput2 = (props) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        data.tax_list.push({})
+        data.tax_list.push({});
+        setWorkDate(data.select_date);
         setRowData(data.tax_list); 
       })
     
@@ -378,30 +410,7 @@ const IncomeInput2 = (props) => {
       .then((response) => response.json())
       .then((datas)=>{ 
         event.node.setDataValue("payment_date", parseInt(data.payment_date));
-        
-    fetch("http://localhost:8080/input/sum_tax", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        worker_id: localStorage.getItem("worker_id"),
-        earner_code:selectedCode.current,
-        payment_ym:data.payment_ym
-      }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-     
-      console.log(data);
-      if(data.sum_tax!==null){
-        data.sum_tax.accrual_ym = "합계";
-      setBottomData([data.sum_tax]);}
-      else{
-        setBottomData([]);
-      }
-     
-    });
+
 
        })
 
@@ -457,51 +466,25 @@ const IncomeInput2 = (props) => {
       .then((response) => response.json())
         .then((data) => {
           console.log(data.earner_tax);
-          event.node.setDataValue("tax_rate", data.earner_tax.taxRate);
-          event.node.setDataValue("tax_income", data.earner_tax.taxIncome);
-          event.node.setDataValue("total_payment", data.earner_tax.totalPayment);
-          event.node.setDataValue("tax_local", data.earner_tax.taxLocal);
-          event.node.setDataValue("tax_total", data.earner_tax.taxTotal);
-          event.node.setDataValue("artist_cost", data.earner_tax.artistCost);
-          event.node.setDataValue("ins_cost", data.earner_tax.insCost);
-          event.node.setDataValue("real_payment", data.earner_tax.realPayment);
-          event.node.setDataValue("tuition_amount", data.earner_tax.deductionAmount);
-          event.node.setDataValue("tax_id",data.earner_tax.taxId);
-          
-    fetch("http://localhost:8080/input/sum_tax", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        worker_id: localStorage.getItem("worker_id"),
-        earner_code:selectedCode.current,
-        payment_ym:data.payment_ym
-      }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-     
-      console.log(data);
-      if(data.sum_tax!==null){
-        data.sum_tax.accrual_ym = "합계";
-      setBottomData([data.sum_tax]);}
-      else{
-        setBottomData([]);
-      }
-     
-    });
+          event.node.setDataValue("tax_rate", data.earner_tax.tax_rate);
+          event.node.setDataValue("tax_income", data.earner_tax.tax_income);
+          event.node.setDataValue("total_payment", data.earner_tax.total_payment);
+          event.node.setDataValue("tax_local", data.earner_tax.tax_local);
+          event.node.setDataValue("tax_total", data.earner_tax.tax_total);
+          event.node.setDataValue("artist_cost", data.earner_tax.artist_cost);
+          event.node.setDataValue("ins_cost", data.earner_tax.ins_cost);
+          event.node.setDataValue("sworker_cost", data.earner_tax.sworker_cost);
+          event.node.setDataValue("sworker_ins", data.earner_tax.sworker_ins);
+          event.node.setDataValue("workinjury_ins", data.earner_tax.workinjury_ins);
+          event.node.setDataValue("real_payment", data.earner_tax.real_payment);
+          event.node.setDataValue("tuition_amount", data.earner_tax.tuition_amount);
+          event.node.setDataValue("tax_id",data.earner_tax.tax_id);
 
         })
-        .catch((error) => {
-          console.error(error);
-          // Show an error message to the user
-        });
-
 
     }
    
-    if (field === "total_payment" && data.total_payment){
+    if (field === "total_payment" ){
 
       
       fetch("http://localhost:8080/input/update_taxinfo", {
@@ -518,40 +501,20 @@ const IncomeInput2 = (props) => {
       .then((response) => response.json())
         .then((data) => {
           console.log(data.earner_tax);
-          event.node.setDataValue("tax_rate", data.earner_tax.taxRate);
-          event.node.setDataValue("tax_income", data.earner_tax.taxIncome);
-          event.node.setDataValue("total_payment", data.earner_tax.totalPayment);
-          event.node.setDataValue("tax_local", data.earner_tax.taxLocal);
-          event.node.setDataValue("tax_total", data.earner_tax.taxTotal);
-          event.node.setDataValue("artist_cost", data.earner_tax.artistCost);
-          event.node.setDataValue("ins_cost", data.earner_tax.insCost);
-          event.node.setDataValue("real_payment", data.earner_tax.realPayment);
-          event.node.setDataValue("tuition_amount", data.earner_tax.deductionAmount);
-          event.node.setDataValue("tax_id",data.earner_tax.taxId);
-          
-    fetch("http://localhost:8080/input/sum_tax", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        worker_id: localStorage.getItem("worker_id"),
-        earner_code:selectedCode.current,
-        payment_ym:data.payment_ym
-      }),
-    })
-    .then((response) => response.json())
-    .then((data) => {
-     
-      console.log(data);
-      if(data.sum_tax!==null){
-        data.sum_tax.accrual_ym = "합계";
-      setBottomData([data.sum_tax]);}
-      else{
-        setBottomData([]);
-      }
-     
-    });
+          event.node.setDataValue("tax_rate", data.earner_tax.tax_rate);
+          event.node.setDataValue("tax_income", data.earner_tax.tax_income);
+          event.node.setDataValue("total_payment", data.earner_tax.total_payment);
+          event.node.setDataValue("tax_local", data.earner_tax.tax_local);
+          event.node.setDataValue("tax_total", data.earner_tax.tax_total);
+          event.node.setDataValue("artist_cost", data.earner_tax.artist_cost);
+          event.node.setDataValue("ins_cost", data.earner_tax.ins_cost);
+          event.node.setDataValue("sworker_cost", data.earner_tax.sworker_cost);
+          event.node.setDataValue("sworker_ins", data.earner_tax.sworker_ins);
+          event.node.setDataValue("workinjury_ins", data.earner_tax.workinjury_ins);
+          event.node.setDataValue("real_payment", data.earner_tax.real_payment);
+          event.node.setDataValue("tuition_amount", data.earner_tax.tuition_amount);
+          event.node.setDataValue("tax_id",data.earner_tax.tax_id);
+  
 
         })
         .catch((error) => {
@@ -572,7 +535,93 @@ const IncomeInput2 = (props) => {
     const selectedEarnerRow = earnerGridRef.current.api.getSelectedRows();
     console.log(selectedEarnerRow[0]);
   }, []);
+  const Tab = [
 
+    {
+      title: "자료입력",
+      content:
+      <div
+          id="right"
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            flexWrap: "wrap",
+            height: "900px",
+            marginLeft:"30px"
+          }}
+          className="ag-theme-alpine"
+        >
+          
+          <div style={{ flex: "1 1 auto" }}>
+            <AgGridReact
+              ref={topGrid}
+              alignedGrids={
+                bottomGrid.current ? [bottomGrid.current] : undefined
+              }
+             
+              gridOptions={rightGridOptions}
+              rowData={rowData}
+              onGridReady={onRightGridReady}
+              overlayLoadingTemplate={
+                '<span style="padding: 10px;">데이터가 없습니다</span>'
+              }
+              overlayNoRowsTemplate={
+                '<span style="padding: 10px;">데이터가 없습니다</span>'
+              }
+              defaultColDef={defaultColDef}
+              columnDefs={columnDefs}
+             
+            />
+          </div>
+
+          <div style={{ height: "45px" }}>
+            <AgGridReact
+              ref={bottomGrid}
+              alignedGrids={topGrid.current ? [topGrid.current] : undefined}
+              rowData={bottomData}
+              defaultColDef={defaultColDef}
+              columnDefs={columnDefs}
+              overlayLoadingTemplate={
+                '<span style="padding: 10px;"></span>'
+              }
+              overlayNoRowsTemplate={
+                '<span style="padding: 10px;"></span>'
+              }
+              headerHeight="0"
+              rowStyle={{ backgroundColor: "#ABCCF8", fontWeight: "bold" }}
+            />
+          </div>
+        </div>
+    
+    },
+    {
+      title: "단기예술/특고",
+      content:    <div style={{width:"2000px", marginLeft:"100px"}
+      }>
+    <Calendar payment_ym={format(startDate.current||new Date(),"yyyyMM")}
+              worker_id = {localStorage.getItem("worker_id")} earner_code={selectedCode.current} 
+              workDate ={workDate}  />
+      </div>
+
+      
+    }
+
+
+  ];
+  
+  const useTab = (idx, Tabs) => {
+    if (!Tabs || !Array.isArray(Tabs)) {
+      return null;
+    }
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    const [currentIdx, setCurrentIdx] = useState(idx);
+    return {
+      currentItem: Tabs[currentIdx],
+      changeItem: setCurrentIdx
+    };
+  };
+ 
+  const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <div id="container">
     
@@ -607,6 +656,7 @@ const IncomeInput2 = (props) => {
               width: "600px",
               height: "700px",
               padding:"10px",
+              marginLeft:40,
              
             }}
           >
@@ -618,10 +668,10 @@ const IncomeInput2 = (props) => {
               onSelectionChanged={onEarnerGridSelection}
               onCellClicked={onCellClicked}
               overlayLoadingTemplate={
-                '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'
+                '<span style="padding: 10px">데이터가 없습니다</span>'
               }
               overlayNoRowsTemplate={
-                '<span style="padding: 10px;">데이터가 없습니다</span>'
+                '<span style="padding: 10px">데이터가 없습니다</span>'
               }
               ref={earnerGridRef}
               onRowSelected={handleRowSelected}
@@ -630,13 +680,12 @@ const IncomeInput2 = (props) => {
           </div>
 
           <div id="leftBottom">
-            <table style={{ border: "1px solid black", width: "480px" ,marginLeft:"60px",height:"300px"}}>
+            <table style={{ border: "1px solid black", width: "580px" ,marginLeft:"20",height:"300px"}}>
               <thead></thead>
               <tbody>
                 <tr>
-                  <td rowSpan="8">총 계</td>
+                  <td rowSpan="9">총 계</td>
                 </tr>
-
                 <tr>
                   <th scope="row">인원[건수]</th>
                   <td>{(earnerCount)||'0'}[{(sumTask.count)||'0'}]</td>
@@ -664,7 +713,12 @@ const IncomeInput2 = (props) => {
                 </tr>
                 <tr>
                   <th scope="row">고용보험료</th>
-                  <td>{sumTask.ins_cost||'0'}</td>
+                  <td>{sumTask.ins_cost+sumTask.sworker_ins||'0'}</td>
+                  <td>원</td>
+                </tr>
+                <tr>
+                  <th scope="row">산재보험료</th>
+                  <td>{sumTask.workinjury_ins||'0'}</td>
                   <td>원</td>
                 </tr>
                 <tr>
@@ -676,59 +730,14 @@ const IncomeInput2 = (props) => {
             </table>
           </div>
         </div>
-              
-        <div
-          id="right"
-          style={{
-            display: "flex",
-            flexDirection: "column",
-            flexWrap: "wrap",
-            height: "900px",
-            marginLeft:"50px"
-          }}
-          className="ag-theme-alpine"
-        >
-          
-          <div style={{ flex: "1 1 auto" }}>
-            <AgGridReact
-              ref={topGrid}
-              alignedGrids={
-                bottomGrid.current ? [bottomGrid.current] : undefined
-              }
-             
-              gridOptions={rightGridOptions}
-              rowData={rowData}
-              onGridReady={onRightGridReady}
-              overlayLoadingTemplate={
-                '<span style="padding: 10px;"><TbFileX>데이터가 없습니다</span>'
-              }
-              overlayNoRowsTemplate={
-                '<span style="padding: 10px;">데이터가 없습니다</span>'
-              }
-              defaultColDef={defaultColDef}
-              columnDefs={columnDefs}
-             
-            />
-          </div>
-
-          <div style={{ height: "45px" }}>
-            <AgGridReact
-              ref={bottomGrid}
-              alignedGrids={topGrid.current ? [topGrid.current] : undefined}
-              rowData={bottomData}
-              defaultColDef={defaultColDef}
-              columnDefs={columnDefs}
-              overlayLoadingTemplate={
-                '<span style="padding: 10px;"></span>'
-              }
-              overlayNoRowsTemplate={
-                '<span style="padding: 10px;"></span>'
-              }
-              headerHeight="0"
-              rowStyle={{ backgroundColor: "#ABCCF8", fontWeight: "bold" }}
-            />
-          </div>
-        </div>
+        <div style={{float:"left" ,marginLeft:"20px",marginTop:'0px',width:"1500px",height:"1000px"}}>
+        {Tab.map((e, index) => (
+          <button key={index} onClick={e => changeItem(index)} style={{width:"150px"}}>
+            {e.title}
+          </button>
+        ))}
+     {currentItem.content}</div>  
+      
         <ReactModal
           style={customStyles}
           isOpen={isModalOpen}

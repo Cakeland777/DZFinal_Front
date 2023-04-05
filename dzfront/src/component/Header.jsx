@@ -62,6 +62,7 @@ function Menu(props) {
     props.onMenuToggle(false); // 사이드바 닫기
   };
    const logOut = () => {
+    navigate("/login");
      localStorage.clear();
      handleLinkClick();
      Swal.fire({
@@ -70,7 +71,7 @@ function Menu(props) {
        icon: "success",
      });
  
-     navigate("/");
+     
    };
      if(isLogin){
   return (
@@ -79,15 +80,15 @@ function Menu(props) {
    
       <ul className="vertical menu">
       <div className="linkMenu">
-             <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}}   to="/registration"   onClick={handleLinkClick}>사업소득자등록</Link></li>
        <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/earnerRead"   onClick={handleLinkClick}>사업소득조회</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} onClick={logOut} >로그아웃</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/test"   onClick={handleLinkClick}>테스트</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/test2"   onClick={handleLinkClick}>테스트2</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/register"   onClick={handleLinkClick}>회원가입</Link></li>
     <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/registPage"   onClick={handleLinkClick}>사업소득자등록</Link></li>
-    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/incomeInput2"   onClick={handleLinkClick}>사업소득자료입력2</Link></li> 
-    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/calendar"   onClick={handleLinkClick}>캘린더</Link></li>
+    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/incomeInput2"   onClick={handleLinkClick}>사업소득자료입력2</Link></li>
+    <li><Link  style={{ textDecoration: "none", color: 'white', margin: 5 ,fontWeight:'bold'}} to="/codeconversion"   onClick={handleLinkClick}>코드변환</Link></li> 
+ 
     </div>
       </ul>
     </div>

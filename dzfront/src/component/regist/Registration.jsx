@@ -1,18 +1,26 @@
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { AgGridReact } from "ag-grid-react";
-import React, { useCallback, useEffect, useReducer, useRef, useState } from "react";
+import React, { useCallback, useEffect, useReducer, useRef, useState,useMemo } from "react";
 import DaumPostcode from "react-daum-postcode";
 import ReactModal from "react-modal";
 import '../../css/registration.css';
 
 const  Registration=(props)=>{
-
+  const [inputEnabled, setInputEnabled] = useState(false);
+  const [inputEnabledT, setInputEnabledT] = useState(false);
+  const [inputEnabledS,setInputEnabledS] =useState(false);
+  const [occupation,setOccupation] = useState({});
+  const inputRef=useRef(null);
+  const etcRef=useRef(null);
+  const specialGridRef =useRef();
   const [preCode,setPreCode]=useState(props.value||"");
   const [earner,setEarner]=useState({});
   const info =useRef();
   useEffect(()=>{
-    console.log(props.value);
+    const inputElement=inputRef.current;
+    const etcElement=etcRef.current;
+    console.log('코드 받아옴',props.value);
     if(preCode!==props.value&&props.value!==""){
       fetch('http://localhost:8080/regist/get_earner',{
         method: "POST",
@@ -29,49 +37,82 @@ const  Registration=(props)=>{
         info.current=data.earner_info;
         setEarner(data.earner_info);
         console.log("데이터가져옴:",data.earner_info);
-       console.log("ref", info.current);
-       document.querySelector("#div_name").value = (info.current && info.current.div_name) || "";
-       document.querySelector("#residence_status").value = (info.current && info.current.residence_status) || "";
-       document.querySelector("#is_native").value = (info.current && info.current.is_native) || "";
-       document.querySelector("#personal_no").value = (info.current && info.current.personal_no) || "";
-       document.querySelector("#email1").value = (info.current && info.current.email1) || "";
-       document.querySelector("#email2").value = (info.current && info.current.email2) || "";
+        if(data.earner_info.occupation_code!=null){
+
+          fetch('http://localhost:8080/regist/get_occupation',{
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              occupation_code:data.earner_info.occupation_code,
+              earner_type:data.earner_info.earner_type
     
-       document.querySelector("#etc").value = info.current && info.current.etc ? info.current.etc : "";       
-       document.querySelector("#address_detail").value = (data.earner_info && data.earner_info.address_detail) || "";
-       document.querySelector("#is_tuition").value = (info.current && info.current.is_tuition) || "";
-       document.querySelector("#is_artist").value = (info.current && info.current.is_artist) || "";
-       document.querySelector("#artist_type").value = (info.current && info.current.artist_type) || "";
-       document.querySelector("#occupation_code").value = (info.current && info.current.occupation_code) || "";
-       document.querySelector("#rate_coefficient").value = (info.current && info.current.rate_coefficient) || "";
-       document.querySelector("#sworker_reduce").value = (info.current && info.current.sworker_reduce) || "";
-       document.querySelector("#workinjury_reduce").value = (info.current && info.current.workinjury_reduce) || "";
-       
+            }),
+          })
+          .then(result => result.json())
+          .then(data => {
+            console.log("들어오나?",data.occupation);
+              setOccupation(data.occupation);
+    
+          });
+        }   
+        if(inputElement){
+          document.querySelector('#address_detail').value = data.earner_info.address_detail||"";
+        }
+        if(etcElement){
+  
+          document.querySelector('#etc').value=data.earner_info.etc||"";
+          
+        }
+
+        document.querySelector('#deduction_amount').value=data.earner_info.deduction_amount||"";
+        if(data.earner_info.is_artist==="Y"||data.earner_info.div_type==="예술인"){
+          setInputEnabled(true);
+          document.querySelector('#artist_type').value=data.earner_info.earner_type||"";
+          
+        }
+        if(data.earner_info.is_artist==="N"||!data.earner_info.div_type==="예술인"){
+          setInputEnabled(false);
+          
+
+        }
+        if(data.earner_info.is_tuition==="Y")
+        {setInputEnabledT(true);}
+        if(data.earner_info.is_tuition==="N")
+        {setInputEnabledT(false);}
+        if(data.earner_info.is_sworker==="Y"||data.earner_info.div_type==="특고인")
+        {
+          setInputEnabledS(true);
+          document.querySelector('#sworker_type').value=data.earner_info.earner_type||"";
+        }
+        if(data.earner_info.is_sworker==="N"||!data.earner_info.div_type==="특고인")
+        {setInputEnabledS(false);}
         
+        document.querySelector('#ins_reduce').value=data.earner_info.ins_reduce||"";
+       console.log("ref", info.current);    
+      
       });
     
+      setPreCode(props.value);
+    
     }
-
-    else{
-        setEarner({});
-
-    }
-    setPreCode(props.value);
-  },[props.value, preCode])
+  },[props.value, preCode]);
   const divColumn = [
     { headerName: "소득구분코드", field: "div_code",width:180 },
     { headerName: "소득구분명", field: "div_name", width:160 },
               
   ];
   const specialColumn=[
-    { headerName: "Code", field: "occupation_code",width:80 },
-    { headerName: "업종", field: "occupation_name", width:150 },
-    { headerName: "경비공제율\n(~22.06)", field: "deduction_rate_before_2207", width:100 },
-    { headerName: "경비공제율\n(~22.07)", field: "deduction_rate_after_2207", width:100 },
-    { headerName: "고용정액\n(~22.06)", field: "fixed_amount_before_2207", width:100 },
-    { headerName: "고용정액\n(~22.07)", field: "fixed_amount_after_2207", width:100 },
-    { headerName: "산재보수\n(~22.06)", field: "workinjury_compensation_before_2207", width:100 },
-    { headerName: "산재보수\n(~22.07)", field: "workinjury_compensation_after_2207", width:100 },
+    { headerName: "Code", field: "occupation_code",width:70 },
+    { headerName: "업종", field: "occupation_name", width:120 },
+    { headerName: "유형", field: "occupation_type", width:150,hide:true },
+    { headerName: "경비공제율(~22.06)", field: "deduction_rate_before_2207", width:120 },
+    { headerName: "경비공제율(~22.07)", field: "deduction_rate_after_2207", width:120 },
+    { headerName: "고용정액(~22.06)", field: "fixed_amount_before_2207", width:90 },
+    { headerName: "고용정액(~22.07)", field: "fixed_amount_after_2207", width:90 },
+    { headerName: "산재보수(~22.06)", field: "workinjury_compensation_before_2207", width:90 },
+    { headerName: "산재보수(~22.07)", field: "workinjury_compensation_after_2207", width:90 },
 
   ]
   const [specialRowData,setSpecialRowData]= useState();
@@ -81,12 +122,15 @@ const  Registration=(props)=>{
       .then((resp) => resp.json())
       .then((data) => setDivRowData(data.div_list));
   }, []);
- 
+  const onSpecialGridReady = useCallback((params) => {
+    fetch('http://localhost:8080/regist/list_occupation')
+      .then((resp) => resp.json())
+      .then((data) => setSpecialRowData(data.occupation_list));
+  }, []);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [PostModalOpen,setPostModalOpen]=useState(false);
   const [specialModalOpen,setSpecialModalOpen] =useState(false);
   
-  const gridRef = useRef();
  
   const handlePostcode = (data) => {
     setEarner({...earner, zipcode : data.zonecode,address:`${data.address} ${data.buildingName}`});
@@ -165,24 +209,13 @@ etc,
 artist_type,
 ins_reduce}=state;
   const [ isTuition, setIsTuition] = useState('');
-  const [inputEnabledT, setInputEnabledT] = useState(false);
+ 
   const [ isArtist, setIsArtist] = useState('');
-  const [inputEnabled, setInputEnabled] = useState(earner.is_artist === "Y");
+  
   const [specialEnabled,setSpecialEnabled] = useState(false);
   
 
-  function onArtistChange(event) {
-    const value = event.target.value;
-    setIsArtist(value);
-
-
-    setInputEnabled(value === 'Y');
-  }
-  function handleTuitionChange(event) {
-    const value = event.target.value;
-    setIsTuition(value);
-    setInputEnabledT(value === 'Y');
-  }
+  
 const onChange=e=>{
   
   dispatch(e.target);
@@ -190,7 +223,23 @@ const onChange=e=>{
  if(name==="is_artist"){
   setIsArtist(value);
   setInputEnabled(value === 'Y');
-  
+  if(value==='N'){
+     
+  document.querySelector('#artist_type').value="";
+  document.querySelector('#ins_reduce').value=""; 
+}
+ }
+
+ if(name==="is_tuition"){
+  setIsTuition(value);
+  setInputEnabledT(value === 'Y');
+  if(value==='N'){
+    document.querySelector('#deduction_amount').value=null;
+ }
+}
+
+ if(name==="is_sworker"){
+  setInputEnabledS(value === 'Y');
  }
     fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
@@ -215,7 +264,22 @@ const onChange=e=>{
 
 const handleBlur = (event) => {
   const { name, value } = event.target;
-
+  if(name==="is_tuition"){
+    setIsTuition(value);
+    setInputEnabledT(value === 'Y');
+    if(value==='N'){
+      document.querySelector('#deduction_amount').value=null;
+   }
+  }
+  if(name==="is_artist"){
+    setIsArtist(value);
+    setInputEnabled(value === 'Y');
+    if(value==='N'){
+       
+    document.querySelector('#artist_type').value="";
+    document.querySelector('#ins_reduce').value=""; 
+  }
+   }
     fetch('http://localhost:8080/regist/earner_update', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
@@ -240,7 +304,13 @@ const handleBlur = (event) => {
     
   
 };
-
+const defaultColDef = useMemo(() => {
+  return {
+  
+    wrapHeaderText: true,
+    autoHeaderHeight: true,
+  };
+}, []);
 const customStyles = {
   content: {
     top: '50%',
@@ -287,26 +357,26 @@ const specialStyles={
         <tbody>
         <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>거주구분</td>
-<td style={{textAlign:"left"}}><select  id="residence_status" name="residence_status" onBlur={handleBlur} onChange={onChange} readOnly disabled> 
+<td style={{textAlign:"left"}}><select  id="residence_status" name="residence_status" onBlur={handleBlur} value={"거주"} onChange={onChange} readOnly disabled> 
       <option value="거주" >0.거주</option>
       <option value="비거주">1.비거주</option>
       </select></td>
         </tr>
         <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>소득구분</td>
-<td style={{textAlign:"left"}}> <input type="text"  id="div_name" name= "div_name" onBlur={handleBlur} onChange={onChange}/><br/>
+<td style={{textAlign:"left"}}> <input type="text"  id="div_name" name= "div_name"  value={earner.div_name||""}onBlur={handleBlur} onChange={onChange}/><br/>
 </td>
         </tr>
         <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>내/외국인</td>
-<td style={{textAlign:"left"}}><select  name="is_native" id ="is_native" onBlur={handleBlur} onChange={onChange}>
+<td style={{textAlign:"left"}}><select  name="is_native" id ="is_native"value={earner.is_native} onBlur={handleBlur} onChange={onChange}>
       <option value="내" >0.내국인</option>
       <option value="외">1.외국인</option>
       </select></td>
         </tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>주민(외국인)등록번호</td>
-  <td style={{textAlign:"left"}}> <input type="text" onChange={onChange}  name="personal_no" id="personal_no" onBlur={handleBlur} />
+  <td style={{textAlign:"left"}}> <input type="text" onChange={onChange}  value={earner.personal_no||''}name="personal_no" id="personal_no" onBlur={handleBlur} />
 </td>
 </tr>
 <tr>
@@ -323,7 +393,7 @@ const specialStyles={
 </tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>상세주소</td>
-<td style={{textAlign:"left"}}> <input type="text" name="address_detail" id="address_detail"  onChange={onChange} onBlur={handleBlur}/></td>
+<td style={{textAlign:"left"}}> <input type="text" name="address_detail" id="address_detail"  onChange={onChange} onBlur={handleBlur} ref={inputRef}/></td>
 </tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>전화번호</td>
@@ -349,7 +419,7 @@ const specialStyles={
 </tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>학자금상환공제자여부</td>
-<td style={{textAlign:"left"}}><select name="is_tuition" id="is_tuition"  onBlur={handleBlur} onChange={onChange} >
+<td style={{textAlign:"left"}}><select name="is_tuition" id="is_tuition" value={earner.is_tuition||''} onBlur={handleBlur} onChange={onChange} >
       <option value="N" >0.부</option>
       <option value="Y" >1.여</option>
       </select></td>
@@ -361,7 +431,7 @@ const specialStyles={
 </tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>비고</td>
-  <td style={{textAlign:"left"}}><input type="text" name="etc" id="etc" onBlur={handleBlur} onChange={onChange}  /></td>
+  <td style={{textAlign:"left"}}><input type="text" name="etc" id="etc" ref={etcRef}onBlur={handleBlur} onChange={onChange}  /></td>
   </tr>
         </tbody></table>
   
@@ -382,30 +452,39 @@ const specialStyles={
       title: "예술/노무(특고) 등록",
       content:    <><h3>예술인 해당 사업소득자 등록</h3>
       <div style={{width:"1000px"}}>
-      <table >
-        <tbody>
-<tr>
-<td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 예술인여부</td>
-<td style={{textAlign:"left"}}><select name="is_artist" id="is_artist"  onBlur={handleBlur} onChange={onChange} value={earner.is_artist} >
-  <option value="N" >0.부</option>
-  <option value="Y" >1.여</option>
-  </select></td></tr>
-  <tr>
-<td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 예술인유형</td>
-<td style={{textAlign:"left"}}><select name="artist_type" id="artist_type"  value={earner.artist_type} disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange} defaultValue={""}>
-  <option value=""> </option>
-  <option value="일반" >1.일반예술인</option>
-  <option value="단기" >2.단기예술인</option>
-  </select></td></tr>
-  <tr>
-<td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 예술인 고용보험 경감</td>
-<td style={{textAlign:"left"}}><select name="ins_reduce" id="ins_reduce"  disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange} defaultValue={""}>
-  <option value=""> </option>
-  <option value="0" >0.0</option>
-  <option value="0.8" >1.80</option>
-  </select></td></tr>
-
-      </tbody></table>
+      <table>
+  <tbody>
+    <tr>
+      <td style={{ textAlign: "right", backgroundColor: "#F7F7F7", fontWeight: "bold" }}> 예술인여부</td>
+      <td style={{ textAlign: "left", width: "75%" }}>
+        <select name="is_artist" id="is_artist" onBlur={handleBlur} disabled={!inputEnabled} onChange={onChange} value={earner.is_artist || ''}>
+          <option value="N">0.부</option>
+          <option value="Y">1.여</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: "right", backgroundColor: "#F7F7F7", fontWeight: "bold" }}> 예술인유형</td>
+      <td style={{ textAlign: "left", width: "75%" }}>
+        <select name="earner_type" id="artist_type" disabled={!inputEnabled||earner.div_type==="특고인"}  onBlur={handleBlur} onChange={onChange} value={earner.div_type==="예술인"?earner.earner_type:""} defaultValue={""}>
+          <option value=""> </option>
+          <option value="일반">1.일반예술인</option>
+          <option value="단기">2.단기예술인</option>
+        </select>
+      </td>
+    </tr>
+    <tr>
+      <td style={{ textAlign: "right", backgroundColor: "#F7F7F7", fontWeight: "bold" }}> 예술인 고용보험 경감</td>
+      <td style={{ textAlign: "left", width: "75%" }}>
+        <select name="ins_reduce" id="ins_reduce" value={earner.div_type==="예술인"?earner.ins_reduce:""} disabled={!inputEnabled||earner.div_type==="특고"} onBlur={handleBlur} onChange={onChange} defaultValue={""}>
+          <option value=""> </option>
+          <option value="0">0.0</option>
+          <option value="80">1.80</option>
+        </select>
+      </td>
+    </tr>
+  </tbody>
+</table>
   <p style={{color:"blue"}}>※고용보험료를 징수하는 예술인일 경우 예술인 여부를 '여' 체크합니다.</p>
   </div>
   <h3>노무제공자(특고) 해당 사업소득자 등록</h3>
@@ -414,19 +493,22 @@ const specialStyles={
         <tbody>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 노무제공자(특수형태근로자)여부</td>
-<td style={{textAlign:"left"}}><select name="is_sworker" id="is_sworker"  onBlur={handleBlur} onChange={onChange}>
+<td style={{textAlign:"left",width: "75%"}}><select name="is_sworker" id="is_sworker"  onBlur={handleBlur}  disabled={!inputEnabledS||earner.div_type==="예술인"} onChange={onChange} value={earner.is_sworker||''}>
   <option value="N" >0.부</option>
   <option value="Y" >1.여</option>
-  </select></td></tr>
+  </select>
+  </td>
+  </tr>
   <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 특고인유형</td>
-<td style={{textAlign:"left"}} colSpan={3}><select name="sworker_type" id="sworker_type"  disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange} defaultValue={""}>
+<td style={{textAlign:"left",width: "75%"}} colSpan={3}>
+  <select name="earner_type" id="sworker_type" value={earner.div_type==="특고인"?earner.earner_type:""}  disabled={!inputEnabledS||earner.div_type==="예술인"} onBlur={handleBlur} onChange={onChange} defaultValue={""} >
   <option value=""> </option>
   <option value="일반" >1.일반특고인</option>
   <option value="단기" >2.단기특고인</option>
   </select>
-  고용보험 여부
-  <select name="sworker_type" id="sworker_type"  disabled={!inputEnabled} onBlur={handleBlur} onChange={onChange} defaultValue={""}>
+  {/* 고용보험 여부 */}
+  <select  disabled={!inputEnabledS||earner.div_type==="예술인"} onBlur={handleBlur} onChange={onChange} defaultValue={""} hidden>
   <option value=""> </option>
   <option value="N" >0.부</option>
   <option value="Y" >1.여</option>
@@ -436,47 +518,88 @@ const specialStyles={
   </td></tr>
   <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 특고직종코드</td>
-<td style={{textAlign:"left"}}><input type="text" name="occupation_code" id="occupation_code" readOnly onClick={()=>setSpecialModalOpen(true)}></input>
+<td style={{textAlign:"left",width: "75%"}}>
+<input type="text" onBlur ={handleBlur} onChange={onChange} name="occupation_code" id="occupation_code" value={earner.occupation_code||""}  disabled={!inputEnabledS||earner.div_type==="예술인"} hidden onClick={()=>setSpecialModalOpen(true)} />
+<input type="text" id="occupation_info" value={earner.occupation_code? "["+earner.occupation_code+"]"+occupation.occupation_name||"" :""}  disabled={!inputEnabledS||earner.div_type==="예술인"} readOnly onClick={()=>setSpecialModalOpen(true)}/>
 </td></tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 경비공제율</td>
-<td style={{textAlign:"left"}} colspan={4}>
-2022.07이전<input type="text" style={{width:"30px"}}/> 2022.07이후 <input type="text" style={{width:"30px"}}/>
+<td style={{textAlign:"left",width: "75%"}} colSpan={4}>
+2022.07이전<input type="text" id="deduction_rate_before_2207" value={earner.occupation_code?occupation.deduction_rate_before_2207+"%":''}disabled={!inputEnabledS||earner.div_type==="예술인"} style={{width:"50px"}} readOnly/> 
+2022.07이후 <input type="text" id="deduction_rate_after_2207" value={earner.occupation_code?occupation.deduction_rate_after_2207+"%":""} disabled={!inputEnabledS||earner.div_type==="예술인"} style={{width:"50px"}} readOnly/>
 </td></tr>
 <tr>
 <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 특고인 고용보험 경감 </td>
-<td style={{textAlign:"left"}} >
-<select name="sworker_reduce" id="sworker_reduce"  disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange} defaultValue={""}>
+<td style={{textAlign:"left",width: "75%"}} >
+<select name="sworker_reduce" id="sworker_reduce" value={earner.sworker_reduce||''} disabled={!inputEnabledS||earner.div_type==="예술인"}  onBlur={handleBlur}  onChange={onChange} defaultValue={""}>
   <option value=""> </option>
   <option value="0" >0.0</option>
-  <option value="0.8" >1.80</option>
+  <option value="80" >1.80</option>
   </select></td></tr>
   <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}> 산재기준보수월액 </td>
-<td style={{textAlign:"left"}} >
-2022.07이전<input type="text"/></td></tr>
+<td style={{textAlign:"left",width: "75%"}} >
+2022.07이전<input type="text"  id="workinjury_compensation_before_2207" value={earner.occupation_code?occupation.workinjury_compensation_before_2207:""}disabled={!inputEnabledS||earner.div_type==="예술인"} readOnly/></td></tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7"}}> </td>
-<td style={{textAlign:"left"}} colspan={2} >
-2022.07이후<input type="text" style={{width:"30px"}}/>
-요율 <input type="text" style={{width:"30px"}}/>%</td></tr>
+<td style={{textAlign:"left",width: "75%"}} colSpan={2} >
+2022.07이후<input type="text" style={{width:"80px"}} value={earner.occupation_code?occupation.workinjury_compensation_after_2207:""} id= "workinjury_compensation_after_2207" disabled={!inputEnabledS||earner.div_type==="예술인"} readOnly/>
+요율 <input type="text"  onChange={onChange} onBlur={handleBlur} value={earner.rate_coefficient||''} disabled={!inputEnabledS||earner.div_type==="예술인"}  style={{width:"30px"}}/>%</td></tr>
 <tr>
   <td style={{textAlign:"right",backgroundColor:"#F7F7F7",fontWeight:"bold"}}>산재보험 경감 </td>
-<td style={{textAlign:"left"}} colspan={2} >
-<select name="workinjury_reduce" id="workinjury_reduce"  disabled={!inputEnabled}  onBlur={handleBlur}onChange={onChange} defaultValue={""}>
+<td style={{textAlign:"left",width: "75%"}} colSpan={2} >
+<select name="workinjury_reduce" id="workinjury_reduce"  value={earner.workinjury_reduce||''} disabled={!inputEnabledS||earner.div_type==="예술인"}  onBlur={handleBlur}onChange={onChange} defaultValue={""}>
   <option value=""> </option>
-  <option value="0" >0.0</option>
-  <option value="0.8" >1.80</option>
+  <option value="0">0.0</option>
+  <option value="50" >1.50</option>
   </select></td></tr>
       </tbody></table>
    
 
   <p style={{color:"red"}}>※산재보험은 사업주와 종사자가 1/2씩 부담합니다.</p>
   </div>
+  
       </>
     }
   ];
- 
+  const [specialValue,setSpecialValue] = useState();
+  const onSelectionChanged = useCallback(() => {
+    const selectedRows = specialGridRef.current.api.getSelectedRows();
+    setSpecialValue(selectedRows[0]);
+    console.log(selectedRows[0]);
+  }, []);
+  const onSpecialClicked =() => {
+    setSpecialModalOpen(false);
+    console.log(specialValue);
+    
+    setOccupation(specialValue);
+    fetch('http://localhost:8080/regist/earner_update', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        param_value: specialValue.occupation_code,
+        param_name:"occupation_code",
+        worker_id:localStorage.getItem("worker_id"),
+        earner_code:props.value
+      
+      }),
+    })  
+    .then(response => response.json())
+    .then(jsonData => {
+      setEarner({...earner, "occupation_code" :specialValue.occupation_code });
+
+
+      
+    })
+    document.querySelector("#sworker_type").value=specialValue.occupation_type;
+    document.querySelector("#occupation_code").value=specialValue.occupation_code;
+
+    document.querySelector("#occupation_info").value="["+specialValue.occupation_code+"]"+ specialValue.occupation_name;
+    document.querySelector("#deduction_rate_after_2207").value=specialValue.deduction_rate_after_2207;
+    document.querySelector("#deduction_rate_before_2207").value=specialValue.deduction_rate_before_2207;
+    document.querySelector("#workinjury_compensation_after_2207").value=specialValue.workinjury_compensation_after_2207;
+    document.querySelector("#workinjury_compensation_before_2207").value=specialValue.workinjury_compensation_before_2207;
+  };
   const useTab = (idx, Tabs) => {
     if (!Tabs || !Array.isArray(Tabs)) {
       return null;
@@ -494,12 +617,20 @@ const specialStyles={
     <div>
       
       <div style={{float:"left" ,marginLeft:"50px",marginTop:'30px'}}>
-        {Tab.map((e, index) => (
-          <button key={index} onClick={e => changeItem(index)} style={{width:"170px"}}>
-            {e.title}
+        
+          <button key={0} onClick={e => changeItem(0)} style={{width:"170px"}}>
+          기본사항
           </button>
-        ))}
-     {currentItem.content}</div>
+          
+          {(earner.is_artist === 'Y'||earner.is_sworker==="Y"||earner.div_type==="예술인"||earner.div_type==="특고인") &&
+    <button key={1} onClick={e => changeItem(1)} style={{width:"170px"}}>
+      예술/노무(특고)등록
+    </button>
+  }
+     {currentItem.content}
+     {currentItem === Tab[1] && earner.earner_code !== preCode  && changeItem(0)}
+     
+     </div>
 <ReactModal style={specialStyles} isOpen={specialModalOpen} onRequestClose={() => setSpecialModalOpen(false)} >
   {
     
@@ -509,7 +640,12 @@ const specialStyles={
         <AgGridReact
           columnDefs={specialColumn}
           rowData={specialRowData}
-
+          onGridReady={onSpecialGridReady}
+          defaultColDef={defaultColDef}
+          rowSelection="single"
+          onSelectionChanged={onSelectionChanged}
+          onCellDoubleClicked={onSpecialClicked}
+          ref={specialGridRef}
         />
         </div>
        

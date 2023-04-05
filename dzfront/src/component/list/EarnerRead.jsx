@@ -104,7 +104,7 @@ const EarnerRead = (props) => {
       resizable: true,
       minWidth:180
     },
-    { field: "div_name", headerName: "소득구분", resizable: true },
+    { field: "div_code", headerName: "소득구분", resizable: true },
     { field: "accrual_ym", headerName: "귀속년월", resizable: true },
     { field: "payment_ym", headerName: "지급년월일", resizable: true },
 

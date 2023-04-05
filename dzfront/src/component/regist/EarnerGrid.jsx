@@ -21,7 +21,7 @@ const EarnerGrid = (props) => {
   const columnDefs = [
     { headerName: "V", headerCheckboxSelection:true, checkboxSelection: true, width: 50 },
     {
-      headerName: "Code",field: "earner_code", editable: (params) => {
+      headerName: "Code",field: "earner_code",editable: (params) => {
         return !params.node.data.div_code&&params.node.data.earner_name;
       },
       width: 90,
@@ -89,7 +89,7 @@ const EarnerGrid = (props) => {
         {headerName:"타입",
         field:"div_type",
         width: 100,
-       //hide:true 
+       hide:true 
       }
       ],
     },
@@ -115,16 +115,13 @@ const EarnerGrid = (props) => {
             
     }
     const selectedCell=event.data;
-    if(selectedCell.earner_code&&selectedCell.div_code&&selectedCell.is_native){
+    if(selectedCell.earner_code&&selectedCell.div_code){
     selectedCode.current=selectedCell.earner_code;
-    console.log(selectedCode.current);
-    setValue(selectedCode.current);
-    props.onValueChange(selectedCode.current);}
-    else{
-      setValue("");
-
-    }
-    event.node.setDataValue("earner_code",selectedCell.earner_code);
+    console.log(selectedCell.earner_code);
+    setValue(selectedCell.earner_code);
+    props.onValueChange(selectedCell.earner_code);}
+   
+   
 
   };
 
@@ -219,6 +216,7 @@ if(field==="div_code"&&event.data.earner_code&&event.data.earner_name){
       earner_name:event.data.earner_name,
       div_code:event.data.div_code,
       div_name:event.data.div_name,
+      div_type:event.data.div_type,
       is_default:defaultCode.current,
       is_native:event.data.is_native,
       personal_no:event.data.personal_no
@@ -393,7 +391,6 @@ Selection:
                 rowSelection={"single"}
                 onCellDoubleClicked={DivModalDoubleClicked}
                 onSelectionChanged={onSelectionChanged}
-          
                 ref={gridRef}
               />
             </div>

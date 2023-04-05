@@ -77,7 +77,7 @@ const EarnDivRead = (props) => {
     { field: "tax_local", headerName: "지방소득세", resizable: true },
     { field: "artist_cost", headerName: "예술인경비", resizable: true },
     { field: "ins_cost", headerName: "고용보험료", resizable: true },
-    { field: "", headerName: "계", resizable: true },
+    { field: "real_payment", headerName: "계", resizable: true },
   ];
 
   const defaultColDef = useMemo(() => ({
