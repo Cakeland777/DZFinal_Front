@@ -1,9 +1,5 @@
-import React, {
-  useState,
-  useRef, useMemo,
-  useCallback
-} from "react";
-import { TbFileX} from "react-icons/tb";
+import React, { useState, useRef, useMemo, useCallback } from "react";
+import { TbFileX } from "react-icons/tb";
 import ReactModal from "react-modal";
 import { Link } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
@@ -22,7 +18,6 @@ const customStyles = {
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
-
   },
 };
 const LinkStyle = {
@@ -42,16 +37,12 @@ const ActiveLinkStyle = {
 };
 
 const NavLink = ({ to, children }) => (
-  <Link
-    to={to}
-    style={LinkStyle}
-    activeStyle={ActiveLinkStyle}
-  >
+  <Link to={to} style={LinkStyle} activeStyle={ActiveLinkStyle}>
     {children}
   </Link>
 );
 const EarnDivRead = (props) => {
-  const earnerGridRef=useRef();
+  const earnerGridRef = useRef();
   props.setTitle("사업소득조회");
   registerLocale("ko", ko);
   const [rowData, setRowData] = useState();
@@ -59,25 +50,43 @@ const EarnDivRead = (props) => {
   const gridRef = useRef();
 
   const columnDefs = [
-    { field: "div_code", headerName: "소득구분", resizable: true },
-    { field: "earner_name", headerName: "소득자명(상호)", resizable: true },
+    { field: "div_code_rs", headerName: "소득구분", resizable: true },
+    { field: "earner_name_rs", headerName: "소득자명(상호)", resizable: true },
     {
       field: "personal_no",
       headerName: "주민(사업자)등록번호",
       resizable: true,
-      minWidth:180
+      minWidth: 180,
     },
-    { field: "is_native", headerName: "내/외국인", resizable: true,maxWidth:130 },
-    { field: "count", headerName: "건수", resizable: true ,maxWidth:100},
+    {
+      field: "is_native_rs",
+      headerName: "내/외국인",
+      resizable: true,
+      maxWidth: 130,
+    },
+    { field: "count_rs", headerName: "건수", resizable: true, maxWidth: 100 },
 
-    { field: "total_payment", headerName: "연간총지급액", resizable: true },
-    { field: "tax_rate", headerName: "세율(%)", resizable: true ,maxWidth:130},
-    { field: "tax_income", headerName: "소득세", resizable: true },
-
-    { field: "tax_local", headerName: "지방소득세", resizable: true },
-    { field: "artist_cost", headerName: "예술인경비", resizable: true },
-    { field: "ins_cost", headerName: "고용보험료", resizable: true },
-    { field: "real_payment", headerName: "계", resizable: true },
+    { field: "total_payment_rs", headerName: "연간총지급액", resizable: true },
+    {
+      field: "tax_rate_rs",
+      headerName: "세율(%)",
+      resizable: true,
+      maxWidth: 130,
+    },
+    {
+      field: "tax_income_rs",
+      headerName: "소득세",
+      resizable: true,
+    },
+    {
+      field: "tax_local_rs",
+      headerName: "지방소득세",
+      resizable: true,
+    },
+    { field: "tax_total_rs", headerName: "세액계", resizable: true },
+    { field: "artist_cost_rs", headerName: "예술인경비", resizable: true },
+    { field: "ins_cost_rs", headerName: "고용보험료", resizable: true },
+    { field: "real_payment_rs", headerName: "계", resizable: true },
   ];
 
   const defaultColDef = useMemo(() => ({
@@ -112,10 +121,9 @@ const EarnDivRead = (props) => {
     }
   };
   const handleDoublePrevClick = () => {
- 
-      setSelectedIndex(0);
-      setEarner(divOptions[selectedIndex]);
-    };
+    setSelectedIndex(0);
+    setEarner(divOptions[selectedIndex]);
+  };
   const handleNextClick = () => {
     if (selectedIndex < divOptions.length - 1) {
       setSelectedIndex(selectedIndex + 1);
@@ -123,10 +131,8 @@ const EarnDivRead = (props) => {
     }
   };
   const handleDoubleNextClick = () => {
-    
-      setSelectedIndex(8);
-      setEarner(divOptions[selectedIndex]);
-    
+    setSelectedIndex(8);
+    setEarner(divOptions[selectedIndex]);
   };
   const [divRowData, setDivRowData] = useState();
   const divColumn = [
@@ -202,86 +208,128 @@ const EarnDivRead = (props) => {
   };
   return (
     <div>
-   <div>
-   <NavLink to="/earnerRead">소득자별</NavLink>
-      <NavLink to="/earnDivRead">소득구분별</NavLink>
-    </div>
-    <form onSubmit={handleSubmit} style={{ display: "flex", flexWrap: "wrap", border: "1px solid grey"  }}>
-  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" ,marginLeft:"2rem"}}>
-    기준
-    <select value={selectedOption} onChange={handleChange}>
-      <option value="accrual_ym">1.귀속년월</option>
-      <option value="payment_ym">2.지급년월</option>
-    </select>
-  </div>
-  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}>
-  <div style={{ position: "relative", zIndex: 800 }}>
-    <DatePicker
-      selected={startDate}
-      onChange={(date) => setStartDate(date)}
-      minDate={new Date(2022, 0, 1)}
-      maxDate={new Date(2022, 11, 31)}
-      dateFormat="yyyy.MM"
-      locale={"ko"}
-      placeholderText="2022."
-      showMonthYearPicker
-    />
-  </div>
-  ~
-  <div style={{ position: "relative", zIndex: 800 }}>
-    <DatePicker
-      selected={endDate}
-      onChange={(date) => setEndDate(date)}
-      minDate={new Date(2022, 0, 1)}
-      maxDate={new Date(2022, 11, 31)}
-      locale={"ko"}
-      placeholderText="2022."
-      dateFormat="yyyy.MM"
-      showMonthYearPicker
-    />
-  </div>
-</div>
-  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}>
-    소득구분
-    <input
-      onChange={handleEarner}
-      value={earner}
-      type="text"
-      onClick={() => setIsModalOpen(true)}
-      readOnly
-      style={{ width: "100px" }}
-    ></input>
-  </div>
-  <div style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}>
-  현재소득구분
-  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handleDoublePrevClick}>
-    &lt;&lt;
-  </button>
-  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handlePrevClick}>
-    &lt;
-  </button>
-  <select value={earner} onChange={handleDivChange}>
-    {divOptions.map((option, index) => (
-      <option key={index} value={option}>
-        {option}
-      </option>
-    ))}
-  </select>
-  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handleNextClick}>
-    &gt;
-  </button>
-  <button style={{ width: "35px", marginRight: "0.1rem" }} onClick={handleDoubleNextClick}>
-    &gt;&gt;
-  </button>
-</div>
- 
-        <button type="submit" style={{ display: "flex",alignItems: "center",width:"60px",marginLeft: "35rem" }}>
+      <div>
+        <NavLink to="/earnerRead">소득자별</NavLink>
+        <NavLink to="/earnDivRead">소득구분별</NavLink>
+      </div>
+      <form
+        onSubmit={handleSubmit}
+        style={{ display: "flex", flexWrap: "wrap", border: "1px solid grey" }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            marginRight: "1rem",
+            marginLeft: "2rem",
+          }}
+        >
+          기준
+          <select value={selectedOption} onChange={handleChange}>
+            <option value="accrual_ym">1.귀속년월</option>
+            <option value="payment_ym">2.지급년월</option>
+          </select>
+        </div>
+        <div
+          style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}
+        >
+          <div style={{ position: "relative", zIndex: 800 }}>
+            <DatePicker
+              selected={startDate}
+              onChange={(date) => setStartDate(date)}
+              minDate={new Date(2022, 0, 1)}
+              maxDate={new Date(2022, 11, 31)}
+              dateFormat="yyyy.MM"
+              locale={"ko"}
+              placeholderText="2022."
+              showMonthYearPicker
+            />
+          </div>
+          ~
+          <div style={{ position: "relative", zIndex: 800 }}>
+            <DatePicker
+              selected={endDate}
+              onChange={(date) => setEndDate(date)}
+              minDate={new Date(2022, 0, 1)}
+              maxDate={new Date(2022, 11, 31)}
+              locale={"ko"}
+              placeholderText="2022."
+              dateFormat="yyyy.MM"
+              showMonthYearPicker
+            />
+          </div>
+        </div>
+        <div
+          style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}
+        >
+          소득구분
+          <input
+            onChange={handleEarner}
+            value={earner}
+            type="text"
+            onClick={() => setIsModalOpen(true)}
+            readOnly
+            style={{ width: "100px" }}
+          ></input>
+        </div>
+        <div
+          style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}
+        >
+          현재소득구분
+          <button
+            style={{ width: "35px", marginRight: "0.1rem" }}
+            onClick={handleDoublePrevClick}
+          >
+            &lt;&lt;
+          </button>
+          <button
+            style={{ width: "35px", marginRight: "0.1rem" }}
+            onClick={handlePrevClick}
+          >
+            &lt;
+          </button>
+          <select value={earner} onChange={handleDivChange}>
+            {divOptions.map((option, index) => (
+              <option key={index} value={option}>
+                {option}
+              </option>
+            ))}
+          </select>
+          <button
+            style={{ width: "35px", marginRight: "0.1rem" }}
+            onClick={handleNextClick}
+          >
+            &gt;
+          </button>
+          <button
+            style={{ width: "35px", marginRight: "0.1rem" }}
+            onClick={handleDoubleNextClick}
+          >
+            &gt;&gt;
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "60px",
+            marginLeft: "35rem",
+          }}
+        >
           조회
         </button>
       </form>
       <div
         className="ag-theme-alpine"
-        style={{ width: 2000, height: 800, zIndex: -100 ,padding:"10px",marginLeft:"20px"}}
+        style={{
+          width: 2000,
+          height: 800,
+          zIndex: -100,
+          padding: "10px",
+          marginLeft: "20px",
+        }}
       >
         <AgGridReact
           ref={earnerGridRef}
@@ -324,7 +372,7 @@ const EarnDivRead = (props) => {
             </div>
 
             <>
-              <div style={{ textAlign: "center",marginTop:50 }}>
+              <div style={{ textAlign: "center", marginTop: 50 }}>
                 <button onClick={DivModalDoubleClicked}>확인</button>
                 <button onClick={() => setIsModalOpen(false)}>취소</button>
               </div>

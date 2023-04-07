@@ -1,13 +1,10 @@
 import './App.css';
-import {withRouter} from "react-router-dom";
-import {useEffect,useState} from 'react';
+import { useState } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from './component/login/Login';
 import Calender from './component/Calendar';
-import Register from './component/Register';
 import Header from './component/Header';
 import EarnerGrid from './component/regist/EarnerGrid';
-import Registration from './component/regist/Registration';
 import EarnerRead from './component/list/EarnerRead';
 import EarnDivRead from './component/list/EarnDivRead';
 import Test from './component/test';
@@ -16,7 +13,7 @@ import RegistPage from './component/regist/RegistPage';
 import CodeConversion from './component/util/CodeConversion';
 import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
-// const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   // useEffect(() => {
   //   let status = localStorage.getItem("isLogOn");
@@ -29,30 +26,30 @@ function App() {
   //     navigate('/login');
   //   }
   // }, [navigate]);
-const [title,setTitle] =useState();
+  const [title, setTitle] = useState();
+  const [earnerCodes, setEarnerCodes] = useState();
+  const [paymentYm, setPaymentYm] = useState();
   return (
-  <>
-   <div>
-      <Header title={title}/>
-      <Routes>
-        <Route path="/" element={<Home setTitle={setTitle}/>} />
-        <Route path ="/login" element={<Login setTitle={setTitle}/>} />  
-        <Route path="/register" element={<Register />} />
-        <Route path="/registration" element={<Registration/>} />
-        <Route path="/earnerRead" element={<EarnerRead setTitle={setTitle}/>}  />
-        <Route path="/earnDivRead" element={<EarnDivRead setTitle={setTitle}/>} />  
-        <Route path="/test" element={<Test/>} />
-        <Route path="/codeconversion" element={<CodeConversion setTitle={setTitle}/>} />
-        <Route path="/test2" element={<EarnerGrid />} />
-        <Route path="/registPage" element={<RegistPage setTitle={setTitle}/>}/>
-        <Route path="/calendar" element={<Calender/>}/>
-        <Route path="/incomeInput2" element={<IncomeInput2 setTitle={setTitle}/>}/>
-      </Routes>
-    </div>
+    <>
+      <div>
+        <Header title={title} earnerCodes={earnerCodes} paymentYm={paymentYm} />
+        <Routes>
+          <Route path="/" element={<Home setTitle={setTitle} />} />
+          <Route path="/login" element={<Login setTitle={setTitle} />} />
+          <Route path="/earnerRead" element={<EarnerRead setTitle={setTitle} />} />
+          <Route path="/earnDivRead" element={<EarnDivRead setTitle={setTitle} />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/codeconversion" element={<CodeConversion setTitle={setTitle} />} />
+          <Route path="/test2" element={<EarnerGrid />} />
+          <Route path="/registPage" element={<RegistPage setTitle={setTitle} setEarnerCodes={setEarnerCodes} />} />
+          <Route path="/calendar" element={<Calender />} />
+          <Route path="/incomeInput2" element={<IncomeInput2 setTitle={setTitle} setEarnerCodes={setEarnerCodes} setPaymentYm={setPaymentYm} />} />
+        </Routes>
+      </div>
 
-  </>
+    </>
   );
- 
+
 };
 
 export default App;
