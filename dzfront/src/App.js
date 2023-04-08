@@ -1,38 +1,66 @@
 import './App.css';
-
+import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import Login from './component/Login'
-import Model from './model/Model'
-import Register from './component/Register';
+import Login from './component/login/Login';
+import Calender from './component/Calendar';
 import Header from './component/Header';
-import FindAddr from './component/FindAddr';
-
-import Registration from './component/Registration';
-import EarnerRead from './component/EarnerRead';
-import EarnDivRead from './component/EarnDivRead';
-import IncomeInput from './component/IncomeInput';
+import EarnerGrid from './component/regist/EarnerGrid';
+import EarnerRead from './component/list/EarnerRead';
+import EarnDivRead from './component/list/EarnDivRead';
+import Test from './component/test';
+import Home from './component/Home';
+import RegistPage from './component/regist/RegistPage';
+import CodeConversion from './component/util/CodeConversion';
+import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
-  
-  const [member, onLogin] = Model();
-  return (
-  <>
-   <div>
-      <Header/>
-      <Routes>
-        <Route path ="/login" element={<Login onLogin={onLogin}/>} />  
-        <Route path="/register" element={<Register/>} />
-        <Route path="/registration" element={<Registration/>} />
-        <Route path="/earnerRead" element={<EarnerRead/>} />
-        <Route path="/earnDivRead" element={<EarnDivRead/>} />
-        <Route path="/findaddr" element={<FindAddr/>} />
-        <Route path="/incomeInput" element={<IncomeInput/>}/>
-       
-      </Routes>
-    </div>
 
-  </>
+  const [isLogin, setIsLogin] = useState(false);
+  useEffect(() => {
+    let status = localStorage.getItem("isLogon");
+    if (status === "1") {
+      setIsLogin(true);
+    } else {
+      setIsLogin(false);
+    }
+  }, []);
+
+  // const navigate = useNavigate();
+
+  // useEffect(() => {
+  //   let status = localStorage.getItem("isLogOn");
+  //   if (status === "1") {
+  //     const timeoutId = setTimeout(() => {
+  //       localStorage.clear();
+  //     }, 500 * 60 * 1000); // 5분 = 5 * 60 * 1000 밀리초
+  //     return () => clearTimeout(timeoutId);
+  //   } else {
+  //     navigate('/login');
+  //   }
+  // }, [navigate]);
+  const [title, setTitle] = useState();
+  const [earnerCodes, setEarnerCodes] = useState();
+  const [paymentYm, setPaymentYm] = useState();
+  return (
+    <>
+      <div>
+        <Header title={title} earnerCodes={earnerCodes} paymentYm={paymentYm} isLogin={isLogin} />
+        <Routes>
+          <Route path="/" element={<Home setTitle={setTitle} />} />
+          <Route path="/login" element={<Login setTitle={setTitle} setIsLogin={setIsLogin} />} />
+          <Route path="/earnerRead" element={<EarnerRead setTitle={setTitle} />} />
+          <Route path="/earnDivRead" element={<EarnDivRead setTitle={setTitle} />} />
+          <Route path="/test" element={<Test />} />
+          <Route path="/codeconversion" element={<CodeConversion setTitle={setTitle} />} />
+          <Route path="/test2" element={<EarnerGrid />} />
+          <Route path="/registPage" element={<RegistPage setTitle={setTitle} setEarnerCodes={setEarnerCodes} />} />
+          <Route path="/calendar" element={<Calender />} />
+          <Route path="/incomeInput2" element={<IncomeInput2 setTitle={setTitle} setEarnerCodes={setEarnerCodes} setPaymentYm={setPaymentYm} />} />
+        </Routes>
+      </div>
+
+    </>
   );
- 
+
 };
 
 export default App;
