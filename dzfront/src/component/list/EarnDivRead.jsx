@@ -180,7 +180,9 @@ const EarnDivRead = (props) => {
     const value = event.target.value;
     setEarner(value);
   }
-
+  const gridOptions = {
+    pinnedBottomRowData: [],
+  };
   function handleSubmit(event) {
     event.preventDefault();
     fetch("http://localhost:8080/list/search_div_code", {
@@ -200,6 +202,49 @@ const EarnDivRead = (props) => {
       .then((result) => result.json())
       .then((rowData) => {
         console.log(rowData);
+
+        const sums = rowData.earnerInfo.reduce(
+          (acc, curr) => ({
+            countSum: acc.countSum + curr.count_rs,
+            insCostSum: acc.insCostSum + curr.ins_cost_rs,
+            artistSum: acc.artistSum + curr.artist_cost_rs,
+            totalSum: acc.totalSum + curr.total_payment_rs,
+            taxLocalSum: acc.taxLocalSum + curr.tax_local_rs,
+            taxIncomeSum: acc.taxIncomeSum + curr.tax_income_rs,
+            realPaymentSum: acc.realPaymentSum + curr.real_payment_rs,
+          }),
+          {
+            realPaymentSum: 0,
+            insCostSum: 0,
+            artistSum: 0,
+            totalSum: 0,
+            taxLocalSum: 0,
+            taxIncomeSum: 0,
+            countSum: 0,
+          }
+        );
+        const {
+          realPaymentSum,
+          insCostSum,
+          artistSum,
+          totalSum,
+          taxLocalSum,
+          taxIncomeSum,
+          countSum,
+        } = sums;
+        earnerGridRef.current.api.setPinnedBottomRowData([
+          {
+            personal_no: "합계",
+            ins_cost_rs: insCostSum,
+            total_payment_rs: totalSum,
+            tax_local_rs: taxLocalSum,
+            artist_cost_rs: artistSum,
+            real_payment_rs: realPaymentSum,
+            tax_income_rs: taxIncomeSum,
+            count_rs: countSum,
+          },
+        ]);
+
         setRowData(rowData.earnerInfo);
       });
   }
@@ -345,6 +390,7 @@ const EarnDivRead = (props) => {
           }
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}
+          gridOptions={gridOptions}
           onGridReady={onEarnerGridReady}
         />
       </div>

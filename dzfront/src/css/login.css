@@ -8,6 +8,7 @@ input {
 }
 
 .container {
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -15,7 +16,6 @@ input {
   background-color: hsl(324, 8%, 88%);
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
 }
 
 .display {
@@ -122,13 +122,19 @@ input {
   font-weight: 600;
   display: flex;
   align-items: center;
-  width: 90%;
+  width: 80%;
   color: #4c489d;
   box-shadow: 0px 2px 2px #5c5696;
   cursor: pointer;
   transition: 0.2s;
 }
+.login_submit_wrapper {
+  text-align: center;
+}
 
+.login_submit span {
+  display: block;
+}
 button {
   padding: 10px;
   border: none;

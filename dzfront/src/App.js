@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import Login from './component/login/Login';
 import Calender from './component/Calendar';
@@ -13,6 +13,17 @@ import RegistPage from './component/regist/RegistPage';
 import CodeConversion from './component/util/CodeConversion';
 import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
+
+  const [isLogin, setIsLogin] = useState(false);
+  useEffect(() => {
+    let status = localStorage.getItem("isLogon");
+    if (status === "1") {
+      setIsLogin(true);
+    } else {
+      setIsLogin(false);
+    }
+  }, []);
+
   // const navigate = useNavigate();
 
   // useEffect(() => {
@@ -32,10 +43,10 @@ function App() {
   return (
     <>
       <div>
-        <Header title={title} earnerCodes={earnerCodes} paymentYm={paymentYm} />
+        <Header title={title} earnerCodes={earnerCodes} paymentYm={paymentYm} isLogin={isLogin} />
         <Routes>
           <Route path="/" element={<Home setTitle={setTitle} />} />
-          <Route path="/login" element={<Login setTitle={setTitle} />} />
+          <Route path="/login" element={<Login setTitle={setTitle} setIsLogin={setIsLogin} />} />
           <Route path="/earnerRead" element={<EarnerRead setTitle={setTitle} />} />
           <Route path="/earnDivRead" element={<EarnDivRead setTitle={setTitle} />} />
           <Route path="/test" element={<Test />} />

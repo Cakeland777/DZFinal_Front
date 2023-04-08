@@ -15,6 +15,8 @@ import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
 
 const LinkStyle = {
   display: "inline-block",
@@ -61,7 +63,9 @@ const EarnerColumn = [
 const EarnerRead = (props) => {
   const earnerGridRef = useRef();
   props.setTitle("사업소득조회");
+  let api;
   const onEarnerGridReady = (params) => {
+    api = params.api;
     earnerGridRef.current.api.sizeColumnsToFit();
   };
   registerLocale("ko", ko);
@@ -133,6 +137,74 @@ const EarnerRead = (props) => {
   const [selected, setSelected] = useState("earner_code");
 
   const [earner, setEarner] = useState("");
+
+  const excelFileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const excelFileExtension = ".xlsx";
+  const excelFileName = `${earner} 사업소득조회`;
+
+  const excelDownload = (excelData) => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      [`작업자_${localStorage.getItem("worker_id")}`],
+      [],
+      [
+        "소득자명",
+        "주민번호",
+        "소득구분",
+        "귀속년월",
+        "지급년월",
+        "지급액",
+        "세율",
+        "학자금상환액",
+        "소득세",
+        "지방소득세",
+        "예술인/특고인 경비",
+        "세액계",
+        "차인지급액",
+      ],
+    ]);
+    excelData.map((data) => {
+      XLSX.utils.sheet_add_aoa(
+        ws,
+        [
+          [
+            data.earner_name_rs,
+            data.personal_no,
+            data.div_code_rs,
+            data.accrual_ym_rs,
+            data.payment_ym_rs,
+            data.total_payment_rs,
+            data.tax_rate_rs,
+            data.tuition_amount_rs,
+            data.tax_income_rs,
+            data.tax_local_rs,
+            data.artist_cost_rs,
+            data.ins_cost_rs,
+            data.real_payment_rs,
+          ],
+        ],
+        { origin: -1 }
+      );
+      ws["!cols"] = [
+        { wpx: 150 },
+        { wpx: 150 },
+        { wpx: 100 },
+        { wpx: 100 },
+        { wpx: 100 },
+        { wpx: 50 },
+        { wpx: 100 },
+        { wpx: 150 },
+        { wpx: 120 },
+        { wpx: 150 },
+        { wpx: 200 },
+      ];
+      return false;
+    });
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelButter = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const excelFile = new Blob([excelButter], { type: excelFileType });
+    FileSaver.saveAs(excelFile, excelFileName + excelFileExtension);
+  };
   function handleSelect(event) {
     setSelected(event.target.value);
   }
@@ -148,13 +220,10 @@ const EarnerRead = (props) => {
     setIsModalOpen(false);
     //const{search_value}='';
   }, []);
-  const onSort = useCallback(() => {
-    earnerGridRef.current.columnApi.applyColumnState({
-      state: [{ colId: "payment_ym_rs", sort: "asc" }],
-      defaultState: { sort: null },
-    });
-  }, []);
 
+  const gridOptions = {
+    pinnedBottomRowData: [],
+  };
   function handleSubmit(event) {
     event.preventDefault();
     fetch(`http://localhost:8080/list/search_earner_code`, {
@@ -172,7 +241,47 @@ const EarnerRead = (props) => {
     })
       .then((result) => result.json())
       .then((rowData) => {
-        console.log(rowData);
+        const sums = rowData.earnerInfo.reduce(
+          (acc, curr) => ({
+            realPaymentSum: acc.realPaymentSum + curr.real_payment_rs,
+            insCostSum: acc.insCostSum + curr.ins_cost_rs,
+            artistSum: acc.artistSum + curr.artist_cost_rs,
+            totalSum: acc.totalSum + curr.total_payment_rs,
+            taxLocalSum: acc.taxLocalSum + curr.tax_local_rs,
+            taxIncomeSum: acc.taxIncomeSum + curr.tax_income_rs,
+            tuitionSum: acc.tuitionSum + curr.tuition_amount_rs,
+          }),
+          {
+            realPaymentSum: 0,
+            insCostSum: 0,
+            artistSum: 0,
+            totalSum: 0,
+            taxLocalSum: 0,
+            taxIncomeSum: 0,
+            tuitionSum: 0,
+          }
+        );
+        const {
+          realPaymentSum,
+          insCostSum,
+          artistSum,
+          totalSum,
+          taxLocalSum,
+          taxIncomeSum,
+          tuitionSum,
+        } = sums;
+        earnerGridRef.current.api.setPinnedBottomRowData([
+          {
+            personal_no: "합계",
+            ins_cost_rs: insCostSum,
+            total_payment_rs: totalSum,
+            tax_local_rs: taxLocalSum,
+            artist_cost_rs: artistSum,
+            real_payment_rs: realPaymentSum,
+            tax_income_rs: taxIncomeSum,
+            tuition_amount_rs: tuitionSum,
+          },
+        ]);
         setRowData(rowData.earnerInfo);
         earnerGridRef.current.columnApi.applyColumnState({
           state: [{ colId: selected, sort: "asc" }],
@@ -291,11 +400,21 @@ const EarnerRead = (props) => {
         >
           조회
         </button>
+        <button
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "60px",
+          }}
+          onClick={() => excelDownload(rowData)}
+        >
+          엑셀
+        </button>
       </form>
       <div
         className="ag-theme-alpine"
         style={{
-          width: 2000,
+          width: "100%",
           height: 800,
           zIndex: -100,
           padding: "10px",
@@ -306,6 +425,7 @@ const EarnerRead = (props) => {
           ref={earnerGridRef}
           rowData={rowData}
           columnDefs={columnDefs}
+          gridOptions={gridOptions}
           onGridReady={onEarnerGridReady}
           animateRows={true}
           overlayLoadingTemplate={

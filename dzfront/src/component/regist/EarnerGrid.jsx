@@ -364,7 +364,7 @@ const EarnerGrid = (props) => {
       className="ag-theme-alpine"
       style={{
         float: "left",
-        height: "500px",
+        height: "900px",
         width: "40%",
         marginTop: "10px",
       }}

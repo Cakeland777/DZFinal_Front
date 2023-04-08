@@ -120,30 +120,33 @@ function Head(props) {
 }
 
 function Menu(props) {
-  const [isLogin, setIsLogin] = React.useState(false);
+  const [isLogin, setIsLogin] = useState(props.isLogin);
+
   useEffect(() => {
-    let status = localStorage.getItem("isLogon");
-    if (status === "1") {
-      setIsLogin(true);
-    } else {
-      setIsLogin(false);
-    }
-  }, []);
-  const navigate = useNavigate();
+    setIsLogin(props.isLogin);
+  }, [props.isLogin]);
+
   const handleLinkClick = () => {
     props.onMenuToggle(false); // 사이드바 닫기
   };
+
   const logOut = () => {
-    navigate("/login");
     localStorage.clear();
     handleLinkClick();
+
     Swal.fire({
       title: "로그아웃되었습니다",
       text: "",
       icon: "success",
+      showConfirmButton: false,
+      timer: 1200,
     });
+    setTimeout(() => {
+      window.location.href = "/login";
+    }, 1800);
   };
-  if (isLogin) {
+
+  if (isLogin === true) {
     return (
       <div className={`sidebar-menu ${props.isMenuOpen ? "open" : ""}`}>
         <ul className="vertical menu">
@@ -262,7 +265,11 @@ function Header(props) {
         earnerCodes={props.earnerCodes}
         paymentYm={props.paymentYm}
       />
-      <Menu isMenuOpen={isMenuOpen} onMenuToggle={toggleMenu} />
+      <Menu
+        isMenuOpen={isMenuOpen}
+        onMenuToggle={toggleMenu}
+        isLogin={props.isLogin}
+      />
     </div>
   );
 }
