@@ -4,7 +4,6 @@
 }
 
 #header {
-  
   height: 100px;
 }
 
@@ -15,29 +14,29 @@
 #content {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-start;
 }
 
 #left {
   display: flex;
   flex-direction: column;
-  min-width: 500px;
-  min-height: 100vh;
+  min-width: 30%;
+
   align-items: center;
   justify-content: center;
 }
 
 #leftTop {
   min-width: 300px;
-  height:70vh;
+  height: 70vh;
   align-self: stretch;
 }
 
 #leftBottom {
   min-width: 500px;
-  min-height:100px;
-  height:30vh;
-  align-self: flex-end;
+  min-height: 100px;
+  height: 30vh;
+  margin-left: 129px;
 }
 
 #right {
@@ -51,13 +50,11 @@ button {
   width: 100px;
 }
 
-
 table {
   border-collapse: collapse;
   width: 100%;
   min-height: 90px;
   text-align: center;
-  
 }
 
 th,
@@ -71,4 +68,3 @@ th {
   background-color: #f2f2f2;
   font-weight: bold;
 }
-

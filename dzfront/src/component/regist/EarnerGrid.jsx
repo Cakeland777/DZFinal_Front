@@ -22,7 +22,7 @@ const EarnerGrid = (props) => {
       headerName: "V",
       headerCheckboxSelection: true,
       checkboxSelection: true,
-      width: 50,
+      maxWidth: 40,
     },
     {
       headerName: "Code",
@@ -30,7 +30,8 @@ const EarnerGrid = (props) => {
       editable: (params) => {
         return !params.node.data.div_code && params.node.data.earner_name;
       },
-      width: 90,
+      maxWidth: 90,
+      resizable: true,
       cellEditor: "agTextCellEditor",
       cellEditorParams: {
         // 입력 제한 설정
@@ -42,7 +43,8 @@ const EarnerGrid = (props) => {
       headerName: "소득자명",
       field: "earner_name",
       editable: true,
-      width: 145,
+      maxWidth: 100,
+      resizable: true,
     },
 
     {
@@ -52,8 +54,9 @@ const EarnerGrid = (props) => {
           headerName: "구분",
           field: "is_native",
           editable: true,
-          width: 70,
+          maxWidth: 70,
           cellEditor: "agSelectCellEditor",
+          resizable: true,
           cellEditorParams: {
             values: ["내", "외"],
           },
@@ -61,10 +64,12 @@ const EarnerGrid = (props) => {
         {
           headerName: "번호",
           field: "personal_no",
-          width: 150,
+          minWidth: 130,
+          maxWidth: 130,
           editable: true,
           colspan: 2,
           cellEditor: "agTextCellEditor",
+          resizable: true,
           cellEditorParams: {
             // 입력 제한 설정
             maxLength: 14,
@@ -80,13 +85,15 @@ const EarnerGrid = (props) => {
           headerName: "구분코드",
           field: "div_code",
           editable: false,
-          width: 90,
+          resizable: true,
+          maxWidth: 90,
         },
         {
           headerName: "구분명",
           field: "div_name",
-          width: 100,
+          width: 90,
           editable: false,
+          resizable: false,
           colspan: 2,
         },
         { headerName: "타입", field: "div_type", width: 100, hide: true },
@@ -123,6 +130,7 @@ const EarnerGrid = (props) => {
 
   let earnerGridApi;
   const onEarnerGridReady = (params) => {
+    gridRef2.current.api.sizeColumnsToFit();
     earnerGridApi = params.api;
     const gridColumnApi = params.columnApi;
   };
@@ -215,7 +223,6 @@ const EarnerGrid = (props) => {
           div_type: event.data.div_type,
           is_default: defaultCode.current,
           is_native: event.data.is_native,
-          personal_no: event.data.personal_no,
         }),
       })
         .then((response) => response.json())
@@ -223,6 +230,18 @@ const EarnerGrid = (props) => {
           console.log(data.code_count);
           if (data.code_count !== 0) {
             localStorage.setItem("code_count", data.code_count);
+            fetch("http://localhost:8080/regist/earner_update", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                worker_id: localStorage.getItem("worker_id"),
+                earner_code: event.data.earner_code,
+                param_value: event.data.personal_no,
+                param_name: "personal_no",
+              }),
+            });
           }
         });
     }
@@ -240,18 +259,17 @@ const EarnerGrid = (props) => {
   const onChange = (e) => {
     dispatch(e.target);
     const { value } = e.target;
-    if (value.trim() !== "") {
-      fetch(`http://localhost:8080/regist/list_divcode/${value}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setDivRowData(data.div_list);
-        });
-    }
+
+    fetch(`http://localhost:8080/regist/list_divcode/${value}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setDivRowData(data.div_list);
+      });
   };
   const onCellEditingStopped = (event) => {
     const { data, colDef } = event;
@@ -364,9 +382,10 @@ const EarnerGrid = (props) => {
       className="ag-theme-alpine"
       style={{
         float: "left",
-        height: "900px",
-        width: "40%",
+        height: "700px",
+        width: "43%",
         marginTop: "10px",
+        padding: "5px",
       }}
     >
       <AgGridReact
@@ -379,6 +398,7 @@ const EarnerGrid = (props) => {
         onCellEditingStopped={onCellEditingStopped}
         onCellClicked={earnerCellClicked}
         ref={gridRef2}
+        gridAutoHeight={true}
         onGridReady={onEarnerGridReady}
         gridOptions={gridOptions}
         isRowSelectable={(params) => {

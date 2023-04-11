@@ -2,9 +2,10 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
 import './index.css';
+
 import App from './App';
 import ReactModal from 'react-modal';
-ReactModal.setAppElement('#root');
+
 ReactDOM.render(
   <BrowserRouter>
     <App />
@@ -12,3 +13,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
+ReactModal.setAppElement('#root')

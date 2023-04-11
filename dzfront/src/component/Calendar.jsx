@@ -81,17 +81,15 @@ const Rendercell = ({
 
   const sendDate = (divBody) => {
     const selectedDateList = divBody.querySelectorAll(".selected");
-    const dateList = {};
-    // selectedDateList.forEach(item => {
-    //     const dataDate = item.getAttribute("data-date");
-    //     dateList[dataDate];
-    // });
+
     const selectedDates = Array.from(selectedDateList, (item) =>
       item.getAttribute("data-date")
     );
+    const accrual_ym = format(currentMonth, "yyyyMM");
+    console.log(format(currentMonth, "yyyyMM"));
     // console.log(divBody);
     // console.log(selectedDateList.getAttribute);
-    console.log(selectedDates);
+    console.log("날짜들", selectedDates);
 
     fetch("http://localhost:8080/input/calendar_insert", {
       method: "POST",
@@ -102,6 +100,7 @@ const Rendercell = ({
         worker_id: worker_id,
         earner_code: earner_code,
         payment_ym: payment_ym,
+        accrual_ym: accrual_ym,
         select_dates: selectedDates,
       }),
     })
@@ -157,7 +156,7 @@ const Rendercell = ({
     "2022-12-25", // 성탄절
   ];
 
-  while (day <= endDate) {
+  for (let s = 0; s < 6; s++) {
     for (let i = 1; i < 8; i++) {
       formattedDate = format(day, "d");
       const cloneDay = day;
@@ -193,8 +192,25 @@ const Rendercell = ({
     days = [];
   }
 
-  const handleResetClick = () => {
+  const handleResetClick = (e) => {
     setSelectedList([]);
+    const selectedDates = [];
+    const accrual_ym = format(currentMonth, "yyyyMM");
+    fetch("http://localhost:8080/input/calendar_insert", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: worker_id,
+        earner_code: earner_code,
+        payment_ym: payment_ym,
+        accrual_ym: accrual_ym,
+        select_dates: selectedDates,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {});
   };
   //모든 날짜 선택
   const SelectAllButton = ({ onSelectAllClick }) => {
@@ -206,6 +222,7 @@ const Rendercell = ({
     const lastDayOfMonth = endOfMonth(currentMonth);
     let day = firstDayOfMonth;
     const selectedDates = [];
+    const accrual_ym = format(currentMonth, "yyyyMM");
 
     // 해당 달의 날짜들을 모두 selectedDates에 추가
     //주말포함
@@ -238,6 +255,7 @@ const Rendercell = ({
         worker_id: worker_id,
         earner_code: earner_code,
         payment_ym: payment_ym,
+        accrual_ym: accrual_ym,
         select_dates: selectedDates,
       }),
     })
@@ -254,7 +272,7 @@ const Rendercell = ({
     <div>
       <div className="body">{rows}</div>
       <SelectAllButton onSelectAllClick={() => handleWeekClick(true)} />
-      <ResetButton onReset={handleResetClick} />
+      <ResetButton onReset={(e) => handleResetClick(e)} />
       <label htmlFor="excludeWeekends">주말 제외</label>
       <input
         type="checkbox"
@@ -284,14 +302,16 @@ export const Calendar = ({ payment_ym, workDate, worker_id, earner_code }) => {
     setSelectedDate(day);
   };
 
-  console.log("여기", worker_id);
-  console.log("여기", earner_code);
-
   return (
     <div style={{ display: "flex" }}>
       <div
         className="calendar"
-        style={{ flexDirection: "row", width: "20%", marginRight: "20px" }}
+        style={{
+          flexDirection: "row",
+          width: "20%",
+          marginRight: "100px",
+          marginLeft: "-70px",
+        }}
       >
         <RenderHeader Month={commingMonth} />
         <RenderDays />
@@ -307,7 +327,7 @@ export const Calendar = ({ payment_ym, workDate, worker_id, earner_code }) => {
       </div>
       <div
         className="calendar"
-        style={{ flexDirection: "row", width: "20%", marginLeft: "10px" }}
+        style={{ flexDirection: "row", width: "20%", marginLeft: "-70px" }}
       >
         <RenderHeader Month={currentMonth} />
         <RenderDays />

@@ -149,10 +149,18 @@ const Registration = (props) => {
       width: 90,
     },
   ];
+
   const [specialRowData, setSpecialRowData] = useState();
   const onSpecialGridReady = useCallback((params) => {
     let typeValue = document.querySelector("#sworker_type").value;
-    fetch(`http://localhost:8080/regist/list_occupation/${typeValue}`)
+    fetch(`http://localhost:8080/regist/list_occupation`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        earner_type: typeValue,
+        search_value: "",
+      }),
+    })
       .then((resp) => resp.json())
       .then((data) => setSpecialRowData(data.occupation_list));
   }, []);
@@ -220,28 +228,14 @@ const Registration = (props) => {
     artist_type: "",
     ins_reduce: "",
   };
-  const [state, dispatch] = useReducer(reducer, earnerInfo);
-  const {
-    residence_status,
-    div,
-    isNative,
-    personal_no,
-    tel1,
-    tel2,
-    tel3,
-    phone1,
-    phone2,
-    phone3,
-    email1,
-    email2,
-    deduction_amount,
-    etc,
-    artist_type,
-    ins_reduce,
-  } = state;
+  //const [state, dispatch] = useReducer(reducer, earnerInfo);
+
+  const [state, dispatch] = useReducer(reducer, {
+    search_value: "",
+  });
 
   const onChange = (e) => {
-    dispatch(e.target);
+    //dispatch(e.target);
     const { name, value } = e.target;
     if (name === "is_artist") {
       setInputEnabled(value === "Y");
@@ -347,26 +341,43 @@ const Registration = (props) => {
       autoHeaderHeight: true,
     };
   }, []);
-  const customStyles = {
-    content: {
-      top: "50%",
-      left: "50%",
-      right: "auto",
-      bottom: "auto",
-      marginRight: "-50%",
-      transform: "translate(-50%, -50%)",
-    },
+
+  const { search_value } = state;
+
+  const onSearchChange = (e) => {
+    let typeValue = document.querySelector("#sworker_type").value;
+    dispatch(e.target);
+    const { value } = e.target;
+
+    fetch("http://localhost:8080/regist/list_occupation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        earner_type: typeValue,
+        search_value: value,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setSpecialRowData(data.occupation_list);
+      });
   };
   const customPostStyles = {
     content: {
       top: "50%",
       left: "50%",
-      width: "800px",
-      height: "600px",
+      width: "400px",
+      height: "500px",
       right: "auto",
       bottom: "auto",
       marginRight: "-50%",
       transform: "translate(-50%, -50%)",
+    },
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
     },
   };
   const specialStyles = {
@@ -380,6 +391,10 @@ const Registration = (props) => {
       marginRight: "-50%",
       transform: "translate(-50%, -50%)",
     },
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
+    },
   };
   const Tab = [
     {
@@ -388,7 +403,7 @@ const Registration = (props) => {
         <>
           <h3>소득자 등록</h3>
 
-          <div style={{ width: "100%", float: "left" }}>
+          <div style={{ width: "100%" }}>
             <table>
               <tbody>
                 <tr>
@@ -764,7 +779,7 @@ const Registration = (props) => {
                     onComplete={handlePostcode}
                     autoClose={true}
                     className="daum-postcode"
-                    style={{ height: 500, marginTop: 50 }}
+                    style={{ height: 480, marginTop: 20, width: 380 }}
                   />
                 </>
               }
@@ -779,7 +794,7 @@ const Registration = (props) => {
       content: (
         <>
           <h3>예술인 해당 사업소득자 등록</h3>
-          <div style={{ width: "60%" }}>
+          <div style={{ width: "100%" }}>
             <table>
               <tbody>
                 <tr>
@@ -876,7 +891,7 @@ const Registration = (props) => {
             </p>
           </div>
           <h3>노무제공자(특고) 해당 사업소득자 등록</h3>
-          <div style={{ width: "60%" }}>
+          <div style={{ width: "100%" }}>
             <table>
               <tbody>
                 <tr>
@@ -1216,7 +1231,14 @@ const Registration = (props) => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <div>
-      <div style={{ float: "left", marginLeft: "50px", marginTop: "5px" }}>
+      <div
+        style={{
+          float: "left",
+          marginLeft: "50px",
+          marginTop: "5px",
+          width: "50%",
+        }}
+      >
         <button
           key={0}
           onClick={(e) => changeItem(0)}
@@ -1284,8 +1306,8 @@ const Registration = (props) => {
                     borderColor: "skyblue",
                     outline: "none",
                   }}
-                  value={""}
-                  onChange={onChange}
+                  value={search_value}
+                  onChange={onSearchChange}
                 ></input>
                 <br />
                 <button onClick={() => setSpecialModalOpen(false)}>취소</button>

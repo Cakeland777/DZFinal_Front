@@ -12,14 +12,22 @@ const CodeConversion = (props) => {
   const gridRef2 = useRef();
   const earnerCode = useRef();
   const earner_name = useRef();
+
   const div_code = useRef();
   const div_name = useRef();
   const div_type = useRef();
-  const old_div_type = useRef();
+
   const old_div_code = useRef();
+  const old_div_name = useRef();
+
   const new_div_code = useRef();
-  const div_modified = useRef();
   const new_div_name = useRef();
+  const new_div_type = useRef();
+
+  const div_modified = useRef();
+
+  //const worker_id = useRef();
+
   const [modified_date, setModified_date] = useState("");
   const [selectedCell, setSelectedCell] = useState(null);
 
@@ -29,11 +37,19 @@ const CodeConversion = (props) => {
     console.log(selectedRows[0].earner_code);
     setSelectedCell(event.node);
     earner_name.current = selectedRows[0].earner_name;
-    old_div_code.current = selectedRows[0].div_code;
+
+    old_div_code.current = selectedRows[0].old_div_code || "";
+    old_div_name.current = selectedRows[0].old_div_name || "";
+
+    div_code.current = selectedRows[0].div_code;
     div_name.current = selectedRows[0].div_name;
-    new_div_code.current = selectedRows[0].new_div_code;
+    div_type.current = selectedRows[0].div_type;
+    // worker_id.current = selectedRows[0].worker_id;
+
     div_modified.current = selectedRows[0].div_modified;
-    console.log("onEarnerSelection", event.node);
+    console.log("old_div_code", old_div_code.current);
+    console.log("old_div_name", old_div_name.current);
+    console.log("onEarnerSelection", selectedRows[0]);
     onCodeHistory();
   };
 
@@ -68,22 +84,42 @@ const CodeConversion = (props) => {
           headerName: "주민(사업자)등록번호",
           field: "personal_no",
           width: 270,
-          cellStyle: { color: "red", backgroundColor: "mistyrose" },
+          cellStyle: {
+            color: "red",
+            backgroundColor: "mistyrose",
+            opacity: 0.7,
+          },
         },
       ],
     },
-    { headerName: "변환전 소득구분", field: "div_code", width: 270 },
+    {
+      headerName: "변환전 소득구분",
+      field: "old_div_code",
+      width: 270,
+    },
     {
       headerName: "변환후 소득구분",
-      field: "new_div_code",
+      field: "div_code",
       width: 270,
       onCellClicked: (event) => setIsModalOpen(true),
+    },
+    {
+      headerName: "변환후 소득이름",
+      field: "div_name",
+      hide: "true",
+      width: 270,
     },
     {
       headerName: "최종작업시간",
       field: "div_modified",
       width: 270,
       onCellClicked: (event) => setTimeOpen(true),
+    },
+    {
+      headerName: "div_type",
+      field: "div_type",
+      hide: "true",
+      width: 270,
     },
   ];
 
@@ -115,57 +151,59 @@ const CodeConversion = (props) => {
 
   const DivModalDoubleClicked = () => {
     const selectedRows = gridRef.current.api.getSelectedRows();
+    console.log("DivModalDoubleClicked-> selectedRows", selectedRows);
     let mode = "";
-    div_code.current = selectedRows[0].div_code;
-    div_name.current = selectedRows[0].div_name;
-    div_type.current = selectedRows[0].div_type;
+    new_div_code.current = selectedRows[0].div_code;
     new_div_name.current = selectedRows[0].div_name;
+    new_div_type.current = selectedRows[0].div_type;
+
     if (
-      old_div_type.current === "특고인" &&
-      (div_type.current === "예술인" || div_type.current === "일반")
+      div_type.current === "특고인" &&
+      (new_div_type.current === "예술인" || new_div_type.current === "일반")
     ) {
       mode = "update_sworker_other";
     } else if (
-      old_div_type.current === "예술인" &&
-      (div_type.current === "특고인" || div_type.current === "일반")
+      div_type.current === "예술인" &&
+      (new_div_type.current === "특고인" || new_div_type.current === "일반")
     ) {
       mode = "update_is_artist_other";
     }
     setIsModalOpen(false);
     let param = {
-      div_code: div_code.current,
-      div_name: div_name.current,
-      div_type: div_type.current,
+      div_code: new_div_code.current,
+      div_name: new_div_name.current,
+      div_type: new_div_type.current,
+      old_div_code: div_code.current,
+      old_div_name: div_name.current,
       worker_id: "yuchan2",
       earner_code: earnerCode.current,
       mode: mode,
     };
-    console.log(param);
+    console.log("DivModalDoubleClicked->", param);
+
     fetch("http://localhost:8080/util/update_earner_code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        div_code: div_code.current,
-        div_name: div_name.current,
-        div_type: div_type.current,
-        worker_id: "yuchan2",
-        earner_code: earnerCode.current,
-        mode: mode,
-      }),
+      body: JSON.stringify(param),
     }).then((response) => {
       response.json();
-      selectedCell.setDataValue("new_div_code", div_code.current);
+      selectedCell.setDataValue("div_code", new_div_code.current);
+      selectedCell.setDataValue("div_name", new_div_name.current);
+      selectedCell.setDataValue("div_type", new_div_type.current);
+      selectedCell.setDataValue("old_div_code", div_code.current);
+      selectedCell.setDataValue("old_div_name", div_name.current);
       onCodeHistory();
     });
   };
 
+  //소득구분코드 도움 cell 선택시 이벤트 핸들러
   const onSelectionChanged = useCallback(() => {
     const selectedRows = gridRef.current.api.getSelectedRows();
-    div_code.current = selectedRows[0].div_code;
-    div_name.current = selectedRows[0].div_name;
-    div_type.current = selectedRows[0].div_type;
+    new_div_code.current = selectedRows[0].div_code;
+    new_div_name.current = selectedRows[0].div_name;
+    new_div_type.current = selectedRows[0].div_type;
   }, []);
 
   const onCodeHistory = () => {
@@ -184,11 +222,14 @@ const CodeConversion = (props) => {
       .then((rowData) => {
         //응답결과 받는 부분
         console.log("aaaaaa", rowData);
-        setModified_date(rowData.code_history.modified_date);
-        selectedCell.setDataValue(
-          "div_modified",
-          rowData.code_history.modified_date
-        );
+        console.log("selectedCell", selectedCell);
+        if (selectedCell && rowData.code_history) {
+          setModified_date(rowData.code_history.modified_date);
+          selectedCell.setDataValue(
+            "div_modified",
+            rowData.code_history.modified_date
+          );
+        }
       });
   };
 
@@ -204,9 +245,10 @@ const CodeConversion = (props) => {
           padding: "5px",
         }}
       >
-        <select>
-          <option value="">1.사업소득</option>
+        <select disabled>
+          <option value="div_income">1.사업소득</option>
         </select>
+
         <button
           style={{ float: "right", textAlign: "center", paddingBottom: "3px" }}
         >
@@ -214,6 +256,7 @@ const CodeConversion = (props) => {
           조회
         </button>
       </div>
+
       <div
         className="ag-theme-alpine"
         style={{
@@ -282,7 +325,7 @@ const CodeConversion = (props) => {
       >
         {
           <>
-            <h2>최종 소득구분 변경 정보</h2>
+            <h2 align="center">최종 소득구분 변경 정보</h2>
             <th style={{ backgroundColor: "lightBlue" }}>
               해당 소득자에 대한 마지막 소득구분 변경기록을 조회할 수 있습니다.
             </th>
@@ -305,13 +348,13 @@ const CodeConversion = (props) => {
                   <tr>
                     <th>기존 소득구분</th>
                     <td>
-                      {old_div_code.current} ({div_name.current}){" "}
+                      {old_div_code.current} ({old_div_name.current}){" "}
                     </td>
                   </tr>
                   <tr>
                     <th>변경 소득구분</th>
                     <td>
-                      {new_div_code.current} ({new_div_name.current})
+                      {div_code.current} ({div_name.current}){" "}
                     </td>
                   </tr>
                   <tr>

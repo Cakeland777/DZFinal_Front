@@ -17,15 +17,16 @@ import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import NumberRenderer from "../util/NumberRenderer";
 
 const LinkStyle = {
   display: "inline-block",
-  padding: "0.5rem",
+  padding: "0.4rem",
   margin: "0 1rem",
   textDecoration: "none",
   fontWeight: "bold",
   color: "gray",
-  borderBottom: "2px solid transparent",
+  borderBottom: "3px solid #6273D9",
   transition: "all 0.2s ease-in-out",
 };
 
@@ -44,23 +45,28 @@ const customStyles = {
   content: {
     top: "50%",
     left: "50%",
-    width: "1000px",
-    height: "600px",
+    width: "800px",
+    height: "450px",
     right: "auto",
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
   },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
+  },
 };
 const EarnerColumn = [
-  { headerName: "Code", field: "earner_code", width: 150 },
+  { headerName: "Code", field: "earner_code", width: 120 },
   { headerName: "소득자명", field: "earner_name", width: 160 },
   { headerName: "내/외", field: "is_native", width: 80 },
   { headerName: "주민등록번호", field: "personal_no", width: 160 },
   { headerName: "소득구분명", field: "div_name", width: 120 },
-  { headerName: "구분코드", field: "div_code", width: 130 },
+  { headerName: "구분코드", field: "div_code", width: 120 },
 ];
 const EarnerRead = (props) => {
+  const [error, setError] = useState(null);
   const earnerGridRef = useRef();
   props.setTitle("사업소득조회");
   let api;
@@ -78,6 +84,7 @@ const EarnerRead = (props) => {
       body: JSON.stringify({
         worker_id: "yuchan2",
         search_value: "",
+        payment_ym: "202401",
       }),
     })
       .then((resp) => resp.json())
@@ -89,39 +96,136 @@ const EarnerRead = (props) => {
   const [rowData, setRowData] = useState("");
   const [EarnerRowData, setEarnerRowData] = useState();
   const gridRef = useRef();
-
+  function getCellStyle(params) {
+    if (params.value === 0 || undefined) {
+      return {
+        backgroundColor: "lightgrey",
+        color: "transparent",
+        opacity: 0.4,
+        textAlign: "right",
+      };
+    } else {
+      return { textAlign: "right" };
+    }
+  }
   const [columnDefs, setColumnDefs] = useState([
-    { field: "earner_name_rs", headerName: "소득자명", resizable: true },
+    {
+      field: "earner_name_rs",
+      headerName: "소득자명",
+      resizable: true,
+      maxWidth: 100,
+      cellStyle: { textAlign: "center" },
+    },
     {
       field: "personal_no",
       headerName: "주민(외국인)등록번호",
       resizable: true,
-      minWidth: 180,
+      maxWidth: 140,
+      cellStyle: { textAlign: "center" },
     },
-    { field: "div_code_rs", headerName: "소득구분", resizable: true },
-    { field: "accrual_ym_rs", headerName: "귀속년월", resizable: true },
-    { field: "payment_ym_rs", headerName: "지급년월일", resizable: true },
-    { field: "total_payment_rs", headerName: "지급액", resizable: true },
+    {
+      field: "div_code_rs",
+      headerName: "소득구분",
+      resizable: true,
+      maxWidth: 120,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      field: "accrual_ym_rs",
+      headerName: "귀속년월",
+      resizable: true,
+      maxWidth: 120,
+    },
+    {
+      field: "payment_ym_rs",
+      headerName: "지급년월일",
+      resizable: true,
+      maxWidth: 120,
+    },
+    {
+      field: "total_payment_rs",
+      headerName: "지급액",
+      maxWidth: 130,
+      resizable: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
     {
       field: "tax_rate_rs",
       headerName: "세율(%)",
       resizable: true,
-      maxWidth: 130,
+      maxWidth: 90,
     },
-    { field: "tuition_amount_rs", headerName: "학자금상환액", resizable: true },
-    { field: "tax_income_rs", headerName: "소득세", resizable: true },
-    { field: "tax_local_rs", headerName: "지방소득세", resizable: true },
-    { field: "artist_cost_rs", headerName: "예술인경비", resizable: true },
-    { field: "ins_cost_rs", headerName: "고용보험료", resizable: true },
-    { field: "real_payment_rs", headerName: "차인지급액", resizable: true },
+    {
+      field: "tuition_amount_rs",
+      headerName: "학자금상환액",
+      maxWidth: 140,
+      resizable: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "tax_income_rs",
+      headerName: "소득세",
+      resizable: true,
+      maxWidth: 130,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "tax_local_rs",
+      headerName: "지방소득세",
+      resizable: true,
+      maxWidth: 130,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "artist_cost_rs",
+      headerName: "예술/특고인경비",
+      resizable: true,
+      maxWidth: 140,
+      minWidth: 130,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "ins_cost_rs",
+      headerName: "고용보험료",
+      resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "real_payment_rs",
+      headerName: "차인지급액",
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+      maxWidth: 150,
+    },
   ]);
 
   const defaultColDef = useMemo(() => {
     return {
-      sortable: true,
+      sortable: false,
+      filter: false,
+      lockPosition: true,
     };
   }, []);
+  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
 
+  useEffect(() => {
+    function handleResize() {
+      setViewportWidth(window.innerWidth);
+    }
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
   const cellClickedListener = useCallback((event) => {
     console.log("cellClicked", event);
   }, []);
@@ -218,11 +322,12 @@ const EarnerRead = (props) => {
     setEarner(selectedRows[0].earner_code);
 
     setIsModalOpen(false);
-    //const{search_value}='';
   }, []);
 
   const gridOptions = {
     pinnedBottomRowData: [],
+    // headerHeight: 30,
+    // rowHeight: 30,
   };
   function handleSubmit(event) {
     event.preventDefault();
@@ -239,8 +344,12 @@ const EarnerRead = (props) => {
         code_value: earner,
       }),
     })
-      .then((result) => result.json())
+      .then((response) => {
+        alert(response.status);
+        throw new Error(response.message);
+      })
       .then((rowData) => {
+        alert(rowData.status_code);
         const sums = rowData.earnerInfo.reduce(
           (acc, curr) => ({
             realPaymentSum: acc.realPaymentSum + curr.real_payment_rs,
@@ -287,6 +396,10 @@ const EarnerRead = (props) => {
           state: [{ colId: selected, sort: "asc" }],
           defaultState: { sort: null },
         });
+      })
+      .catch((error) => {
+        // handle error response
+        console.log(error.message);
       });
   }
   function reducer(state, action) {
@@ -302,23 +415,27 @@ const EarnerRead = (props) => {
   const onChange = (e) => {
     dispatch(e.target);
     const { value } = e.target;
-    if (value.trim() !== "") {
-      fetch("http://localhost:8080/input/earner_search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          worker_id: "yuchan2",
-          search_value: value,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setEarnerRowData(data.earner_list);
-        });
-    }
+
+    fetch("http://localhost:8080/input/earner_search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: "yuchan2",
+        search_value: value,
+        payment_ym: "202401",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setEarnerRowData(data.earner_list);
+      });
   };
+  const frameworkComponents = {
+    numberRenderer: NumberRenderer,
+  };
+
   return (
     <div>
       <div>
@@ -342,7 +459,7 @@ const EarnerRead = (props) => {
           <option value="accrual_ym">1.귀속년월</option>
           <option value="payment_ym">2.지급년월</option>
         </select>
-        <div style={{ position: "relative", zIndex: 800 }}>
+        <div>
           <label>
             <DatePicker
               showIcon
@@ -358,7 +475,7 @@ const EarnerRead = (props) => {
           </label>
         </div>{" "}
         ~
-        <div style={{ position: "relative", zIndex: 800 }}>
+        <div>
           <DatePicker
             selected={endDate}
             onChange={(date) => setEndDate(date)}
@@ -376,14 +493,11 @@ const EarnerRead = (props) => {
           onClick={() => setIsModalOpen(true)}
           value={earner}
           type="text"
-          style={{ marginRight: "1rem" }}
+          style={{ marginRight: "1rem", width: "5%" }}
+          readOnly
         />
         <label style={{ marginRight: "1rem" }}>정렬</label>
-        <select
-          onChange={handleSelect}
-          value={selected}
-          style={{ marginRight: "1rem" }}
-        >
+        <select onChange={handleSelect} value={selected}>
           <option value="earner_name_rs">1.소득자명순</option>
           <option value="div_name_rs">2.소득구분순</option>
           <option value="payment_ym_rs">3.지급년월순</option>
@@ -394,7 +508,8 @@ const EarnerRead = (props) => {
             display: "flex",
             alignItems: "center",
             width: "60px",
-            marginLeft: "39rem",
+            marginLeft: "auto",
+            marginRight: "10px",
           }}
           type="submit"
         >
@@ -405,6 +520,7 @@ const EarnerRead = (props) => {
             display: "flex",
             alignItems: "center",
             width: "60px",
+            marginRight: "30px",
           }}
           onClick={() => excelDownload(rowData)}
         >
@@ -414,11 +530,12 @@ const EarnerRead = (props) => {
       <div
         className="ag-theme-alpine"
         style={{
-          width: "100%",
-          height: 800,
-          zIndex: -100,
-          padding: "10px",
-          marginLeft: "20px",
+          width: "99%",
+          height: "75vh",
+          padding: "5px",
+          marginLeft: "10px",
+          fontSize: "10px",
+          textAlign: "right",
         }}
       >
         <AgGridReact
@@ -437,6 +554,7 @@ const EarnerRead = (props) => {
           rowSelection="multiple"
           onCellClicked={cellClickedListener}
           defaultColDef={defaultColDef}
+          frameworkComponents={frameworkComponents}
         />
       </div>
       <ReactModal
@@ -449,7 +567,7 @@ const EarnerRead = (props) => {
             <h4>사업소득자 코드도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ height: 400, width: "900px" }}
+              style={{ height: 300, width: "800px" }}
             >
               <AgGridReact
                 columnDefs={EarnerColumn}
@@ -475,6 +593,7 @@ const EarnerRead = (props) => {
                   onChange={onChange}
                 ></input>
                 <br />
+                <button onClick={() => EarnerModalDoubleClicked()}>확인</button>
                 <button onClick={() => setIsModalOpen(false)}>취소</button>
               </div>
             </>

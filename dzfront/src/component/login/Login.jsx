@@ -75,7 +75,7 @@ function Login(props) {
         style={{
           width: "500px",
           height: "1000px",
-          marginLeft: "1500px",
+          marginLeft: "1000px",
           float: "right",
         }}
       >

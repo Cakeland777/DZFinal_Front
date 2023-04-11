@@ -12,6 +12,7 @@ import Home from './component/Home';
 import RegistPage from './component/regist/RegistPage';
 import CodeConversion from './component/util/CodeConversion';
 import IncomeInput2 from './component/input/IncomeInput2';
+
 function App() {
 
   const [isLogin, setIsLogin] = useState(false);
@@ -24,25 +25,13 @@ function App() {
     }
   }, []);
 
-  // const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   let status = localStorage.getItem("isLogOn");
-  //   if (status === "1") {
-  //     const timeoutId = setTimeout(() => {
-  //       localStorage.clear();
-  //     }, 500 * 60 * 1000); // 5분 = 5 * 60 * 1000 밀리초
-  //     return () => clearTimeout(timeoutId);
-  //   } else {
-  //     navigate('/login');
-  //   }
-  // }, [navigate]);
   const [title, setTitle] = useState();
   const [earnerCodes, setEarnerCodes] = useState();
   const [paymentYm, setPaymentYm] = useState();
   return (
     <>
       <div>
+
         <Header title={title} earnerCodes={earnerCodes} paymentYm={paymentYm} isLogin={isLogin} />
         <Routes>
           <Route path="/" element={<Home setTitle={setTitle} />} />

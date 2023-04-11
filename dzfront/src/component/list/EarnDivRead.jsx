@@ -1,33 +1,37 @@
-import React, { useState, useRef, useMemo, useCallback } from "react";
-import { TbFileX } from "react-icons/tb";
-import ReactModal from "react-modal";
-import { Link } from "react-router-dom";
-import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
-import DatePicker, { registerLocale } from "react-datepicker";
-import { ko } from "date-fns/locale";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
+import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import { format } from "date-fns";
+import { ko } from "date-fns/locale";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import DatePicker, { registerLocale } from "react-datepicker";
+import ReactModal from "react-modal";
+import { Link } from "react-router-dom";
+import NumberRenderer from "../util/NumberRenderer";
 const customStyles = {
   content: {
     top: "50%",
     left: "50%",
-    width: "400px",
-    height: "600px",
+    width: "360px",
+    height: "520px",
     right: "auto",
     bottom: "auto",
     marginRight: "-50%",
     transform: "translate(-50%, -50%)",
   },
+  overlay: {
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
+  },
 };
 const LinkStyle = {
   display: "inline-block",
-  padding: "0.5rem",
+  padding: "0.4rem",
   margin: "0 1rem",
   textDecoration: "none",
   fontWeight: "bold",
   color: "gray",
-  borderBottom: "2px solid transparent",
+  borderBottom: "3px solid #6273D9",
   transition: "all 0.2s ease-in-out",
 };
 
@@ -48,50 +52,122 @@ const EarnDivRead = (props) => {
   const [rowData, setRowData] = useState();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const gridRef = useRef();
-
+  function getCellStyle(params) {
+    if (params.value === 0 || undefined) {
+      return {
+        backgroundColor: "lightgrey",
+        color: "transparent",
+        opacity: 0.4,
+        textAlign: "right",
+      };
+    } else {
+      return { textAlign: "right" };
+    }
+  }
   const columnDefs = [
-    { field: "div_code_rs", headerName: "소득구분", resizable: true },
-    { field: "earner_name_rs", headerName: "소득자명(상호)", resizable: true },
+    {
+      field: "div_code_rs",
+      headerName: "소득구분",
+      resizable: true,
+      maxWidth: 150,
+      cellStyle: { textAlign: "center" },
+    },
+    {
+      field: "earner_name_rs",
+      headerName: "소득자명(상호)",
+      resizable: true,
+      cellStyle: { textAlign: "center" },
+    },
     {
       field: "personal_no",
       headerName: "주민(사업자)등록번호",
       resizable: true,
-      minWidth: 180,
+      minWidth: 160,
+      maxWidth: 150,
+      cellStyle: { textAlign: "center" },
     },
     {
       field: "is_native_rs",
       headerName: "내/외국인",
       resizable: true,
-      maxWidth: 130,
+      maxWidth: 120,
     },
-    { field: "count_rs", headerName: "건수", resizable: true, maxWidth: 100 },
+    {
+      field: "count_rs",
+      headerName: "건수",
+      resizable: true,
+      maxWidth: 100,
+      cellStyle: { textAlign: "center" },
+    },
 
-    { field: "total_payment_rs", headerName: "연간총지급액", resizable: true },
+    {
+      field: "total_payment_rs",
+      headerName: "연간총지급액",
+      resizable: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
     {
       field: "tax_rate_rs",
       headerName: "세율(%)",
       resizable: true,
       maxWidth: 130,
+      cellStyle: getCellStyle,
     },
     {
       field: "tax_income_rs",
       headerName: "소득세",
       resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
     },
     {
       field: "tax_local_rs",
       headerName: "지방소득세",
       resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
     },
-    { field: "tax_total_rs", headerName: "세액계", resizable: true },
-    { field: "artist_cost_rs", headerName: "예술인경비", resizable: true },
-    { field: "ins_cost_rs", headerName: "고용보험료", resizable: true },
-    { field: "real_payment_rs", headerName: "계", resizable: true },
+    {
+      field: "tax_total_rs",
+      headerName: "세액계",
+      resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "artist_cost_rs",
+      headerName: "예술인경비",
+      resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "ins_cost_rs",
+      headerName: "고용보험료",
+      resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "real_payment_rs",
+      headerName: "계",
+      resizable: true,
+      maxWidth: 140,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
   ];
 
   const defaultColDef = useMemo(() => ({
-    sortable: true,
-    filter: true,
+    sortable: false,
+    filter: false,
+    lockPosition: true,
   }));
   const DivModalDoubleClicked = useCallback(() => {
     const selectedRows = gridRef.current.api.getSelectedRows();
@@ -165,13 +241,6 @@ const EarnDivRead = (props) => {
   const [selected2, setSelected2] = useState("earner_name");
 
   const [earner, setEarner] = useState("");
-  function handleSelect2(event) {
-    setSelected2(event.target.value);
-  }
-
-  function handleSelect(event) {
-    setSelected(event.target.value);
-  }
 
   function handleEarner(event) {
     setEarner(event.target.value);
@@ -209,6 +278,7 @@ const EarnDivRead = (props) => {
             insCostSum: acc.insCostSum + curr.ins_cost_rs,
             artistSum: acc.artistSum + curr.artist_cost_rs,
             totalSum: acc.totalSum + curr.total_payment_rs,
+            taxTotalSum: acc.taxTotalSum + curr.tax_total_rs,
             taxLocalSum: acc.taxLocalSum + curr.tax_local_rs,
             taxIncomeSum: acc.taxIncomeSum + curr.tax_income_rs,
             realPaymentSum: acc.realPaymentSum + curr.real_payment_rs,
@@ -221,6 +291,7 @@ const EarnDivRead = (props) => {
             taxLocalSum: 0,
             taxIncomeSum: 0,
             countSum: 0,
+            taxTotalSum: 0,
           }
         );
         const {
@@ -231,6 +302,7 @@ const EarnDivRead = (props) => {
           taxLocalSum,
           taxIncomeSum,
           countSum,
+          taxTotalSum,
         } = sums;
         earnerGridRef.current.api.setPinnedBottomRowData([
           {
@@ -242,15 +314,22 @@ const EarnDivRead = (props) => {
             real_payment_rs: realPaymentSum,
             tax_income_rs: taxIncomeSum,
             count_rs: countSum,
+            tax_total_rs: taxTotalSum,
           },
         ]);
 
         setRowData(rowData.earnerInfo);
       });
   }
+  let api;
   const onEarnerGridReady = (params) => {
+    api = params.api;
     earnerGridRef.current.api.sizeColumnsToFit();
   };
+  const frameworkComponents = {
+    numberRenderer: NumberRenderer,
+  };
+
   return (
     <div>
       <div>
@@ -278,7 +357,7 @@ const EarnDivRead = (props) => {
         <div
           style={{ display: "flex", alignItems: "center", marginRight: "1rem" }}
         >
-          <div style={{ position: "relative", zIndex: 800 }}>
+          <div>
             <DatePicker
               selected={startDate}
               onChange={(date) => setStartDate(date)}
@@ -291,7 +370,7 @@ const EarnDivRead = (props) => {
             />
           </div>
           ~
-          <div style={{ position: "relative", zIndex: 800 }}>
+          <div>
             <DatePicker
               selected={endDate}
               onChange={(date) => setEndDate(date)}
@@ -360,7 +439,7 @@ const EarnDivRead = (props) => {
             display: "flex",
             alignItems: "center",
             width: "60px",
-            marginLeft: "35rem",
+            marginLeft: "15rem",
           }}
         >
           조회
@@ -369,11 +448,12 @@ const EarnDivRead = (props) => {
       <div
         className="ag-theme-alpine"
         style={{
-          width: 2000,
-          height: 800,
-          zIndex: -100,
-          padding: "10px",
-          marginLeft: "20px",
+          width: "99%",
+          height: "75vh",
+          padding: "5px",
+          marginLeft: "10px",
+          fontSize: "10px",
+          textAlign: "right",
         }}
       >
         <AgGridReact
@@ -392,6 +472,7 @@ const EarnDivRead = (props) => {
           defaultColDef={defaultColDef}
           gridOptions={gridOptions}
           onGridReady={onEarnerGridReady}
+          frameworkComponents={frameworkComponents}
         />
       </div>
       <ReactModal
@@ -404,7 +485,7 @@ const EarnDivRead = (props) => {
             <h4>소득구분코드 도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ height: 400, width: 400 }}
+              style={{ height: 400, width: 360, textAlign: "center" }}
             >
               <AgGridReact
                 columnDefs={divColumn}
@@ -418,7 +499,7 @@ const EarnDivRead = (props) => {
             </div>
 
             <>
-              <div style={{ textAlign: "center", marginTop: 50 }}>
+              <div style={{ textAlign: "center", marginTop: 10 }}>
                 <button onClick={DivModalDoubleClicked}>확인</button>
                 <button onClick={() => setIsModalOpen(false)}>취소</button>
               </div>

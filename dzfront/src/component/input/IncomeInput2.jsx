@@ -8,6 +8,8 @@ import React, {
   useReducer,
   useEffect,
 } from "react";
+import ErrorAlert from "../util/ErrorAlert";
+import Swal from "sweetalert2";
 import Calendar from "../Calendar";
 import "../../css/IncomeInput2.css";
 import ReactModal from "react-modal";
@@ -16,11 +18,15 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
+import NumberRenderer from "../util/NumberRenderer";
 const IncomeInput2 = (props) => {
   //datepicker관련
   props.setTitle("사업소득자료입력");
-
+  const frameworkComponents = {
+    numberRenderer: NumberRenderer,
+  };
   registerLocale("ko", ko);
+  const [error, setError] = useState(null);
   const [workDate, setWorkDate] = useState([]);
   const [bottomData, setBottomData] = useState([]);
   const earnerGridRef = useRef();
@@ -39,19 +45,22 @@ const IncomeInput2 = (props) => {
     content: {
       top: "50%",
       left: "50%",
-      width: "1000px",
-      height: "600px",
+      width: "900px",
+      height: "550px",
       right: "auto",
       bottom: "auto",
       marginRight: "-50%",
       transform: "translate(-50%, -50%)",
     },
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
+    },
   };
   const LeftColumnDefs = [
     {
-      headerName: "V",
       checkboxSelection: true,
-      width: 45,
+      width: 10,
       headerCheckboxSelection: true,
     },
     //{ headerName: "Code", field: "earner_code",editable:true,width:90},
@@ -59,7 +68,7 @@ const IncomeInput2 = (props) => {
       headerName: "소득자명",
       field: "earner_name",
       editable: false,
-      width: 100,
+      width: 90,
       onCellClicked: (event) => {
         if (!event.data.earner_name) {
           setIsModalOpen(true);
@@ -74,7 +83,7 @@ const IncomeInput2 = (props) => {
           headerName: "구분",
           field: "is_native",
           editable: false,
-          width: 70,
+          width: 60,
           cellEditor: "agSelectCellEditor",
           cellEditorParams: {
             values: ["내", "외"],
@@ -83,7 +92,7 @@ const IncomeInput2 = (props) => {
         {
           headerName: "번호",
           field: "personal_no",
-          width: 130,
+          width: 120,
           editable: false,
           colspan: 2,
         },
@@ -96,12 +105,12 @@ const IncomeInput2 = (props) => {
           headerName: "구분코드",
           field: "div_code",
           editable: false,
-          width: 90,
+          width: 80,
         },
         {
           headerName: "구분명",
           field: "div_name",
-          width: 100,
+          width: 80,
           editable: false,
           colspan: 2,
         },
@@ -119,6 +128,22 @@ const IncomeInput2 = (props) => {
     console.log(startDate.current);
     setSelectedDate(startDate.current);
     props.setPaymentYm(parseInt(format(startDate.current, "yyyyMM")));
+
+    fetch("http://localhost:8080/input/earner_search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: "yuchan2",
+        payment_ym: parseInt(format(startDate.current, "yyyyMM")),
+        search_value: "",
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setEarnerRowData(data.earner_list);
+      });
     fetch("http://localhost:8080/input/get_task", {
       method: "POST",
       headers: {
@@ -185,25 +210,19 @@ const IncomeInput2 = (props) => {
     //const{search_value}='';
   }, []);
 
-  useEffect(() => {
-    fetch("http://localhost:8080/input/earner_search", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        worker_id: "yuchan2",
-        search_value: "",
-      }),
-    })
-      .then((resp) => resp.json())
-      .then((data) => {
-        setEarnerRowData(data.earner_list);
-      });
-  }, []);
-  function onRightCellClicked(event) {
+  let api;
+  const onEarnerGridReady = (params) => {
+    api = params.api;
+    earnerGridRef.current.api.sizeColumnsToFit();
+  };
+  useEffect(() => {}, []);
+  const taxRow = useRef();
+  const onRightCellClicked = (event) => {
     const { data, colDef } = event;
     const { field } = colDef;
+    const select = topGrid.current.api.getSelectedRows();
+    taxRow.current = event.data;
+    console.log("클릭~!", select);
     if (event.colDef.field === "accrual_ym") {
       console.log(selectedDate);
 
@@ -216,10 +235,11 @@ const IncomeInput2 = (props) => {
         parseInt(format(startDate.current, "yyyyMM"))
       );
     }
-  }
+  };
   let rightGridApi;
   function onRightGridReady(params) {
     rightGridApi = params.api;
+    topGrid.current.api.sizeColumnsToFit();
     const gridColumnApi = params.columnApi;
   }
 
@@ -253,10 +273,103 @@ const IncomeInput2 = (props) => {
     }
     return insTotal;
   };
+  const onCellEditingStopped = (event) => {
+    const { data, colDef } = event;
+    const { field } = colDef;
+
+    if (field === "accrual_ym") {
+      fetch("http://localhost:8080/input/update_taxdate", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          tax_id: event.data.tax_id,
+          payment_date: event.data.payment_date,
+          accrual_ym: event.data.accrual_ym,
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {});
+    }
+
+    if (field === "total_payment") {
+      alert(taxRow.current.total_payment);
+      if (event.data.total_payment > 0) {
+        fetch("http://localhost:8080/input/update_taxinfo", {
+          method: "PATCH",
+          body: JSON.stringify({
+            tax_id: data.tax_id,
+            total_payment: parseInt(data.total_payment),
+            tax_rate: 3,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.earner_tax);
+            event.node.setDataValue("tax_rate", data.earner_tax.tax_rate);
+            event.node.setDataValue("tax_income", data.earner_tax.tax_income);
+            event.node.setDataValue(
+              "total_payment",
+              data.earner_tax.total_payment
+            );
+            event.node.setDataValue("tax_local", data.earner_tax.tax_local);
+            event.node.setDataValue("tax_total", data.earner_tax.tax_total);
+            event.node.setDataValue("artist_cost", data.earner_tax.artist_cost);
+            event.node.setDataValue("ins_cost", data.earner_tax.ins_cost);
+            event.node.setDataValue(
+              "sworker_cost",
+              data.earner_tax.sworker_cost
+            );
+            event.node.setDataValue("sworker_ins", data.earner_tax.sworker_ins);
+            event.node.setDataValue(
+              "workinjury_ins",
+              data.earner_tax.workinjury_ins
+            );
+            event.node.setDataValue(
+              "real_payment",
+              data.earner_tax.real_payment
+            );
+            event.node.setDataValue(
+              "tuition_amount",
+              data.earner_tax.tuition_amount
+            );
+            event.node.setDataValue("tax_id", data.earner_tax.tax_id);
+          })
+          .catch((error) => {
+            console.error(error);
+            // Show an error message to the user
+          });
+      } else {
+        Swal.fire(
+          "0이상을 입력하세요",
+          "값이 정상적으로 저장되지 않습니다",
+          "error"
+        );
+        event.node.setDataValue("total_payment", oldValue.current);
+      }
+    }
+  };
+
+  const oldValue = useRef();
+  const onCellEditingStarted = (event) => {
+    const { data, colDef } = event;
+    const { field } = colDef;
+    if (field === "total_payment") {
+      oldValue.current = event.data.total_payment;
+      console.log(oldValue.current);
+    }
+  };
+
   const rightGridOptions = {
     rowData: rowData,
     onCellClicked: onRightCellClicked,
     onCellValueChanged: onRightCellValueChanged,
+    onCellEditingStopped: onCellEditingStopped,
+    onCellEditingStarted: onCellEditingStarted,
     pinnedBottomRowData: [],
   };
   const columnDefs = [
@@ -283,6 +396,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "지급총액",
       field: "total_payment",
+      cellRenderer: "numberRenderer",
       width: 150,
       cellStyle: { textAlign: "right" },
     },
@@ -295,6 +409,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "학자금상환액",
       field: "tuition_amount",
+      cellRenderer: "numberRenderer",
       editable: false,
       minWidth: 130,
       cellStyle: getCellStyle,
@@ -302,6 +417,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "소득세",
       field: "tax_income",
+      cellRenderer: "numberRenderer",
       editable: false,
       width: 150,
       cellStyle: { textAlign: "right" },
@@ -309,6 +425,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "지방소득세",
       field: "tax_local",
+      cellRenderer: "numberRenderer",
       editable: false,
       width: 150,
       cellStyle: { textAlign: "right" },
@@ -316,18 +433,40 @@ const IncomeInput2 = (props) => {
     {
       headerName: "세액계",
       field: "tax_total",
+      cellRenderer: "numberRenderer",
       editable: false,
       width: 100,
       cellStyle: { textAlign: "right" },
     },
-    { field: "artist_cost", hide: true },
-    { field: "sworker_cost", hide: true },
-    { field: "ins_cost", hide: true },
-    { field: "sworker_ins", hide: true },
+    {
+      field: "artist_cost",
+      hide: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "sworker_cost",
+      hide: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "ins_cost",
+      hide: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
+    {
+      field: "sworker_ins",
+      hide: true,
+      cellRenderer: "numberRenderer",
+      cellStyle: getCellStyle,
+    },
     {
       headerName: "예술인/특고인경비",
       field: "total",
       editable: false,
+      cellRenderer: "numberRenderer",
       minWidth: 150,
       valueGetter: totalValueGetter,
       cellStyle: getCellStyle,
@@ -335,6 +474,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "고용보험료",
       field: "ins_total",
+      cellRenderer: "numberRenderer",
       editable: false,
       width: 100,
       valueGetter: totalInsValueGetter,
@@ -343,16 +483,18 @@ const IncomeInput2 = (props) => {
     {
       headerName: "산재보험료",
       field: "workinjury_ins",
+      cellRenderer: "numberRenderer",
       editable: false,
       width: 100,
-      cellStyle: { textAlign: "right" },
+      cellStyle: getCellStyle,
     },
     {
       headerName: "차인지급액",
       field: "real_payment",
+      cellRenderer: "numberRenderer",
       editable: false,
       width: 100,
-      cellStyle: { textAlign: "right" },
+      cellStyle: getCellStyle,
     },
   ];
 
@@ -363,8 +505,13 @@ const IncomeInput2 = (props) => {
     };
   }
   function getCellStyle(params) {
-    if (params.value === 0) {
-      return { backgroundColor: "lightgrey", color: "transparent" };
+    if (params.value === 0 || undefined) {
+      return {
+        backgroundColor: "lightgrey",
+        color: "transparent",
+        opacity: 0.4,
+        textAlign: "right",
+      };
     } else {
       return { textAlign: "right" };
     }
@@ -377,23 +524,24 @@ const IncomeInput2 = (props) => {
   const onChange = (e) => {
     dispatch(e.target);
     const { value } = e.target;
-    if (value.trim() !== "") {
-      fetch("http://localhost:8080/input/earner_search", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          worker_id: "yuchan2",
-          search_value: value,
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setEarnerRowData(data.earner_list);
-        });
-    }
+
+    fetch("http://localhost:8080/input/earner_search", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: "yuchan2",
+        search_value: value,
+        payment_ym: parseInt(format(startDate.current, "yyyyMM")),
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setEarnerRowData(data.earner_list);
+      });
   };
+
   const [clickedCellInfo, setClickedCellInfo] = useState(null);
   function onCellClicked(event) {
     setClickedCellInfo(event.data);
@@ -465,6 +613,10 @@ const IncomeInput2 = (props) => {
             total_payment: totalPaymentSum,
             tax_local: taxLocalSum,
             ins_total: sworkerinsSum + insCostSum,
+            sworker_ins: sworkerinsSum,
+            ins_cost: insCostSum,
+            artist_cost: artistSum,
+            sworker_cost: sworkerCostSum,
             tax_total: taxTotalSum,
             workinjury_ins: injurySum,
             total: artistSum + sworkerCostSum,
@@ -522,11 +674,22 @@ const IncomeInput2 = (props) => {
           "Content-Type": "application/json",
         },
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((error) => {
+              throw new Error(error.message);
+            });
+          }
+          return response.json();
+        })
         .then((datas) => {
           event.node.setDataValue("payment_date", parseInt(data.payment_date));
+        })
+        .catch((error) => {
+          setError(error.message);
         });
     }
+
     if (field === "payment_ym" && data.accrual_ym && data.payment_ym) {
       fetch("http://localhost:8080/input/tax_insert", {
         method: "POST",
@@ -598,50 +761,6 @@ const IncomeInput2 = (props) => {
           event.node.setDataValue("tax_id", data.earner_tax.tax_id);
         });
     }
-
-    if (field === "total_payment") {
-      fetch("http://localhost:8080/input/update_taxinfo", {
-        method: "PATCH",
-        body: JSON.stringify({
-          tax_id: data.tax_id,
-          total_payment: parseInt(data.total_payment),
-          tax_rate: 3,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data.earner_tax);
-          event.node.setDataValue("tax_rate", data.earner_tax.tax_rate);
-          event.node.setDataValue("tax_income", data.earner_tax.tax_income);
-          event.node.setDataValue(
-            "total_payment",
-            data.earner_tax.total_payment
-          );
-          event.node.setDataValue("tax_local", data.earner_tax.tax_local);
-          event.node.setDataValue("tax_total", data.earner_tax.tax_total);
-          event.node.setDataValue("artist_cost", data.earner_tax.artist_cost);
-          event.node.setDataValue("ins_cost", data.earner_tax.ins_cost);
-          event.node.setDataValue("sworker_cost", data.earner_tax.sworker_cost);
-          event.node.setDataValue("sworker_ins", data.earner_tax.sworker_ins);
-          event.node.setDataValue(
-            "workinjury_ins",
-            data.earner_tax.workinjury_ins
-          );
-          event.node.setDataValue("real_payment", data.earner_tax.real_payment);
-          event.node.setDataValue(
-            "tuition_amount",
-            data.earner_tax.tuition_amount
-          );
-          event.node.setDataValue("tax_id", data.earner_tax.tax_id);
-        })
-        .catch((error) => {
-          console.error(error);
-          // Show an error message to the user
-        });
-    }
   }
 
   const onEarnerGridSelection = useCallback(() => {
@@ -660,18 +779,15 @@ const IncomeInput2 = (props) => {
               display: "flex",
               flexDirection: "column",
               flexWrap: "wrap",
-              height: "900px",
+              height: "600px",
               marginLeft: "30px",
-              width: "1500px",
+              width: "95%",
             }}
             className="ag-theme-alpine"
           >
             <div style={{ flex: "1 1 auto" }}>
               <AgGridReact
                 ref={topGrid}
-                alignedGrids={
-                  bottomGrid.current ? [bottomGrid.current] : undefined
-                }
                 gridOptions={rightGridOptions}
                 rowData={rowData}
                 onGridReady={onRightGridReady}
@@ -683,20 +799,7 @@ const IncomeInput2 = (props) => {
                 }
                 defaultColDef={defaultColDef}
                 columnDefs={columnDefs}
-              />
-            </div>
-
-            <div style={{ height: "45px" }}>
-              <AgGridReact
-                ref={bottomGrid}
-                alignedGrids={topGrid.current ? [topGrid.current] : undefined}
-                rowData={bottomData}
-                defaultColDef={defaultColDef}
-                columnDefs={columnDefs}
-                overlayLoadingTemplate={'<span style="padding: 10px;"></span>'}
-                overlayNoRowsTemplate={'<span style="padding: 10px;"></span>'}
-                headerHeight="0"
-                rowStyle={{ backgroundColor: "#ABCCF8", fontWeight: "bold" }}
+                frameworkComponents={frameworkComponents}
               />
             </div>
           </div>
@@ -747,209 +850,213 @@ const IncomeInput2 = (props) => {
   }
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
-    <div id="container">
-      <div id="header">
-        <div
-          style={{
-            border: "1px solid black",
-            borderRadius: "4px",
-            display: "flex",
-            alignItems: "center",
-            marginTop: "30px",
-          }}
-        >
-          <span style={{ width: "150px", marginLeft: "3rem" }}>지급년월</span>
-          <DatePicker
-            showIcon
-            placeholderText="2022."
-            selected={selectedDate}
-            onChange={(date) => {
-              startDate.current = date;
-              setSelectedDate(startDate.current);
-              console.log(startDate.current);
-            }}
-            minDate={new Date(2022, 0, 1)}
-            maxDate={new Date(2022, 11, 31)}
-            dateFormat="yyyy.MM"
-            showMonthYearPicker
-            locale={"ko"}
-          />
-          <button onClick={setDate} style={{ marginRight: "2rem" }}>
-            {" "}
-            조회
-          </button>
-        </div>
-      </div>
-
-      <div id="content">
-        <div id="left">
+    <>
+      <ErrorAlert error={error} />
+      <div id="container">
+        <div id="header">
           <div
-            id="leftTop"
-            className="ag-theme-alpine"
             style={{
-              width: "600px",
-              height: "700px",
-              padding: "10px",
-              marginLeft: 40,
+              border: "1px solid black",
+              borderRadius: "4px",
+              display: "flex",
+              alignItems: "center",
+              marginTop: "10px",
             }}
           >
-            <AgGridReact
-              columnDefs={LeftColumnDefs}
-              rowData={earnerData}
-              suppressRowClickSelection={true}
-              rowSelection={"multiple"}
-              onSelectionChanged={onEarnerGridSelection}
-              onCellClicked={onCellClicked}
-              onRowSelected={onRowSelected}
-              isRowSelectable={(params) => {
-                return !!params.data.earner_code;
+            <span style={{ width: "150px", marginLeft: "3rem" }}>지급년월</span>
+            <DatePicker
+              showIcon
+              placeholderText="2022."
+              selected={selectedDate}
+              onChange={(date) => {
+                startDate.current = date;
+                setSelectedDate(startDate.current);
+                console.log(startDate.current);
               }}
-              overlayLoadingTemplate={
-                '<span style="padding: 10px">데이터가 없습니다</span>'
-              }
-              overlayNoRowsTemplate={
-                '<span style="padding: 10px">데이터가 없습니다</span>'
-              }
-              ref={earnerGridRef}
+              minDate={new Date(2022, 0, 1)}
+              maxDate={new Date(2022, 11, 31)}
+              dateFormat="yyyy.MM"
+              showMonthYearPicker
+              locale={"ko"}
             />
+            <button onClick={setDate} style={{ marginRight: "2rem" }}>
+              {" "}
+              조회
+            </button>
           </div>
+        </div>
 
-          <div id="leftBottom">
-            <table
+        <div id="content">
+          <div id="left">
+            <div
+              id="leftTop"
+              className="ag-theme-alpine"
               style={{
-                border: "1px solid black",
-                width: "580px",
-                marginRight: "10px",
-                marginLeft: "15px",
-                height: "300px",
+                width: "95%",
+                height: "500px",
+                padding: "10px",
+                marginLeft: 30,
               }}
             >
-              <thead></thead>
-              <tbody>
-                <tr>
-                  <td rowSpan="9">총 계</td>
-                </tr>
-                <tr>
-                  <th scope="row">인원[건수]</th>
-                  <td>
-                    {earnerCount || "0"}[{sumTask.count || "0"}]
-                  </td>
-                  <td>명</td>
-                </tr>
-                <tr>
-                  <th scope="row">지급액</th>
-                  <td>{sumTask.total_payment || 0}</td>
-                  <td>원</td>
-                </tr>
-                <tr>
-                  <th scope="row">학자금상환액</th>
-                  <td>{sumTask.tuition_amount || "0"}</td>
-                  <td>원</td>
-                </tr>
-                <tr>
-                  <th scope="row">소득세</th>
-                  <td>{sumTask.tax_income || "0"}</td>
-                  <td>원</td>
-                </tr>
-                <tr>
-                  <th scope="row">지방소득세</th>
-                  <td>{sumTask.tax_local || "0"}</td>
-                  <td>원</td>
-                </tr>
-                <tr>
-                  <th scope="row">고용보험료</th>
-                  <td>{sumTask.ins_cost + sumTask.sworker_ins || "0"}</td>
-                  <td>원</td>
-                </tr>
-                <tr>
-                  <th scope="row">산재보험료</th>
-                  <td>{sumTask.workinjury_ins || "0"}</td>
-                  <td>원</td>
-                </tr>
-                <tr>
-                  <th scope="row">차인지급액</th>
-                  <td>{sumTask.real_payment || "0"}</td>
-                  <td>원</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-        <div
-          style={{
-            float: "left",
-            marginLeft: "20px",
-            marginTop: "0px",
-            width: "1500px",
-            height: "1000px",
-          }}
-        >
-          <button
-            key={0}
-            onClick={(e) => changeItem(0)}
-            style={{ width: "150px", marginLeft: 30 }}
-          >
-            자료입력
-          </button>
+              <AgGridReact
+                columnDefs={LeftColumnDefs}
+                rowData={earnerData}
+                suppressRowClickSelection={true}
+                rowSelection={"multiple"}
+                onGridReady={onEarnerGridReady}
+                onSelectionChanged={onEarnerGridSelection}
+                onCellClicked={onCellClicked}
+                onRowSelected={onRowSelected}
+                isRowSelectable={(params) => {
+                  return !!params.data.earner_code;
+                }}
+                overlayLoadingTemplate={
+                  '<span style="padding: 10px">데이터가 없습니다</span>'
+                }
+                overlayNoRowsTemplate={
+                  '<span style="padding: 10px">데이터가 없습니다</span>'
+                }
+                ref={earnerGridRef}
+              />
+            </div>
 
-          {selectedType === "단기" && (
-            <button
-              key={1}
-              onClick={(e) => changeItem(1)}
-              style={{ width: "170px" }}
-            >
-              예술/노무(특고)등록
-            </button>
-          )}
+            <div id="leftBottom">
+              <table
+                style={{
+                  border: "1px solid black",
+                  width: "400px",
+                  marginRight: "100px",
 
-          {currentItem.content}
-        </div>
-
-        <ReactModal
-          style={customStyles}
-          isOpen={isModalOpen}
-          onRequestClose={() => setIsModalOpen(false)}
-        >
-          {
-            <>
-              <h4>사업소득자 코드도움</h4>
-              <div
-                className="ag-theme-alpine"
-                style={{ height: 400, width: "900px" }}
+                  height: "300px",
+                }}
               >
-                <AgGridReact
-                  columnDefs={EarnerColumn}
-                  rowData={EarnerRowData}
-                  rowSelection={"single"}
-                  onCellDoubleClicked={EarnerModalDoubleClicked}
-                  ref={gridRef}
-                />
-              </div>
+                <thead></thead>
+                <tbody>
+                  <tr>
+                    <td rowSpan="9">총 계</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">인원[건수]</th>
+                    <td>
+                      {earnerCount || "0"}[{sumTask.count || "0"}]
+                    </td>
+                    <td>명</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">지급액</th>
+                    <td>{sumTask.total_payment || 0}</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">학자금상환액</th>
+                    <td>{sumTask.tuition_amount || "0"}</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">소득세</th>
+                    <td>{sumTask.tax_income || "0"}</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">지방소득세</th>
+                    <td>{sumTask.tax_local || "0"}</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">고용보험료</th>
+                    <td>{sumTask.ins_cost + sumTask.sworker_ins || "0"}</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">산재보험료</th>
+                    <td>{sumTask.workinjury_ins || "0"}</td>
+                    <td>원</td>
+                  </tr>
+                  <tr>
+                    <th scope="row">차인지급액</th>
+                    <td>{sumTask.real_payment || "0"}</td>
+                    <td>원</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div
+            style={{
+              float: "left",
+              marginLeft: "10px",
+              marginTop: "0px",
+              width: "1500px",
+              height: "1000px",
+            }}
+          >
+            <button
+              key={0}
+              onClick={(e) => changeItem(0)}
+              style={{ width: "150px", marginLeft: 30 }}
+            >
+              자료입력
+            </button>
 
+            {selectedType === "단기" && (
+              <button
+                key={1}
+                onClick={(e) => changeItem(1)}
+                style={{ width: "170px" }}
+              >
+                예술/노무(특고)등록
+              </button>
+            )}
+
+            {currentItem.content}
+          </div>
+
+          <ReactModal
+            style={customStyles}
+            isOpen={isModalOpen}
+            onRequestClose={() => setIsModalOpen(false)}
+          >
+            {
               <>
-                <div style={{ textAlign: "center" }}>
-                  찾을 내용{" "}
-                  <input
-                    type="text"
-                    name="search_value"
-                    style={{
-                      width: "500px",
-                      borderColor: "skyblue",
-                      outline: "none",
-                    }}
-                    value={search_value}
-                    onChange={onChange}
-                  ></input>
-                  <br />
-                  <button onClick={() => setIsModalOpen(false)}>취소</button>
-                  <button onClick={EarnerModalDoubleClicked}>확인</button>
+                <h4>사업소득자 코드도움</h4>
+                <div
+                  className="ag-theme-alpine"
+                  style={{ height: 400, width: "900px" }}
+                >
+                  <AgGridReact
+                    columnDefs={EarnerColumn}
+                    rowData={EarnerRowData}
+                    rowSelection={"single"}
+                    onCellDoubleClicked={EarnerModalDoubleClicked}
+                    ref={gridRef}
+                  />
                 </div>
+
+                <>
+                  <div style={{ textAlign: "center" }}>
+                    찾을 내용{" "}
+                    <input
+                      type="text"
+                      name="search_value"
+                      style={{
+                        width: "500px",
+                        borderColor: "skyblue",
+                        outline: "none",
+                      }}
+                      value={search_value}
+                      onChange={onChange}
+                    ></input>
+                    <br />
+                    <button onClick={() => setIsModalOpen(false)}>취소</button>
+                    <button onClick={EarnerModalDoubleClicked}>확인</button>
+                  </div>
+                </>
               </>
-            </>
-          }
-        </ReactModal>
+            }
+          </ReactModal>
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 export default IncomeInput2;

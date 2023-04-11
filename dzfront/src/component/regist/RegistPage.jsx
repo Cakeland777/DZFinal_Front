@@ -10,13 +10,16 @@ const RegistPage = (props) => {
   props.setTitle("사업소득자등록");
   return (
     <div>
-      <div style={{ padding: "50px" }}>
-        <EarnerGrid
-          value={value}
-          onValueChange={handleValueChange}
-          setEarnerCodes={props.setEarnerCodes}
-        />
-
+      <div>
+        {" "}
+        {/* width 값 수정 */}
+        <div style={{ padding: "10px", width: "90%" }}>
+          <EarnerGrid
+            value={value}
+            onValueChange={handleValueChange}
+            setEarnerCodes={props.setEarnerCodes}
+          />
+        </div>
         <Registration value={value} />
       </div>
     </div>

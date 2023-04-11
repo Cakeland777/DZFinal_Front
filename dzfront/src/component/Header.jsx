@@ -2,12 +2,14 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "../css/header.css";
 import { IoTrashOutline } from "react-icons/io5";
+import { RiMenuLine, RiMenuUnfoldLine } from "react-icons/ri";
+
 import Swal from "sweetalert2";
 
 function Head(props) {
   const isDeleteButtonVisible =
     props.title === "사업소득자등록" || props.title === "사업소득자료입력";
-
+  const menuIcon = props.isMenuOpen ? <RiMenuUnfoldLine /> : <RiMenuLine />;
   const deleteEarner = () => {
     if (props.title === "사업소득자료입력") {
       console.log("넘어온 코드들", props.earnerCodes);
@@ -83,34 +85,41 @@ function Head(props) {
   };
 
   return (
-    <div className="header">
+    <div className="header" style={{ height: "50px" }}>
       <ul
         className="menu simple float-right"
         style={{ display: "flex", alignItems: "flex-start" }}
       >
-        <li>
+        <li style={{ float: "left" }}>
           <button
             type="button"
             className={`button small ${props.isMenuOpen ? "hide" : ""}`}
             onClick={props.onMenuToggle}
-            style={{ marginRight: 10, height: 40, backgroundColor: "#3B42BF" }}
+            style={{
+              marginRight: 10,
+              height: 30,
+              marginTop: 5,
+              backgroundColor: "#3B42BF",
+              width: "80px",
+              fontSize: "15px",
+            }}
           >
-            B
+            {menuIcon}
           </button>
         </li>
 
-        <li style={{ marginLeft: 0, whiteSpace: "nowrap", marginTop: "15px" }}>
+        <li style={{ marginLeft: 0, whiteSpace: "nowrap", marginTop: "8px" }}>
           <b>{props.title}</b>
         </li>
         {isDeleteButtonVisible && (
-          <li>
+          <li style={{ marginLeft: "1100px" }}>
             <button
               type="button"
               className={`button small ${props.isMenuOpen ? "hide" : ""}`}
               onClick={() => deleteEarner()}
-              style={{ marginRight: 10, height: 40, marginLeft: 1500 }}
+              style={{ marginRight: 10, height: 30 }}
             >
-              <IoTrashOutline style={{ height: 30, width: 40 }} />
+              <IoTrashOutline style={{ height: 20, width: 30 }} />
             </button>
           </li>
         )}
@@ -156,7 +165,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-                  margin: 5,
+
                   fontWeight: "bold",
                 }}
                 onClick={logOut}
@@ -169,7 +178,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-                  margin: 5,
+
                   fontWeight: "bold",
                 }}
                 to="/earnerRead"
@@ -184,7 +193,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-                  margin: 5,
+
                   fontWeight: "bold",
                 }}
                 to="/registPage"
@@ -198,7 +207,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-                  margin: 5,
+
                   fontWeight: "bold",
                 }}
                 to="/incomeInput2"
@@ -212,7 +221,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-                  margin: 5,
+
                   fontWeight: "bold",
                 }}
                 to="/codeconversion"
