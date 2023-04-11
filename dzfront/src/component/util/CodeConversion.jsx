@@ -89,13 +89,19 @@ const CodeConversion = (props) => {
       ],
     },
     { 
-      headerName: "변환전 소득구분", 
-      field: "old_div_code", 
+      headerName: "과거이력용", 
+      field: "old_div_code",
+      hide:"true",
       width: 270 
     },
     {
+      headerName: "변환전 소득구분",
+      field: "div_code", 
+      width: 270,
+    },
+    {
       headerName: "변환후 소득구분",
-      field: "div_code",
+      field: "new_div_code", 
       width: 270,
       onCellClicked: (event) => setIsModalOpen(true),
     },
@@ -185,11 +191,22 @@ const CodeConversion = (props) => {
       body: JSON.stringify(param),
     }).then((response) => {
       response.json();
-      selectedCell.setDataValue("div_code", new_div_code.current);
-      selectedCell.setDataValue("div_name", new_div_name.current);
-      selectedCell.setDataValue("div_type", new_div_type.current);
-      selectedCell.setDataValue("old_div_code", div_code.current);
-      selectedCell.setDataValue("old_div_name", div_name.current);
+      const selected_new_div_code = selectedCell.data.new_div_code || "";
+      const selected_new_div_name = selectedCell.data.new_div_name || "";
+      const selected_new_div_type = selectedCell.data.new_div_type || "";
+
+      if (selected_new_div_code === "") {
+        selectedCell.setDataValue("new_div_code", new_div_code.current);
+        selectedCell.setDataValue("old_div_code", div_code.current);
+        selectedCell.setDataValue("old_div_name", div_name.current);
+      } else {
+        selectedCell.setDataValue("new_div_code", new_div_code.current);
+        selectedCell.setDataValue("div_code", selected_new_div_code);
+        selectedCell.setDataValue("div_name", selected_new_div_name);
+        selectedCell.setDataValue("div_type", selected_new_div_type);
+        selectedCell.setDataValue("old_div_code", div_code.current);
+        selectedCell.setDataValue("old_div_name", div_name.current);
+      }
       onCodeHistory();
     });
   };
@@ -346,13 +363,13 @@ const CodeConversion = (props) => {
                   <tr>
                     <th>기존 소득구분</th>
                     <td>
-                      {old_div_code.current} ({old_div_name.current}){" "}
+                     {div_code.current} ({div_name.current}){" "}
                     </td>
                   </tr>
                   <tr>
                     <th>변경 소득구분</th>
                     <td>
-                      {div_code.current} ({div_name.current}){" "}
+                      {new_div_code.current} ({new_div_name.current}){" "}
 
                     </td>
                   </tr>
