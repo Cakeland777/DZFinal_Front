@@ -116,7 +116,13 @@ const EarnerGrid = (props) => {
       }
       if (!event.data.earner_name) {
         setIsModalOpen(false);
-        Swal.fire("이름을 먼저 입력해주세요", "", "info");
+        Swal.fire("", "이름을 먼저 입력해주세요", "info");
+      }
+    }
+    if (field === "personal_no") {
+      if (!event.data.earner_name) {
+        setIsModalOpen(false);
+        Swal.fire("", "이름을 먼저 입력해주세요", "info");
       }
     }
     const selectedCell = event.data;
@@ -306,6 +312,31 @@ const EarnerGrid = (props) => {
             defaultCode.current = 0;
           }
         });
+    }
+
+    if (field === "personal_no") {
+      const koreanRegex = /^\d{6}-\d{7}$/;
+      const foreignRegex = /^\d{6}[a-zA-Z\d]{7}$/;
+
+      if (event.data.is_native === "내") {
+        if (!koreanRegex.test(event.data.personal_no)) {
+          Swal.fire({
+            title: "다시입력해주세요",
+            text: "올바르지 않은 형식입니다",
+            icon: "error",
+          });
+          event.node.setDataValue("personal_no", "");
+        }
+      } else if (event.data.is_native === "외") {
+        if (!foreignRegex.test(event.data.personal_no)) {
+          Swal.fire({
+            title: "다시입력해주세요",
+            text: "올바르지 않은 형식입니다",
+            icon: "error",
+          });
+          event.node.setDataValue("personal_no", "");
+        }
+      }
     }
   };
   useEffect(() => {

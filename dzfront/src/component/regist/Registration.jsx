@@ -24,6 +24,7 @@ const Registration = (props) => {
   const [preCode, setPreCode] = useState(props.value || "");
   const [earner, setEarner] = useState({});
   const info = useRef();
+  const [error, setError] = useState("");
   useEffect(() => {
     const inputElement = inputRef.current;
     const etcElement = etcRef.current;
@@ -232,10 +233,11 @@ const Registration = (props) => {
 
   const [state, dispatch] = useReducer(reducer, {
     search_value: "",
+    earnerInfo,
   });
 
   const onChange = (e) => {
-    //dispatch(e.target);
+    dispatch(e.target);
     const { name, value } = e.target;
     if (name === "is_artist") {
       setInputEnabled(value === "Y");

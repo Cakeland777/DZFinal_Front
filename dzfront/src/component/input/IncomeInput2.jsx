@@ -26,7 +26,7 @@ const IncomeInput2 = (props) => {
     numberRenderer: NumberRenderer,
   };
   registerLocale("ko", ko);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState("");
   const [workDate, setWorkDate] = useState([]);
   const [bottomData, setBottomData] = useState([]);
   const earnerGridRef = useRef();
@@ -68,7 +68,7 @@ const IncomeInput2 = (props) => {
       headerName: "소득자명",
       field: "earner_name",
       editable: false,
-      width: 90,
+      width: 80,
       onCellClicked: (event) => {
         if (!event.data.earner_name) {
           setIsModalOpen(true);
@@ -289,68 +289,70 @@ const IncomeInput2 = (props) => {
           accrual_ym: event.data.accrual_ym,
         }),
       })
-        .then((response) => response.json())
-        .then((data) => {});
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((error) => {
+              throw new Error(error.message);
+            });
+          }
+          return response.json();
+        })
+        .then((data) => {})
+        .catch((error) => {
+          setError(error.message);
+        });
     }
 
     if (field === "total_payment") {
       alert(taxRow.current.total_payment);
-      if (event.data.total_payment > 0) {
-        fetch("http://localhost:8080/input/update_taxinfo", {
-          method: "PATCH",
-          body: JSON.stringify({
-            tax_id: data.tax_id,
-            total_payment: parseInt(data.total_payment),
-            tax_rate: 3,
-          }),
-          headers: {
-            "Content-Type": "application/json",
-          },
+
+      fetch("http://localhost:8080/input/update_taxinfo", {
+        method: "PATCH",
+        body: JSON.stringify({
+          tax_id: data.tax_id,
+          total_payment: parseInt(data.total_payment),
+          tax_rate: 3,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((error) => {
+              throw new Error(error.message);
+            });
+          }
+          return response.json();
         })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data.earner_tax);
-            event.node.setDataValue("tax_rate", data.earner_tax.tax_rate);
-            event.node.setDataValue("tax_income", data.earner_tax.tax_income);
-            event.node.setDataValue(
-              "total_payment",
-              data.earner_tax.total_payment
-            );
-            event.node.setDataValue("tax_local", data.earner_tax.tax_local);
-            event.node.setDataValue("tax_total", data.earner_tax.tax_total);
-            event.node.setDataValue("artist_cost", data.earner_tax.artist_cost);
-            event.node.setDataValue("ins_cost", data.earner_tax.ins_cost);
-            event.node.setDataValue(
-              "sworker_cost",
-              data.earner_tax.sworker_cost
-            );
-            event.node.setDataValue("sworker_ins", data.earner_tax.sworker_ins);
-            event.node.setDataValue(
-              "workinjury_ins",
-              data.earner_tax.workinjury_ins
-            );
-            event.node.setDataValue(
-              "real_payment",
-              data.earner_tax.real_payment
-            );
-            event.node.setDataValue(
-              "tuition_amount",
-              data.earner_tax.tuition_amount
-            );
-            event.node.setDataValue("tax_id", data.earner_tax.tax_id);
-          })
-          .catch((error) => {
-            console.error(error);
-            // Show an error message to the user
-          });
-      } else {
-        Swal.fire(
-          "0이상을 입력하세요",
-          "값이 정상적으로 저장되지 않습니다",
-          "error"
-        );
-        event.node.setDataValue("total_payment", oldValue.current);
-      }
+        .then((data) => {
+          event.node.setDataValue("tax_rate", data.earner_tax.tax_rate);
+          event.node.setDataValue("tax_income", data.earner_tax.tax_income);
+          event.node.setDataValue(
+            "total_payment",
+            data.earner_tax.total_payment
+          );
+          event.node.setDataValue("tax_local", data.earner_tax.tax_local);
+          event.node.setDataValue("tax_total", data.earner_tax.tax_total);
+          event.node.setDataValue("artist_cost", data.earner_tax.artist_cost);
+          event.node.setDataValue("ins_cost", data.earner_tax.ins_cost);
+          event.node.setDataValue("sworker_cost", data.earner_tax.sworker_cost);
+          event.node.setDataValue("sworker_ins", data.earner_tax.sworker_ins);
+          event.node.setDataValue(
+            "workinjury_ins",
+            data.earner_tax.workinjury_ins
+          );
+          event.node.setDataValue("real_payment", data.earner_tax.real_payment);
+          event.node.setDataValue(
+            "tuition_amount",
+            data.earner_tax.tuition_amount
+          );
+          event.node.setDataValue("tax_id", data.earner_tax.tax_id);
+        })
+        .catch((error) => {
+          setError(error.message);
+          event.node.setDataValue("total_payment", oldValue.current);
+        });
     }
   };
 
@@ -403,7 +405,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "세율",
       field: "tax_rate",
-      maxWidth: 70,
+      maxWidth: 60,
       cellStyle: { textAlign: "right" },
     },
     {
@@ -463,11 +465,11 @@ const IncomeInput2 = (props) => {
       cellStyle: getCellStyle,
     },
     {
-      headerName: "예술인/특고인경비",
+      headerName: "예술/특고인경비",
       field: "total",
       editable: false,
       cellRenderer: "numberRenderer",
-      minWidth: 150,
+      minWidth: 130,
       valueGetter: totalValueGetter,
       cellStyle: getCellStyle,
     },
@@ -719,7 +721,18 @@ const IncomeInput2 = (props) => {
             headers: {
               "Content-Type": "application/json",
             },
-          }).then((response) => response.json())
+          })
+            .then((response) => {
+              if (!response.ok) {
+                return response.json().then((error) => {
+                  throw new Error(error.message);
+                });
+              }
+              return response.json();
+            })
+            .catch((error) => {
+              setError(error.message);
+            })
         );
     }
     if (field === "tax_rate" && data.total_payment && data.tax_rate) {
@@ -780,8 +793,8 @@ const IncomeInput2 = (props) => {
               flexDirection: "column",
               flexWrap: "wrap",
               height: "600px",
-              marginLeft: "30px",
-              width: "95%",
+              marginLeft: "10px",
+              width: "92%",
             }}
             className="ag-theme-alpine"
           >
@@ -839,12 +852,10 @@ const IncomeInput2 = (props) => {
 
     if (isSelected === true) {
       deleteCodes.current = [...deleteCodes.current, earner_code];
-      console.log("선택", deleteCodes.current);
     } else if (isSelected === false) {
       deleteCodes.current = deleteCodes.current.filter(
         (code) => code !== earner_code
       );
-      console.log("선택해제", deleteCodes.current);
     }
     props.setEarnerCodes(deleteCodes.current);
   }
@@ -986,14 +997,14 @@ const IncomeInput2 = (props) => {
               float: "left",
               marginLeft: "10px",
               marginTop: "0px",
-              width: "1500px",
+              width: "99%",
               height: "1000px",
             }}
           >
             <button
               key={0}
               onClick={(e) => changeItem(0)}
-              style={{ width: "150px", marginLeft: 30 }}
+              style={{ width: "150px", marginLeft: 10 }}
             >
               자료입력
             </button>
