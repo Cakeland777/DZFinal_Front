@@ -12,7 +12,7 @@ import React, {
 import DaumPostcode from "react-daum-postcode";
 import ReactModal from "react-modal";
 import "../../css/registration.css";
-
+import Swal from "sweetalert2";
 const Registration = (props) => {
   const [inputEnabled, setInputEnabled] = useState(false);
   const [inputEnabledT, setInputEnabledT] = useState(false);
@@ -336,6 +336,31 @@ const Registration = (props) => {
       .then((jsonData) => {
         setEarner({ ...earner, [name]: value });
       });
+
+    if (name === "personal_no") {
+      const koreanRegex = /^\d{6}-\d{7}$/;
+      const foreignRegex = /^\d{6}[a-zA-Z\d]{7}$/;
+      let native = document.querySelector("#is_native").value;
+      if (native === "내") {
+        if (!koreanRegex.test(value)) {
+          document.querySelector("#personal_no").value = "";
+          Swal.fire({
+            title: "다시입력해주세요",
+            text: "올바르지 않은 형식입니다",
+            icon: "error",
+          });
+        }
+      } else if (native === "외") {
+        if (!foreignRegex.test(value)) {
+          document.querySelector("#personal_no").value = "";
+          Swal.fire({
+            title: "다시입력해주세요",
+            text: "올바르지 않은 형식입니다",
+            icon: "error",
+          });
+        }
+      }
+    }
   };
   const defaultColDef = useMemo(() => {
     return {
