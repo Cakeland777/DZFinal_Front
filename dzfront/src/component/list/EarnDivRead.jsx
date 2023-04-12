@@ -8,6 +8,8 @@ import DatePicker, { registerLocale } from "react-datepicker";
 import ReactModal from "react-modal";
 import { Link } from "react-router-dom";
 import NumberRenderer from "../util/NumberRenderer";
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
 const customStyles = {
   content: {
     top: "50%",
@@ -64,6 +66,7 @@ const EarnDivRead = (props) => {
       return { textAlign: "right" };
     }
   }
+  const [earner, setEarner] = useState("");
   const columnDefs = [
     {
       field: "div_code_rs",
@@ -190,6 +193,76 @@ const EarnDivRead = (props) => {
     "940926",
   ]);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const excelFileType =
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const excelFileExtension = ".xlsx";
+  const excelFileName = `${earner} 코드별 사업소득조회`;
+
+  const excelDownload = (excelData) => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      [`작업자_${localStorage.getItem("worker_id")}`],
+      [],
+      [
+        "소득구분",
+        "소득자명(상호)",
+        "주민번호",
+        "내/외국인",
+        "건수",
+        "연간총지급액",
+        "세율",
+        "소득세",
+        "지방소득세",
+        "세액계",
+        "예술인경비",
+        "고용보험료",
+        "계",
+      ],
+    ]);
+    excelData.map((data) => {
+      XLSX.utils.sheet_add_aoa(
+        ws,
+        [
+          [
+            data.div_code_rs,
+            data.earner_name_rs,
+            data.personal_no,
+            data.is_native_rs,
+            data.count_rs,
+            data.total_payment_rs,
+            data.tax_rate_rs,
+            data.tax_income_rs,
+            data.tax_local_rs,
+            data.tax_total_rs,
+            data.artist_cost_rs,
+            data.ins_cost_rs,
+            data.real_payment_rs,
+          ],
+        ],
+        { origin: -1 }
+      );
+      ws["!cols"] = [
+        { wpx: 150 },
+        { wpx: 150 },
+        { wpx: 100 },
+        { wpx: 100 },
+        { wpx: 100 },
+        { wpx: 50 },
+        { wpx: 100 },
+        { wpx: 150 },
+        { wpx: 120 },
+        { wpx: 150 },
+        { wpx: 200 },
+        { wpx: 200 },
+        { wpx: 200 },
+        { wpx: 200 },
+      ];
+      return false;
+    });
+    const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+    const excelButter = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+    const excelFile = new Blob([excelButter], { type: excelFileType });
+    FileSaver.saveAs(excelFile, excelFileName + excelFileExtension);
+  };
   const handlePrevClick = () => {
     if (selectedIndex > 0) {
       setSelectedIndex(selectedIndex - 1);
@@ -239,8 +312,6 @@ const EarnDivRead = (props) => {
   const [endDate, setEndDate] = useState("");
   const [selected, setSelected] = useState("");
   const [selected2, setSelected2] = useState("earner_name");
-
-  const [earner, setEarner] = useState("");
 
   function handleEarner(event) {
     setEarner(event.target.value);
@@ -443,6 +514,17 @@ const EarnDivRead = (props) => {
           }}
         >
           조회
+        </button>
+        <button
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "60px",
+            marginRight: "30px",
+          }}
+          onClick={() => excelDownload(rowData)}
+        >
+          엑셀
         </button>
       </form>
       <div

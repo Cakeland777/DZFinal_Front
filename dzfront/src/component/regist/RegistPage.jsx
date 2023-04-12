@@ -7,6 +7,8 @@ const RegistPage = (props) => {
   const handleValueChange = (newValue) => {
     setValue(newValue);
   };
+  const [name, setName] = useState();
+
   props.setTitle("사업소득자등록");
   return (
     <div>
@@ -18,9 +20,11 @@ const RegistPage = (props) => {
             value={value}
             onValueChange={handleValueChange}
             setEarnerCodes={props.setEarnerCodes}
+            setName={setName}
+            name={name}
           />
         </div>
-        <Registration value={value} />
+        <Registration value={value} setName={setName} name={name} />
       </div>
     </div>
   );

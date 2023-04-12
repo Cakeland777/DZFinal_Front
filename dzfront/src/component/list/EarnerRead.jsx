@@ -6,7 +6,7 @@ import React, {
   useCallback,
   useReducer,
 } from "react";
-import { Link } from "react-router-dom";
+import { Link, UNSAFE_DataRouterContext } from "react-router-dom";
 import ReactModal from "react-modal";
 import { AgGridReact } from "ag-grid-react"; // the AG Grid React Component
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -66,7 +66,6 @@ const EarnerColumn = [
   { headerName: "구분코드", field: "div_code", width: 120 },
 ];
 const EarnerRead = (props) => {
-  const [error, setError] = useState(null);
   const earnerGridRef = useRef();
   props.setTitle("사업소득조회");
   let api;
@@ -108,7 +107,7 @@ const EarnerRead = (props) => {
       return { textAlign: "right" };
     }
   }
-  const [columnDefs, setColumnDefs] = useState([
+  const columnDefs = [
     {
       field: "earner_name_rs",
       headerName: "소득자명",
@@ -204,7 +203,7 @@ const EarnerRead = (props) => {
       cellStyle: getCellStyle,
       maxWidth: 150,
     },
-  ]);
+  ];
 
   const defaultColDef = useMemo(() => {
     return {
@@ -331,7 +330,7 @@ const EarnerRead = (props) => {
   };
   function handleSubmit(event) {
     event.preventDefault();
-    fetch(`http://localhost:8080/list/search_earner_code`, {
+    fetch("http://localhost:8080/list/search_earner_code", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -344,13 +343,11 @@ const EarnerRead = (props) => {
         code_value: earner,
       }),
     })
-      .then((response) => {
-        alert(response.status);
-        throw new Error(response.message);
-      })
-      .then((rowData) => {
-        alert(rowData.status_code);
-        const sums = rowData.earnerInfo.reduce(
+      .then((result) => result.json())
+      .then((data) => {
+        console.log(rowData.earnerInfo);
+        setRowData(data.earnerInfo);
+        const sums = data.earnerInfo.reduce(
           (acc, curr) => ({
             realPaymentSum: acc.realPaymentSum + curr.real_payment_rs,
             insCostSum: acc.insCostSum + curr.ins_cost_rs,
@@ -391,15 +388,11 @@ const EarnerRead = (props) => {
             tuition_amount_rs: tuitionSum,
           },
         ]);
-        setRowData(rowData.earnerInfo);
+
         earnerGridRef.current.columnApi.applyColumnState({
           state: [{ colId: selected, sort: "asc" }],
           defaultState: { sort: null },
         });
-      })
-      .catch((error) => {
-        // handle error response
-        console.log(error.message);
       });
   }
   function reducer(state, action) {

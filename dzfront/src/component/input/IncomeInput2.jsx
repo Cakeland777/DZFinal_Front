@@ -98,6 +98,7 @@ const IncomeInput2 = (props) => {
         },
       ],
     },
+
     {
       headerName: "소득구분",
       children: [
@@ -117,6 +118,7 @@ const IncomeInput2 = (props) => {
       ],
     },
   ];
+
   const [selectedDate, setSelectedDate] = useState("");
   const startDate = useRef("");
   const selectedCode = useRef("");
@@ -392,7 +394,7 @@ const IncomeInput2 = (props) => {
     {
       headerName: "일",
       field: "payment_date",
-      maxWidth: 60,
+      maxWidth: 55,
       cellStyle: { textAlign: "right" },
     },
     {
@@ -413,7 +415,7 @@ const IncomeInput2 = (props) => {
       field: "tuition_amount",
       cellRenderer: "numberRenderer",
       editable: false,
-      minWidth: 130,
+      maxWidth: 160,
       cellStyle: getCellStyle,
     },
     {
@@ -421,7 +423,7 @@ const IncomeInput2 = (props) => {
       field: "tax_income",
       cellRenderer: "numberRenderer",
       editable: false,
-      width: 150,
+      maxWidth: 100,
       cellStyle: { textAlign: "right" },
     },
     {
@@ -560,7 +562,7 @@ const IncomeInput2 = (props) => {
       },
       body: JSON.stringify({
         worker_id: "yuchan2",
-        earner_code: selectedRow.earner_code,
+        earner_code: selectedCode.current,
         payment_ym: selectedRow.payment_ym,
       }),
     })
@@ -607,8 +609,22 @@ const IncomeInput2 = (props) => {
           taxIncomeSum,
           tuitionSum,
         } = sums;
-        console.log(sums);
-        console.log(sworkerinsSum + insCostSum);
+        setBottom({
+          payment_ym: "합계",
+          total_payment: totalPaymentSum,
+          tax_local: taxLocalSum,
+          ins_total: sworkerinsSum + insCostSum,
+          sworker_ins: sworkerinsSum,
+          ins_cost: insCostSum,
+          artist_cost: artistSum,
+          sworker_cost: sworkerCostSum,
+          tax_total: taxTotalSum,
+          workinjury_ins: injurySum,
+          total: artistSum + sworkerCostSum,
+          real_payment: realPaymentSum,
+          tax_income: taxIncomeSum,
+          tuition_amount: tuitionSum,
+        });
         topGrid.current.api.setPinnedBottomRowData([
           {
             payment_ym: "합계",
@@ -721,18 +737,9 @@ const IncomeInput2 = (props) => {
             headers: {
               "Content-Type": "application/json",
             },
+          }).then((response) => {
+            response.json();
           })
-            .then((response) => {
-              if (!response.ok) {
-                return response.json().then((error) => {
-                  throw new Error(error.message);
-                });
-              }
-              return response.json();
-            })
-            .catch((error) => {
-              setError(error.message);
-            })
         );
     }
     if (field === "tax_rate" && data.total_payment && data.tax_rate) {
@@ -792,9 +799,9 @@ const IncomeInput2 = (props) => {
               display: "flex",
               flexDirection: "column",
               flexWrap: "wrap",
-              height: "600px",
-              marginLeft: "10px",
-              width: "92%",
+              height: "605px",
+              marginLeft: "5px",
+              width: "99%",
             }}
             className="ag-theme-alpine"
           >
@@ -833,7 +840,27 @@ const IncomeInput2 = (props) => {
       ),
     },
   ];
-
+  const [bottom, setBottom] = useState({});
+  const setData = () => {
+    fetch("http://localhost:8080/input/get_tax", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        worker_id: "yuchan2",
+        earner_code: selectedCode.current,
+        payment_ym: format(startDate.current, "yyyyMM"),
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        topGrid.current.api.setPinnedBottomRowData([bottom]);
+        data.tax_list.push({});
+        setWorkDate(data.select_date);
+        setRowData(data.tax_list);
+      });
+  };
   const useTab = (idx, Tabs) => {
     if (!Tabs || !Array.isArray(Tabs)) {
       return null;
@@ -904,7 +931,7 @@ const IncomeInput2 = (props) => {
               className="ag-theme-alpine"
               style={{
                 width: "95%",
-                height: "500px",
+                height: "400px",
                 padding: "10px",
                 marginLeft: 30,
               }}
@@ -935,10 +962,10 @@ const IncomeInput2 = (props) => {
               <table
                 style={{
                   border: "1px solid black",
-                  width: "400px",
-                  marginRight: "100px",
+                  width: "460px",
+                  marginRight: "90px",
 
-                  height: "300px",
+                  height: "250px",
                 }}
               >
                 <thead></thead>
@@ -997,13 +1024,16 @@ const IncomeInput2 = (props) => {
               float: "left",
               marginLeft: "10px",
               marginTop: "0px",
-              width: "99%",
+              width: "100%",
               height: "1000px",
             }}
           >
             <button
               key={0}
-              onClick={(e) => changeItem(0)}
+              onClick={(e) => {
+                changeItem(0);
+                setData();
+              }}
               style={{ width: "150px", marginLeft: 10 }}
             >
               자료입력
@@ -1012,13 +1042,16 @@ const IncomeInput2 = (props) => {
             {selectedType === "단기" && (
               <button
                 key={1}
-                onClick={(e) => changeItem(1)}
+                onClick={(e) => {
+                  changeItem(1);
+                  setData();
+                }}
                 style={{ width: "170px" }}
               >
                 예술/노무(특고)등록
               </button>
             )}
-
+            {currentItem === Tab[1] && selectedType !== "단기" && changeItem(0)}
             {currentItem.content}
           </div>
 

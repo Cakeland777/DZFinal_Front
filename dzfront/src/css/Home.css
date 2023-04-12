@@ -210,3 +210,6 @@ table tr:first-child {
 table tr:last-child {
   border-bottom: 1px solid black;
 }
+.ag-header-cell-text {
+  font-size: 7px;
+}
