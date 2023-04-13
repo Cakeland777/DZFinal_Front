@@ -2,7 +2,7 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  overflow-y: scroll;
+  overflow-y: hidden;
   overflow-x: hidden;
   font-size: 12px;
 }

@@ -10,6 +10,7 @@ import { Link } from "react-router-dom";
 import NumberRenderer from "../util/NumberRenderer";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import Swal from "sweetalert2";
 const customStyles = {
   content: {
     top: "50%",
@@ -325,6 +326,9 @@ const EarnDivRead = (props) => {
   };
   function handleSubmit(event) {
     event.preventDefault();
+    if (!startDate) {
+      Swal.fire("기간을 선택해주세요", "", "question");
+    }
     fetch("http://localhost:8080/list/search_div_code", {
       method: "POST",
       headers: {
@@ -462,6 +466,7 @@ const EarnDivRead = (props) => {
             onChange={handleEarner}
             value={earner}
             type="text"
+            placeholder="전체"
             onClick={() => setIsModalOpen(true)}
             readOnly
             style={{ width: "100px" }}
@@ -509,8 +514,8 @@ const EarnDivRead = (props) => {
           style={{
             display: "flex",
             alignItems: "center",
-            width: "60px",
-            marginLeft: "15rem",
+            width: "45px",
+            marginLeft: "16rem",
           }}
         >
           조회
@@ -519,7 +524,7 @@ const EarnDivRead = (props) => {
           style={{
             display: "flex",
             alignItems: "center",
-            width: "60px",
+            width: "45px",
             marginRight: "30px",
           }}
           onClick={() => excelDownload(rowData)}

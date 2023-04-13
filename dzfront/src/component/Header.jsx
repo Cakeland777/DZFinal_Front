@@ -99,6 +99,7 @@ function Head(props) {
               marginRight: 10,
               height: 30,
               marginTop: 5,
+              marginLeft: -30,
               backgroundColor: "#3B42BF",
               width: "80px",
               fontSize: "15px",
@@ -112,7 +113,7 @@ function Head(props) {
           <b>{props.title}</b>
         </li>
         {isDeleteButtonVisible && (
-          <li style={{ marginLeft: "1100px" }}>
+          <li style={{ marginLeft: "1300px" }}>
             <button
               type="button"
               className={`button small ${props.isMenuOpen ? "hide" : ""}`}

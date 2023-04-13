@@ -284,34 +284,43 @@ const EarnerGrid = (props) => {
     if (field === "earner_code") {
       console.log("코드입력");
       const inputCode = event.data.earner_code;
-      fetch("http://localhost:8080/regist/check_code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          custom_code: inputCode,
-          worker_id: localStorage.getItem("worker_id"),
-        }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log(data.code_count);
-          if (data.code_count >= 1) {
-            Swal.fire({
-              title: "이미 존재하는 코드입니다",
-              text: "다른코드를 입력하세요",
-              icon: "error",
-            });
-          } else {
-            Swal.fire({
-              title: "사용가능한 코드입니다",
-              text: "..",
-              icon: "success",
-            });
-            defaultCode.current = 0;
-          }
+      const codeRegex = /^\d{6}$/;
+      if (!codeRegex.text(inputCode)) {
+        Swal.fire({
+          title: "코드 형식이 맞지 않습니다",
+          text: "6자리의 숫자를 입력해주세요",
+          icon: "error",
         });
+      } else {
+        fetch("http://localhost:8080/regist/check_code", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            custom_code: inputCode,
+            worker_id: localStorage.getItem("worker_id"),
+          }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            console.log(data.code_count);
+            if (data.code_count >= 1) {
+              Swal.fire({
+                title: "이미 존재하는 코드입니다",
+                text: "다른코드를 입력하세요",
+                icon: "error",
+              });
+            } else {
+              Swal.fire({
+                title: "사용가능한 코드입니다",
+                text: "..",
+                icon: "success",
+              });
+              defaultCode.current = 0;
+            }
+          });
+      }
     }
 
     if (field === "personal_no") {
@@ -413,8 +422,8 @@ const EarnerGrid = (props) => {
       className="ag-theme-alpine"
       style={{
         float: "left",
-        height: "700px",
-        width: "43%",
+        height: "640px",
+        width: "41%",
         marginTop: "10px",
         padding: "5px",
       }}

@@ -3,6 +3,7 @@ import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import ReactModal from "react-modal";
+import "../../css/codeConversion.css";
 
 const CodeConversion = (props) => {
   props.setTitle("코드변환");
@@ -68,58 +69,66 @@ const CodeConversion = (props) => {
   const columnDefs = [
     {
       headerName: "변환 대상 소득자",
-      width: 270,
+      width: 265,
       children: [
         {
           headerName: "code",
           field: "earner_code",
-          width: 270,
+          width: 265,
         },
         {
           headerName: "소득자명",
           field: "earner_name",
-          width: 270,
+          width: 265,
         },
         {
           headerName: "주민(사업자)등록번호",
           field: "personal_no",
-          width: 270,
+          width: 265,
           cellStyle: {
-            color: "red",
+            color: "#DC143C",
             backgroundColor: "mistyrose",
-            opacity: 0.7,
+            opacity: 0.6,
+            textAlign: "center",
           },
         },
       ],
     },
     {
-      headerName: "변환전 소득구분",
+      headerName: "과거이력용",
       field: "old_div_code",
-      width: 270,
+
+      hide: "true",
+      width: 265,
+    },
+    {
+      headerName: "변환전 소득구분",
+      field: "div_code",
+      width: 265,
     },
     {
       headerName: "변환후 소득구분",
-      field: "div_code",
-      width: 270,
+      field: "new_div_code",
+      width: 265,
       onCellClicked: (event) => setIsModalOpen(true),
     },
     {
       headerName: "변환후 소득이름",
       field: "div_name",
       hide: "true",
-      width: 270,
+      width: 265,
     },
     {
       headerName: "최종작업시간",
       field: "div_modified",
-      width: 270,
+      width: 280,
       onCellClicked: (event) => setTimeOpen(true),
     },
     {
       headerName: "div_type",
       field: "div_type",
       hide: "true",
-      width: 270,
+      width: 265,
     },
   ];
 
@@ -189,11 +198,22 @@ const CodeConversion = (props) => {
       body: JSON.stringify(param),
     }).then((response) => {
       response.json();
-      selectedCell.setDataValue("div_code", new_div_code.current);
-      selectedCell.setDataValue("div_name", new_div_name.current);
-      selectedCell.setDataValue("div_type", new_div_type.current);
-      selectedCell.setDataValue("old_div_code", div_code.current);
-      selectedCell.setDataValue("old_div_name", div_name.current);
+      const selected_new_div_code = selectedCell.data.new_div_code || "";
+      const selected_new_div_name = selectedCell.data.new_div_name || "";
+      const selected_new_div_type = selectedCell.data.new_div_type || "";
+
+      if (selected_new_div_code === "") {
+        selectedCell.setDataValue("new_div_code", new_div_code.current);
+        selectedCell.setDataValue("old_div_code", div_code.current);
+        selectedCell.setDataValue("old_div_name", div_name.current);
+      } else {
+        selectedCell.setDataValue("new_div_code", new_div_code.current);
+        selectedCell.setDataValue("div_code", selected_new_div_code);
+        selectedCell.setDataValue("div_name", selected_new_div_name);
+        selectedCell.setDataValue("div_type", selected_new_div_type);
+        selectedCell.setDataValue("old_div_code", div_code.current);
+        selectedCell.setDataValue("old_div_name", div_name.current);
+      }
       onCodeHistory();
     });
   };
@@ -250,22 +270,35 @@ const CodeConversion = (props) => {
         </select>
 
         <button
-          style={{ float: "right", textAlign: "center", paddingBottom: "3px" }}
+          style={{
+            textAlign: "center",
+            width: "8%",
+            height: "100%",
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            fontSize: "17px",
+            float: "right",
+            marginTop: "4px",
+            marginBottom: "4px",
+          }}
+          onClick={() => window.location.reload()}
         >
-          {" "}
-          조회
+          새로불러오기
         </button>
       </div>
 
       <div
         className="ag-theme-alpine"
         style={{
-          height: 750,
-          width: 1640,
-          marginTop: "5px",
-          padding: "5px",
-          marginLeft: "3px",
-          marginRight: "3px",
+          height: 600,
+          width: "100%",
+          marginTop: "2px",
+          padding: "10px",
+          marginLeft: "2px",
+          marginRight: "1px",
+          textAlign: "center",
+          overflow: "auto", // 스크롤 추가
         }}
       >
         <AgGridReact
@@ -348,13 +381,13 @@ const CodeConversion = (props) => {
                   <tr>
                     <th>기존 소득구분</th>
                     <td>
-                      {old_div_code.current} ({old_div_name.current}){" "}
+                      {div_code.current} ({div_name.current}){" "}
                     </td>
                   </tr>
                   <tr>
                     <th>변경 소득구분</th>
                     <td>
-                      {div_code.current} ({div_name.current}){" "}
+                      {new_div_code.current} ({new_div_name.current}){" "}
                     </td>
                   </tr>
                   <tr>

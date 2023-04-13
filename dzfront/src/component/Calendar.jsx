@@ -272,7 +272,7 @@ const Rendercell = ({
     <div>
       <div className="body">{rows}</div>
       <SelectAllButton onSelectAllClick={() => handleWeekClick(true)} />
-      <ResetButton onReset={(e) => handleResetClick(e)} />
+      <ResetButton onReset={handleResetClick} />
       <label htmlFor="excludeWeekends">주말 제외</label>
       <input
         type="checkbox"

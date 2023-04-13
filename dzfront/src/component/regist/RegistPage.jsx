@@ -15,7 +15,7 @@ const RegistPage = (props) => {
       <div>
         {" "}
         {/* width 값 수정 */}
-        <div style={{ padding: "10px", width: "90%" }}>
+        <div style={{ padding: "10px", width: "90%", marginLeft: "50px" }}>
           <EarnerGrid
             value={value}
             onValueChange={handleValueChange}

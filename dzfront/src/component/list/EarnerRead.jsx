@@ -18,6 +18,7 @@ import { format } from "date-fns";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import NumberRenderer from "../util/NumberRenderer";
+import Swal from "sweetalert2";
 
 const LinkStyle = {
   display: "inline-block",
@@ -330,6 +331,9 @@ const EarnerRead = (props) => {
   };
   function handleSubmit(event) {
     event.preventDefault();
+    if (!startDate) {
+      Swal.fire("기간을 선택해주세요", "", "question");
+    }
     fetch("http://localhost:8080/list/search_earner_code", {
       method: "POST",
       headers: {
@@ -485,6 +489,7 @@ const EarnerRead = (props) => {
           onChange={handleEarner}
           onClick={() => setIsModalOpen(true)}
           value={earner}
+          placeholder="전체"
           type="text"
           style={{ marginRight: "1rem", width: "5%" }}
           readOnly
@@ -500,7 +505,7 @@ const EarnerRead = (props) => {
           style={{
             display: "flex",
             alignItems: "center",
-            width: "60px",
+            width: "45px",
             marginLeft: "auto",
             marginRight: "10px",
           }}
@@ -512,7 +517,7 @@ const EarnerRead = (props) => {
           style={{
             display: "flex",
             alignItems: "center",
-            width: "60px",
+            width: "45px",
             marginRight: "30px",
           }}
           onClick={() => excelDownload(rowData)}

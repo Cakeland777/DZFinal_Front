@@ -299,12 +299,13 @@ const IncomeInput2 = (props) => {
           }
           return response.json();
         })
-        .then((data) => {})
+
         .catch((error) => {
+          console.log("에러 들어옴");
+          alert(error.message);
           setError(error.message);
         });
     }
-
     if (field === "total_payment") {
       alert(taxRow.current.total_payment);
 
@@ -411,7 +412,7 @@ const IncomeInput2 = (props) => {
       cellStyle: { textAlign: "right" },
     },
     {
-      headerName: "학자금상환액",
+      headerName: "학자금",
       field: "tuition_amount",
       cellRenderer: "numberRenderer",
       editable: false,
@@ -889,7 +890,7 @@ const IncomeInput2 = (props) => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <>
-      <ErrorAlert error={error} />
+      <ErrorAlert error={error ? error : ""} />
       <div id="container">
         <div id="header">
           <div
@@ -962,10 +963,10 @@ const IncomeInput2 = (props) => {
               <table
                 style={{
                   border: "1px solid black",
-                  width: "460px",
+                  width: "465px",
                   marginRight: "90px",
 
-                  height: "250px",
+                  height: "248px",
                 }}
               >
                 <thead></thead>
@@ -1023,7 +1024,8 @@ const IncomeInput2 = (props) => {
             style={{
               float: "left",
               marginLeft: "10px",
-              marginTop: "0px",
+              marginRight: "10px",
+              marginTop: "-30px",
               width: "100%",
               height: "1000px",
             }}

@@ -9,6 +9,7 @@ import React, {
   useState,
   useMemo,
 } from "react";
+import ErrorAlert from "../util/ErrorAlert";
 import DaumPostcode from "react-daum-postcode";
 import ReactModal from "react-modal";
 import "../../css/registration.css";
@@ -82,7 +83,7 @@ const Registration = (props) => {
           }
           if (
             data.earner_info.is_artist === "N" ||
-            !data.earner_info.div_type === "예술인"
+            data.earner_info.div_type !== "예술인"
           ) {
             setInputEnabled(false);
           }
@@ -102,7 +103,7 @@ const Registration = (props) => {
           }
           if (
             data.earner_info.is_sworker === "N" ||
-            !data.earner_info.div_type === "특고인"
+            data.earner_info.div_type !== "특고인"
           ) {
             setInputEnabledS(false);
           }
@@ -332,7 +333,14 @@ const Registration = (props) => {
         earner_code: props.value,
       }),
     })
-      .then((response) => {})
+      .then((response) => {
+        if (!response.ok) {
+          return response.json().then((error) => {
+            throw new Error(error.message);
+          });
+        }
+        return response.json();
+      })
       .then((jsonData) => {
         setEarner({ ...earner, [name]: value });
       });
@@ -412,7 +420,7 @@ const Registration = (props) => {
       top: "50%",
       left: "50%",
       width: "800px",
-      height: "700px",
+      height: "600px",
       right: "auto",
       bottom: "auto",
       marginRight: "-50%",
@@ -608,7 +616,7 @@ const Registration = (props) => {
                   </td>
                   <td style={{ textAlign: "left" }} colSpan={3}>
                     <input
-                      type="text"
+                      type="number"
                       name="tel1"
                       id="tel1"
                       onBlur={handleBlur}
@@ -620,7 +628,7 @@ const Registration = (props) => {
                     />
                     -
                     <input
-                      type="text"
+                      type="number"
                       name="tel2"
                       id="tel2"
                       onBlur={handleBlur}
@@ -632,7 +640,7 @@ const Registration = (props) => {
                     />
                     -
                     <input
-                      type="text"
+                      type="number"
                       name="tel3"
                       id="tel3"
                       onBlur={handleBlur}
@@ -1258,6 +1266,7 @@ const Registration = (props) => {
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <div>
+      <ErrorAlert error={error} />
       <div
         style={{
           float: "left",
@@ -1301,7 +1310,7 @@ const Registration = (props) => {
             <h4>특고 직종코드 코드도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ float: "left", height: 500, width: 800 }}
+              style={{ float: "left", height: 400, width: 800 }}
             >
               <AgGridReact
                 columnDefs={specialColumn}
