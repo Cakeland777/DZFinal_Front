@@ -779,7 +779,7 @@ const Registration = (props) => {
       content: (
         <>
           <h3>예술인 해당 사업소득자 등록</h3>
-          <div style={{ width: "60%" }}>
+          <div style={{ width: "120%" }}>
             <table>
               <tbody>
                 <tr>
@@ -876,7 +876,7 @@ const Registration = (props) => {
             </p>
           </div>
           <h3>노무제공자(특고) 해당 사업소득자 등록</h3>
-          <div style={{ width: "60%" }}>
+          <div style={{ width: "120%" }}>
             <table>
               <tbody>
                 <tr>
