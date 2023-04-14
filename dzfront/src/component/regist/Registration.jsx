@@ -25,7 +25,7 @@ const Registration = (props) => {
   const [preCode, setPreCode] = useState(props.value || "");
   const [earner, setEarner] = useState({});
   const info = useRef();
-  const [error, setError] = useState("");
+  const [error, setError] = useState([]);
   useEffect(() => {
     const inputElement = inputRef.current;
     const etcElement = etcRef.current;
@@ -343,6 +343,9 @@ const Registration = (props) => {
       })
       .then((jsonData) => {
         setEarner({ ...earner, [name]: value });
+      })
+      .catch((error) => {
+        setError((prevErrors) => [...prevErrors, error.message]);
       });
 
     if (name === "personal_no") {

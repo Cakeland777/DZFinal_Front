@@ -7,6 +7,7 @@ import React, {
   useCallback,
   useReducer,
   useEffect,
+  memo,
 } from "react";
 import ErrorAlert from "../util/ErrorAlert";
 import Swal from "sweetalert2";
@@ -19,6 +20,7 @@ import { ko } from "date-fns/locale";
 import "react-datepicker/dist/react-datepicker.css";
 import { format } from "date-fns";
 import NumberRenderer from "../util/NumberRenderer";
+
 const IncomeInput2 = (props) => {
   //datepicker관련
   props.setTitle("사업소득자료입력");
@@ -26,7 +28,7 @@ const IncomeInput2 = (props) => {
     numberRenderer: NumberRenderer,
   };
   registerLocale("ko", ko);
-  const [error, setError] = useState("");
+  const [error, setError] = useState([]);
   const [workDate, setWorkDate] = useState([]);
   const [bottomData, setBottomData] = useState([]);
   const earnerGridRef = useRef();
@@ -84,6 +86,7 @@ const IncomeInput2 = (props) => {
           field: "is_native",
           editable: false,
           width: 60,
+          resizable: false,
           cellEditor: "agSelectCellEditor",
           cellEditorParams: {
             values: ["내", "외"],
@@ -101,6 +104,7 @@ const IncomeInput2 = (props) => {
 
     {
       headerName: "소득구분",
+      resizable: false,
       children: [
         {
           headerName: "구분코드",
@@ -217,7 +221,7 @@ const IncomeInput2 = (props) => {
     api = params.api;
     earnerGridRef.current.api.sizeColumnsToFit();
   };
-  useEffect(() => {}, []);
+
   const taxRow = useRef();
   const onRightCellClicked = (event) => {
     const { data, colDef } = event;
@@ -301,14 +305,11 @@ const IncomeInput2 = (props) => {
         })
 
         .catch((error) => {
-          console.log("에러 들어옴");
-          alert(error.message);
-          setError(error.message);
+          setError((prevErrors) => [...prevErrors, error.message]);
+          event.node.setDataValue("accrual_ym", oldAcc.current);
         });
     }
     if (field === "total_payment") {
-      alert(taxRow.current.total_payment);
-
       fetch("http://localhost:8080/input/update_taxinfo", {
         method: "PATCH",
         body: JSON.stringify({
@@ -353,19 +354,28 @@ const IncomeInput2 = (props) => {
           event.node.setDataValue("tax_id", data.earner_tax.tax_id);
         })
         .catch((error) => {
-          setError(error.message);
+          console.log(error.message);
+          setError((prevErrors) => [...prevErrors, error.message]);
           event.node.setDataValue("total_payment", oldValue.current);
         });
     }
   };
 
   const oldValue = useRef();
+  const oldDate = useRef();
+  const oldAcc = useRef();
   const onCellEditingStarted = (event) => {
     const { data, colDef } = event;
     const { field } = colDef;
     if (field === "total_payment") {
       oldValue.current = event.data.total_payment;
       console.log(oldValue.current);
+    }
+    if (field === "payment_date") {
+      oldDate.current = event.data.payment_date;
+    }
+    if (field === "accrual_ym") {
+      oldAcc.current = event.data.accrual_ym;
     }
   };
 
@@ -510,7 +520,7 @@ const IncomeInput2 = (props) => {
     };
   }
   function getCellStyle(params) {
-    if (params.value === 0 || undefined) {
+    if (params.value === 0 || undefined || null) {
       return {
         backgroundColor: "lightgrey",
         color: "transparent",
@@ -649,27 +659,27 @@ const IncomeInput2 = (props) => {
         setRowData(data.tax_list);
       });
 
-    fetch("http://localhost:8080/input/sum_tax", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        worker_id: "yuchan2",
-        earner_code: selectedRow.earner_code,
-        payment_ym: selectedRow.payment_ym,
-      }),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        if (data.sum_tax !== null) {
-          data.sum_tax.accrual_ym = "합계";
-          setBottomData([data.sum_tax]);
-        } else {
-          setBottomData([]);
-        }
-      });
+    // fetch("http://localhost:8080/input/sum_tax", {
+    //   method: "POST",
+    //   headers: {
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({
+    //     worker_id: "yuchan2",
+    //     earner_code: selectedRow.earner_code,
+    //     payment_ym: selectedRow.payment_ym,
+    //   }),
+    // })
+    //   .then((response) => response.json())
+    //   .then((data) => {
+    //     console.log(data);
+    //     if (data.sum_tax !== null) {
+    //       data.sum_tax.accrual_ym = "합계";
+    //       setBottomData([data.sum_tax]);
+    //     } else {
+    //       setBottomData([]);
+    //     }
+    //   });
   }
   function onRightCellValueChanged(event) {
     const { data, colDef } = event;
@@ -705,7 +715,8 @@ const IncomeInput2 = (props) => {
           event.node.setDataValue("payment_date", parseInt(data.payment_date));
         })
         .catch((error) => {
-          setError(error.message);
+          setError((prevErrors) => [...prevErrors, error.message]);
+          event.node.setDataValue("payment_date", oldDate.current);
         });
     }
 
@@ -887,10 +898,11 @@ const IncomeInput2 = (props) => {
     }
     props.setEarnerCodes(deleteCodes.current);
   }
+
   const { currentItem, changeItem } = useTab(0, Tab);
   return (
     <>
-      <ErrorAlert error={error ? error : ""} />
+      <ErrorAlert error={error} />
       <div id="container">
         <div id="header">
           <div
@@ -983,37 +995,67 @@ const IncomeInput2 = (props) => {
                   </tr>
                   <tr>
                     <th scope="row">지급액</th>
-                    <td>{sumTask.total_payment || 0}</td>
+                    <td>
+                      {sumTask.total_payment
+                        ? sumTask.total_payment.toLocaleString()
+                        : 0}
+                    </td>
                     <td>원</td>
                   </tr>
                   <tr>
                     <th scope="row">학자금상환액</th>
-                    <td>{sumTask.tuition_amount || "0"}</td>
+                    <td>
+                      {sumTask.tuition_amount
+                        ? sumTask.tuition_amount.toLocaleString()
+                        : "0"}
+                    </td>
                     <td>원</td>
                   </tr>
                   <tr>
                     <th scope="row">소득세</th>
-                    <td>{sumTask.tax_income || "0"}</td>
+                    <td>
+                      {sumTask.tax_income
+                        ? sumTask.tax_income.toLocaleString()
+                        : "0"}
+                    </td>
                     <td>원</td>
                   </tr>
                   <tr>
                     <th scope="row">지방소득세</th>
-                    <td>{sumTask.tax_local || "0"}</td>
+                    <td>
+                      {sumTask.tax_local
+                        ? sumTask.tax_local.toLocaleString()
+                        : "0"}
+                    </td>
                     <td>원</td>
                   </tr>
                   <tr>
                     <th scope="row">고용보험료</th>
-                    <td>{sumTask.ins_cost + sumTask.sworker_ins || "0"}</td>
+                    <td>
+                      {sumTask.ins_cost + sumTask.sworker_ins
+                        ? (
+                            sumTask.ins_cost + sumTask.sworker_ins
+                          ).toLocaleString()
+                        : "0"}
+                    </td>
                     <td>원</td>
                   </tr>
                   <tr>
                     <th scope="row">산재보험료</th>
-                    <td>{sumTask.workinjury_ins || "0"}</td>
+                    <td>
+                      {sumTask.workinjury_ins
+                        ? sumTask.workinjury_ins.toLocaleString()
+                        : "0"}
+                    </td>
                     <td>원</td>
                   </tr>
                   <tr>
                     <th scope="row">차인지급액</th>
-                    <td>{sumTask.real_payment || "0"}</td>
+                    <td>
+                      {sumTask.real_payment
+                        ? sumTask.real_payment.toLocaleString()
+                        : "0"}
+                    </td>
                     <td>원</td>
                   </tr>
                 </tbody>

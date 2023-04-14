@@ -1,17 +1,32 @@
 import React, { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-function ErrorAlert(props) {
-  const [error, setError] = useState("");
+function ErrorAlert({ error }) {
+  const [showAlert, setShowAlert] = useState(false);
 
   useEffect(() => {
-    if (props.error !== "") {
-      Swal.fire("", `${props.error}`, "error");
-      setError(props.error);
+    if (error && error.length > 0) {
+      setShowAlert(true);
     }
-  }, [props.error]);
+  }, [error]);
 
-  return error !== "" ? null : "";
+  const handleCloseAlert = () => {
+    setShowAlert(false);
+  };
+
+  if (!showAlert) {
+    return null;
+  }
+
+  Swal.fire({
+    icon: "error",
+    title: "에러 발생",
+    text: error[error.length - 1],
+  }).then(() => {
+    handleCloseAlert();
+  });
+
+  return null;
 }
 
 export default ErrorAlert;
