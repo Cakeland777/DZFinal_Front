@@ -1,4 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
+import { FiEdit } from 'react-icons/fi';
+
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -66,13 +68,16 @@ const CodeConversion = (props) => {
       });
   };
 
-
+  
+  
   
   const columnDefs = [
     
     {
       headerName: "변환 대상 소득자",    
-      width: 265,
+      width: 265,cellStyle: {
+        borderRight: "1px solid #000"}, // 오른쪽 테두리 추가
+      
       children: [
         {
           headerName: "code",
@@ -112,6 +117,20 @@ const CodeConversion = (props) => {
       headerName: "변환후 소득구분",
       field: "new_div_code", 
       width: 265,
+      cellRenderer: function(params) {
+        return (
+          <div style={{ position: "relative" }}>
+      <span>{params.value}</span>
+      <FiEdit style={{ 
+        position: "absolute", 
+        right: 0,
+        
+        paddingTop : "13px"
+        
+      }} />
+    </div>
+        );
+      },
       onCellClicked: (event) => setIsModalOpen(true),
     },
     {
@@ -122,6 +141,7 @@ const CodeConversion = (props) => {
     },
     {
       headerName: "최종작업시간",
+      
       field: "div_modified",
       width: 280,
       onCellClicked: (event) => setTimeOpen(true),
@@ -139,7 +159,7 @@ const CodeConversion = (props) => {
     { headerName: "소득구분코드", field: "div_code", width: 270 },
     { headerName: "소득구분명", field: "div_name", width: 270 },
   ];
-
+ 
   const [divRowData, setDivRowData] = useState();
 
   const onGridReady = useCallback((params) => {
@@ -199,8 +219,11 @@ const CodeConversion = (props) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(param),
-    }).then((response) => {
-      response.json();
+    }).then((response) => response.json())
+      .then((rowData) => { 
+
+        console.log("rowData", rowData);
+        
       const selected_new_div_code = selectedCell.data.new_div_code || "";
       const selected_new_div_name = selectedCell.data.new_div_name || "";
       const selected_new_div_type = selectedCell.data.new_div_type || "";
@@ -208,16 +231,20 @@ const CodeConversion = (props) => {
       if (selected_new_div_code === "") {
         selectedCell.setDataValue("new_div_code", new_div_code.current);
         selectedCell.setDataValue("old_div_code", div_code.current);
-        selectedCell.setDataValue("old_div_name", div_name.current);
+        //selectedCell.setDataValue("old_div_name", div_name.current);
+        selectedCell.setDataValue("div_modified", rowData.div_modified);
       } else {
         selectedCell.setDataValue("new_div_code", new_div_code.current);
         selectedCell.setDataValue("div_code", selected_new_div_code);
         selectedCell.setDataValue("div_name", selected_new_div_name);
         selectedCell.setDataValue("div_type", selected_new_div_type);
         selectedCell.setDataValue("old_div_code", div_code.current);
-        selectedCell.setDataValue("old_div_name", div_name.current);
+        //selectedCell.setDataValue("old_div_name", div_name.current);
+        selectedCell.setDataValue("div_modified", rowData.div_modified);
       }
-      onCodeHistory();
+      //setModified_date(rowData.rowData.div_modified);
+      
+      //onCodeHistory();
     });
   };
 
@@ -276,7 +303,7 @@ const CodeConversion = (props) => {
       <button
         style={{  
           textAlign: "center", 
-          width: "8%", 
+          width: "6%", 
           height: "100%",
           display: "flex",
           alignItems: "flex-start", 
@@ -290,7 +317,7 @@ const CodeConversion = (props) => {
       onClick={() => window.location.reload()}
       >
        
-         새로불러오기
+         새로고침
       </button>
 
       </div>
@@ -336,7 +363,7 @@ const CodeConversion = (props) => {
             <h4>소득구분코드 도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ float: "left", height: 400, width: 400 }}
+              style={{ float: "left", height: 500, width: 600 }}
             >
               <AgGridReact
                 columnDefs={divColumn}
@@ -361,6 +388,7 @@ const CodeConversion = (props) => {
       </ReactModal>
 
       <ReactModal
+      
         style={customStyles}
         isOpen={timeOpen}
         onRequestClose={() => setTimeOpen(false)}
@@ -390,14 +418,17 @@ const CodeConversion = (props) => {
                   <tr>
                     <th>기존 소득구분</th>
                     <td>
-                     {div_code.current} ({div_name.current}){" "}
+                    {div_code.current} ({div_name.current}){" "}
+                  
+
                     </td>
                   </tr>
                   <tr>
                     <th>변경 소득구분</th>
                     <td>
-                      {new_div_code.current} ({new_div_name.current}){" "}
-
+                   
+                    {new_div_code.current} ({new_div_name.current}){" "}
+                     
                     </td>
                   </tr>
                   <tr>
