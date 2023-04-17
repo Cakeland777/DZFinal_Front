@@ -40,16 +40,16 @@ function Login(props) {
       .then((data) => {
         if (data.isLogon === true) {
           Swal.fire({
-            title: data.MemberVO.worker_id + "님 로그인되었습니다.",
+            title: data.MemberVO.worker_name + "님 로그인되었습니다.",
             text: "환영합니다",
             icon: "success",
           });
           props.setIsLogin(true);
-          localStorage.setItem("memberInfo", data.member);
+          localStorage.setItem("worker_name", data.MemberVO.worker_name);
           localStorage.setItem("worker_id", data.MemberVO.worker_id);
           localStorage.setItem("code_count", data.MemberVO.code_count);
           localStorage.setItem("isLogon", 1);
-          navigate("/earnerRead");
+          navigate("/");
         } else {
           Swal.fire({
             title: "로그인 실패",
@@ -114,8 +114,6 @@ function Login(props) {
           </div>
         </form>
         <div className="display_background">
-          <span class="display_background_shape display_background_shape4"></span>
-          <span class="display_background_shape display_background_shape3"></span>
           <span class="display_background_shape display_background_shape2"></span>
           <span class="display_background_shape display_background_shape1"></span>
         </div>

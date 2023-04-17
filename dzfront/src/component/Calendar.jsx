@@ -303,7 +303,7 @@ export const Calendar = ({ payment_ym, workDate, worker_id, earner_code }) => {
   };
 
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: "flex", marginLeft: "-22px" }}>
       <div
         className="calendar"
         style={{

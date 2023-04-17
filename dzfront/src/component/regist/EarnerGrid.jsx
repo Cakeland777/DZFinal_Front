@@ -22,29 +22,22 @@ const EarnerGrid = (props) => {
       headerName: "V",
       headerCheckboxSelection: true,
       checkboxSelection: true,
-      maxWidth: 40,
+      maxWidth: 50,
     },
     {
       headerName: "Code",
       field: "earner_code",
+
       editable: (params) => {
         return !params.node.data.div_code && params.node.data.earner_name;
       },
       maxWidth: 90,
-      resizable: true,
-      cellEditor: "agTextCellEditor",
-      cellEditorParams: {
-        // 입력 제한 설정
-        maxLength: 6,
-        pattern: "\\d*", // 숫자만 입력할 수 있도록 정규식 설정
-      },
     },
     {
       headerName: "소득자명",
       field: "earner_name",
       editable: true,
       maxWidth: 100,
-      resizable: true,
     },
 
     {
@@ -56,7 +49,7 @@ const EarnerGrid = (props) => {
           editable: true,
           maxWidth: 70,
           cellEditor: "agSelectCellEditor",
-          resizable: true,
+
           cellEditorParams: {
             values: ["내", "외"],
           },
@@ -69,7 +62,7 @@ const EarnerGrid = (props) => {
           editable: true,
           colspan: 2,
           cellEditor: "agTextCellEditor",
-          resizable: true,
+
           cellEditorParams: {
             // 입력 제한 설정
             maxLength: 14,
@@ -85,13 +78,13 @@ const EarnerGrid = (props) => {
           headerName: "구분코드",
           field: "div_code",
           editable: false,
-          resizable: true,
+
           maxWidth: 90,
         },
         {
           headerName: "구분명",
           field: "div_name",
-          width: 90,
+          width: 95,
           editable: false,
           resizable: false,
           colspan: 2,
@@ -102,7 +95,7 @@ const EarnerGrid = (props) => {
   ];
   const divColumn = [
     { headerName: "소득구분코드", field: "div_code", width: 180 },
-    { headerName: "소득구분명", field: "div_name", width: 160 },
+    { headerName: "소득구분명", field: "div_name", width: 180 },
   ];
   const selectedCode = useRef();
   const [selectedCell, setSelectedCell] = useState(null);
@@ -116,13 +109,13 @@ const EarnerGrid = (props) => {
       }
       if (!event.data.earner_name) {
         setIsModalOpen(false);
-        Swal.fire("", "이름을 먼저 입력해주세요", "info");
+        Swal.fire("이름을 먼저 입력해주세요", "", "info");
       }
     }
     if (field === "personal_no") {
       if (!event.data.earner_name) {
         setIsModalOpen(false);
-        Swal.fire("", "이름을 먼저 입력해주세요", "info");
+        Swal.fire("이름을 먼저 입력해주세요", "", "info");
       }
     }
     const selectedCell = event.data;
@@ -131,6 +124,9 @@ const EarnerGrid = (props) => {
       console.log(selectedCell.earner_code);
       setValue(selectedCell.earner_code);
       props.onValueChange(selectedCell.earner_code);
+    } else {
+      setValue("");
+      props.onValueChange("");
     }
   };
 
@@ -281,46 +277,41 @@ const EarnerGrid = (props) => {
     const { data, colDef } = event;
     const { field } = colDef;
 
-    if (field === "earner_code") {
+    if (field === "earner_code" && event.data.earner_code) {
       console.log("코드입력");
       const inputCode = event.data.earner_code;
       const codeRegex = /^\d{6}$/;
-      if (!codeRegex.text(inputCode)) {
-        Swal.fire({
-          title: "코드 형식이 맞지 않습니다",
-          text: "6자리의 숫자를 입력해주세요",
-          icon: "error",
+
+      fetch("http://localhost:8080/regist/check_code", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          custom_code: inputCode,
+          worker_id: localStorage.getItem("worker_id"),
+        }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(data.code_count);
+          if (data.code_count >= 1) {
+            Swal.fire({
+              title: "이미 존재하는 코드입니다",
+              text: "다른코드를 입력하세요",
+              icon: "error",
+            });
+
+            event.node.setDataValue("earner_code", "");
+          } else {
+            Swal.fire({
+              title: "사용가능한 코드입니다",
+              text: "",
+              icon: "success",
+            });
+            defaultCode.current = 0;
+          }
         });
-      } else {
-        fetch("http://localhost:8080/regist/check_code", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            custom_code: inputCode,
-            worker_id: localStorage.getItem("worker_id"),
-          }),
-        })
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data.code_count);
-            if (data.code_count >= 1) {
-              Swal.fire({
-                title: "이미 존재하는 코드입니다",
-                text: "다른코드를 입력하세요",
-                icon: "error",
-              });
-            } else {
-              Swal.fire({
-                title: "사용가능한 코드입니다",
-                text: "..",
-                icon: "success",
-              });
-              defaultCode.current = 0;
-            }
-          });
-      }
     }
 
     if (field === "personal_no") {
@@ -328,7 +319,10 @@ const EarnerGrid = (props) => {
       const foreignRegex = /^\d{6}[a-zA-Z\d]{7}$/;
 
       if (event.data.is_native === "내") {
-        if (!koreanRegex.test(event.data.personal_no)) {
+        if (
+          !koreanRegex.test(event.data.personal_no) &&
+          event.data.personal_no
+        ) {
           Swal.fire({
             title: "다시입력해주세요",
             text: "올바르지 않은 형식입니다",
@@ -337,7 +331,10 @@ const EarnerGrid = (props) => {
           event.node.setDataValue("personal_no", "");
         }
       } else if (event.data.is_native === "외") {
-        if (!foreignRegex.test(event.data.personal_no)) {
+        if (
+          !foreignRegex.test(event.data.personal_no) ||
+          event.data.personal_no
+        ) {
           Swal.fire({
             title: "다시입력해주세요",
             text: "올바르지 않은 형식입니다",
@@ -400,6 +397,10 @@ const EarnerGrid = (props) => {
       marginRight: "-50%",
       transform: "translate(-50%, -50%)",
     },
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
+    },
   };
   const deleteCodes = useRef([]);
   function onRowSelected(event) {
@@ -423,7 +424,7 @@ const EarnerGrid = (props) => {
       style={{
         float: "left",
         height: "640px",
-        width: "41%",
+        width: "41.5%",
         marginTop: "10px",
         padding: "5px",
       }}
@@ -456,7 +457,7 @@ const EarnerGrid = (props) => {
             <h4>소득구분코드 도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ float: "left", height: 400, width: 400 }}
+              style={{ float: "left", height: 400, width: 380 }}
             >
               <AgGridReact
                 overlayLoadingTemplate={

@@ -108,66 +108,89 @@ const EarnerRead = (props) => {
       return { textAlign: "right" };
     }
   }
+  const totalValueGetter = (params) => {
+    let total = "";
+    total =
+      String(params.data.payment_ym_rs) + String(params.data.payment_date_rs);
+    return total;
+  };
+
   const columnDefs = [
     {
       field: "earner_name_rs",
       headerName: "소득자명",
-      resizable: true,
+      //resizable: true,
       maxWidth: 100,
       cellStyle: { textAlign: "center" },
     },
     {
       field: "personal_no",
       headerName: "주민(외국인)등록번호",
-      resizable: true,
-      maxWidth: 140,
+      //resizable: true,
+      maxWidth: 150,
       cellStyle: { textAlign: "center" },
     },
     {
       field: "div_code_rs",
       headerName: "소득구분",
-      resizable: true,
+      //resizable: true,
       maxWidth: 120,
       cellStyle: { textAlign: "center" },
     },
     {
       field: "accrual_ym_rs",
       headerName: "귀속년월",
-      resizable: true,
+      //resizable: true,
       maxWidth: 120,
     },
     {
       field: "payment_ym_rs",
       headerName: "지급년월일",
-      resizable: true,
+      //resizable: true,
+      hide: true,
       maxWidth: 120,
     },
+    {
+      field: "payment_date_rs",
+      headerName: "일",
+      //resizable: true,
+      hide: true,
+      maxWidth: 50,
+    },
+    {
+      field: "payment_date",
+      headerName: "지급년월일",
+      //resizable: true,
+      valueGetter: totalValueGetter,
+      maxWidth: 120,
+    },
+
     {
       field: "total_payment_rs",
       headerName: "지급액",
       maxWidth: 130,
-      resizable: true,
+      //resizable: true,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
     },
     {
       field: "tax_rate_rs",
       headerName: "세율(%)",
-      resizable: true,
+      //resizable: true,
       maxWidth: 90,
     },
     {
       field: "tuition_amount_rs",
       headerName: "학자금상환액",
       maxWidth: 140,
-      resizable: true,
+      //resizable: true,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
     },
     {
       field: "tax_income_rs",
       headerName: "소득세",
-      resizable: true,
+      //resizable: true,
       maxWidth: 130,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -175,7 +198,7 @@ const EarnerRead = (props) => {
     {
       field: "tax_local_rs",
       headerName: "지방소득세",
-      resizable: true,
+      //resizable: true,
       maxWidth: 130,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -183,7 +206,7 @@ const EarnerRead = (props) => {
     {
       field: "artist_cost_rs",
       headerName: "예술/특고인경비",
-      resizable: true,
+      //resizable: true,
       maxWidth: 140,
       minWidth: 130,
       cellRenderer: "numberRenderer",
@@ -192,7 +215,7 @@ const EarnerRead = (props) => {
     {
       field: "ins_cost_rs",
       headerName: "고용보험료",
-      resizable: true,
+      //resizable: true,
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -213,19 +236,7 @@ const EarnerRead = (props) => {
       lockPosition: true,
     };
   }, []);
-  const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
 
-  useEffect(() => {
-    function handleResize() {
-      setViewportWidth(window.innerWidth);
-    }
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
   const cellClickedListener = useCallback((event) => {
     console.log("cellClicked", event);
   }, []);
@@ -385,6 +396,8 @@ const EarnerRead = (props) => {
             personal_no: "합계",
             ins_cost_rs: insCostSum,
             total_payment_rs: totalSum,
+            payment_date_rs: "",
+            payment_ym_rs: "",
             tax_local_rs: taxLocalSum,
             artist_cost_rs: artistSum,
             real_payment_rs: realPaymentSum,
@@ -507,7 +520,7 @@ const EarnerRead = (props) => {
             alignItems: "center",
             width: "45px",
             marginLeft: "auto",
-            marginRight: "10px",
+            marginRight: "5px",
           }}
           type="submit"
         >

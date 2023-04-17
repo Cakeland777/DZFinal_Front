@@ -72,20 +72,20 @@ const EarnDivRead = (props) => {
     {
       field: "div_code_rs",
       headerName: "소득구분",
-      resizable: true,
+
       maxWidth: 150,
       cellStyle: { textAlign: "center" },
     },
     {
       field: "earner_name_rs",
       headerName: "소득자명(상호)",
-      resizable: true,
+
       cellStyle: { textAlign: "center" },
     },
     {
       field: "personal_no",
       headerName: "주민(사업자)등록번호",
-      resizable: true,
+
       minWidth: 160,
       maxWidth: 150,
       cellStyle: { textAlign: "center" },
@@ -93,13 +93,13 @@ const EarnDivRead = (props) => {
     {
       field: "is_native_rs",
       headerName: "내/외국인",
-      resizable: true,
+
       maxWidth: 120,
     },
     {
       field: "count_rs",
       headerName: "건수",
-      resizable: true,
+
       maxWidth: 100,
       cellStyle: { textAlign: "center" },
     },
@@ -107,21 +107,21 @@ const EarnDivRead = (props) => {
     {
       field: "total_payment_rs",
       headerName: "연간총지급액",
-      resizable: true,
+
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
     },
     {
       field: "tax_rate_rs",
       headerName: "세율(%)",
-      resizable: true,
+
       maxWidth: 130,
       cellStyle: getCellStyle,
     },
     {
       field: "tax_income_rs",
       headerName: "소득세",
-      resizable: true,
+
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -129,7 +129,7 @@ const EarnDivRead = (props) => {
     {
       field: "tax_local_rs",
       headerName: "지방소득세",
-      resizable: true,
+
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -137,7 +137,7 @@ const EarnDivRead = (props) => {
     {
       field: "tax_total_rs",
       headerName: "세액계",
-      resizable: true,
+
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -145,7 +145,7 @@ const EarnDivRead = (props) => {
     {
       field: "artist_cost_rs",
       headerName: "예술인경비",
-      resizable: true,
+
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -153,7 +153,7 @@ const EarnDivRead = (props) => {
     {
       field: "ins_cost_rs",
       headerName: "고용보험료",
-      resizable: true,
+
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
@@ -161,18 +161,20 @@ const EarnDivRead = (props) => {
     {
       field: "real_payment_rs",
       headerName: "계",
-      resizable: true,
+
       maxWidth: 140,
       cellRenderer: "numberRenderer",
       cellStyle: getCellStyle,
     },
   ];
 
-  const defaultColDef = useMemo(() => ({
-    sortable: false,
-    filter: false,
-    lockPosition: true,
-  }));
+  const defaultColDef = useMemo(() => {
+    return {
+      sortable: false,
+      filter: false,
+      lockPosition: true,
+    };
+  }, []);
   const DivModalDoubleClicked = useCallback(() => {
     const selectedRows = gridRef.current.api.getSelectedRows();
     setEarner(selectedRows[0].div_code);
@@ -515,7 +517,7 @@ const EarnDivRead = (props) => {
             display: "flex",
             alignItems: "center",
             width: "45px",
-            marginLeft: "16rem",
+            marginLeft: "28rem",
           }}
         >
           조회

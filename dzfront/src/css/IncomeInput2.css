@@ -66,6 +66,14 @@ td {
   text-align: center;
 }
 
+td.total {
+  background-color: #f2f2f2;
+  font-weight: bold;
+}
+
+td.label {
+  font-weight: bold;
+}
 th {
   background-color: #f2f2f2;
   font-weight: bold;

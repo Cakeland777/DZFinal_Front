@@ -19,7 +19,7 @@ input {
 }
 
 .display {
-  background: linear-gradient(90deg, hsl(247, 41%, 37%), #7c78b8);
+  background: linear-gradient(90deg, hsl(247, 41%, 37%), #9788f2);
   position: relative;
   height: 600px;
   width: 360px;
@@ -60,7 +60,7 @@ input {
 .display_background_shape2 {
   height: 220px;
   width: 220px;
-  background: #887ed4;
+  background: #9788f2;
   top: -172px;
   right: 0;
   border-radius: 32px;
@@ -140,14 +140,14 @@ button {
   text-align: center;
   border-radius: 5px;
   font-size: 12px;
-  background-color: #6273d9;
+  background-color: #8b7bf0;
   color: #fff;
   cursor: pointer;
   margin: 5px;
 }
 
 button:hover {
-  background-color: #7790d9;
+  background-color: #a699f3;
 }
 
 form {

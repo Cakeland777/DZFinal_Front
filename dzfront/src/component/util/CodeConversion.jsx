@@ -1,4 +1,6 @@
 import React, { useCallback, useRef, useState } from "react";
+import { FiEdit } from "react-icons/fi";
+
 import { AgGridReact } from "ag-grid-react";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -6,7 +8,7 @@ import ReactModal from "react-modal";
 import "../../css/codeConversion.css";
 
 const CodeConversion = (props) => {
-  props.setTitle("코드변환");
+  props.setTitle("소득구분코드변환");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [timeOpen, setTimeOpen] = useState(false);
   const gridRef = useRef();
@@ -58,11 +60,14 @@ const CodeConversion = (props) => {
 
   const onEarnerGridReady = (params) => {
     gridApi = params.api;
-    fetch(`http://localhost:8080/regist/earner_list/yuchan2`)
+    fetch(
+      `http://localhost:8080/regist/earner_list/${localStorage.getItem(
+        "worker_id"
+      )}`
+    )
       .then((resp) => resp.json())
       .then((rowData) => {
         setRowData(rowData.earner_list);
-        console.log(rowData);
       });
   };
 
@@ -70,6 +75,10 @@ const CodeConversion = (props) => {
     {
       headerName: "변환 대상 소득자",
       width: 265,
+      cellStyle: {
+        borderRight: "1px solid #000",
+      }, // 오른쪽 테두리 추가
+
       children: [
         {
           headerName: "code",
@@ -110,6 +119,21 @@ const CodeConversion = (props) => {
       headerName: "변환후 소득구분",
       field: "new_div_code",
       width: 265,
+      cellRenderer: function (params) {
+        return (
+          <div style={{ position: "relative" }}>
+            <span>{params.value}</span>
+            <FiEdit
+              style={{
+                position: "absolute",
+                right: 0,
+
+                paddingTop: "13px",
+              }}
+            />
+          </div>
+        );
+      },
       onCellClicked: (event) => setIsModalOpen(true),
     },
     {
@@ -120,6 +144,7 @@ const CodeConversion = (props) => {
     },
     {
       headerName: "최종작업시간",
+
       field: "div_modified",
       width: 280,
       onCellClicked: (event) => setTimeOpen(true),
@@ -156,6 +181,10 @@ const CodeConversion = (props) => {
       marginRight: "-50%",
       transform: "translate(-50%, -50%)",
     },
+    overlay: {
+      backgroundColor: "rgba(0, 0, 0, 0.5)",
+      zIndex: 1000, // .sidebar-menu의 z-index 값보다 큰 값으로 설정
+    },
   };
 
   const DivModalDoubleClicked = () => {
@@ -184,7 +213,7 @@ const CodeConversion = (props) => {
       div_type: new_div_type.current,
       old_div_code: div_code.current,
       old_div_name: div_name.current,
-      worker_id: "yuchan2",
+      worker_id: localStorage.getItem("worker_id"),
       earner_code: earnerCode.current,
       mode: mode,
     };
@@ -196,26 +225,33 @@ const CodeConversion = (props) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(param),
-    }).then((response) => {
-      response.json();
-      const selected_new_div_code = selectedCell.data.new_div_code || "";
-      const selected_new_div_name = selectedCell.data.new_div_name || "";
-      const selected_new_div_type = selectedCell.data.new_div_type || "";
+    })
+      .then((response) => response.json())
+      .then((rowData) => {
+        console.log("rowData", rowData);
 
-      if (selected_new_div_code === "") {
-        selectedCell.setDataValue("new_div_code", new_div_code.current);
-        selectedCell.setDataValue("old_div_code", div_code.current);
-        selectedCell.setDataValue("old_div_name", div_name.current);
-      } else {
-        selectedCell.setDataValue("new_div_code", new_div_code.current);
-        selectedCell.setDataValue("div_code", selected_new_div_code);
-        selectedCell.setDataValue("div_name", selected_new_div_name);
-        selectedCell.setDataValue("div_type", selected_new_div_type);
-        selectedCell.setDataValue("old_div_code", div_code.current);
-        selectedCell.setDataValue("old_div_name", div_name.current);
-      }
-      onCodeHistory();
-    });
+        const selected_new_div_code = selectedCell.data.new_div_code || "";
+        const selected_new_div_name = selectedCell.data.new_div_name || "";
+        const selected_new_div_type = selectedCell.data.new_div_type || "";
+
+        if (selected_new_div_code === "") {
+          selectedCell.setDataValue("new_div_code", new_div_code.current);
+          selectedCell.setDataValue("old_div_code", div_code.current);
+          //selectedCell.setDataValue("old_div_name", div_name.current);
+          selectedCell.setDataValue("div_modified", rowData.div_modified);
+        } else {
+          selectedCell.setDataValue("new_div_code", new_div_code.current);
+          selectedCell.setDataValue("div_code", selected_new_div_code);
+          selectedCell.setDataValue("div_name", selected_new_div_name);
+          selectedCell.setDataValue("div_type", selected_new_div_type);
+          selectedCell.setDataValue("old_div_code", div_code.current);
+          //selectedCell.setDataValue("old_div_name", div_name.current);
+          selectedCell.setDataValue("div_modified", rowData.div_modified);
+        }
+        //setModified_date(rowData.rowData.div_modified);
+
+        //onCodeHistory();
+      });
   };
 
   //소득구분코드 도움 cell 선택시 이벤트 핸들러
@@ -234,7 +270,7 @@ const CodeConversion = (props) => {
       },
       body: JSON.stringify({
         //필요한 인자전달 하는 부분
-        worker_id: "yuchan2",
+        worker_id: localStorage.getItem("worker_id"),
         earner_code: earnerCode.current,
       }),
     })
@@ -272,17 +308,17 @@ const CodeConversion = (props) => {
         <button
           style={{
             textAlign: "center",
-            width: "8%",
+            width: "7%",
             height: "100%",
             display: "flex",
             alignItems: "flex-start",
             justifyContent: "center",
-            fontSize: "17px",
+            fontSize: "13px",
             float: "right",
             marginTop: "4px",
             marginBottom: "4px",
           }}
-          onClick={() => window.location.reload()}
+          onClick={onEarnerGridReady}
         >
           새로불러오기
         </button>
@@ -327,7 +363,7 @@ const CodeConversion = (props) => {
             <h4>소득구분코드 도움</h4>
             <div
               className="ag-theme-alpine"
-              style={{ float: "left", height: 400, width: 400 }}
+              style={{ float: "left", height: 500, width: 600 }}
             >
               <AgGridReact
                 columnDefs={divColumn}
@@ -396,7 +432,10 @@ const CodeConversion = (props) => {
                   </tr>
                   <tr>
                     <th>유저ID/작업자</th>
-                    <td>yuchan2/김유찬</td>
+                    <td>
+                      {localStorage.getItem("worker_id")}/
+                      {localStorage.getItem("worker_name")}
+                    </td>
                   </tr>
                 </tbody>
               </table>

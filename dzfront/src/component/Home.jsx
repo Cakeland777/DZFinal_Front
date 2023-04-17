@@ -1,32 +1,59 @@
 import React from "react";
 import "../css/Home.css";
-function Home() {
+import { Link } from "react-router-dom";
+function Home(props) {
+  props.setTitle("");
+
   return (
     <div>
-      <body class="welcome">
+      <body className="welcome">
         <span id="splash-overlay" class="splash"></span>
         <span id="welcome" class="z-depth-4"></span>
 
-        <main class="valign-wrapper">
-          <span class="container grey-text text-lighten-1 ">
-            <h1 class="title grey-text text-lighten-3">BIZ WARRIOR</h1>
+        <main className="valign-wrapper">
+          <span className="container grey-text text-lighten-1 ">
+            <img
+              src="/BizLogo.png"
+              style={{ width: "300px", float: "left", height: "200px" }}
+            ></img>
+            <div
+              className="button-container"
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+              }}
+            >
+              <div className="top-buttons">
+                <Link
+                  to="/earnerRead"
+                  className="waves-effect waves-light btn"
+                  style={{ width: "200px", marginRight: "10px" }}
+                >
+                  사업소득조회
+                </Link>
+                <Link to="/registPage" className="waves-effect waves-light btn">
+                  사업소득자등록
+                </Link>
+              </div>
 
-            <blockquote class="flow-text"></blockquote>
-
-            <div class="center-align"></div>
+              <div className="bottom-buttons">
+                <Link
+                  to="/incomeInput2"
+                  className="waves-effect waves-light btn"
+                >
+                  사업소득자료입력
+                </Link>
+                <Link
+                  to="/codeconversion"
+                  className="waves-effect waves-light btn"
+                >
+                  소득구분코드변환
+                </Link>
+              </div>
+            </div>
           </span>
         </main>
-
-        <div class="fixed-action-btn">
-          <a
-            href="#message"
-            class="modal-trigger btn btn-large btn-floating amber waves-effect waves-light"
-          >
-            <i class="large material-icons">message</i>
-          </a>
-        </div>
-
-        <footer class="page-footer deep-purple darken-3"></footer>
       </body>
     </div>
   );

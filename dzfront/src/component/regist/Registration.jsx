@@ -21,6 +21,7 @@ const Registration = (props) => {
   const [occupation, setOccupation] = useState({});
   const inputRef = useRef(null);
   const etcRef = useRef(null);
+  const occupationRef = useRef(null);
   const specialGridRef = useRef();
   const [preCode, setPreCode] = useState(props.value || "");
   const [earner, setEarner] = useState({});
@@ -29,7 +30,11 @@ const Registration = (props) => {
   useEffect(() => {
     const inputElement = inputRef.current;
     const etcElement = etcRef.current;
+    const occupationElement = occupationRef.current;
     console.log("코드 받아옴", props.value);
+    if (props.value === "") {
+      setEarner({});
+    }
     if (preCode !== props.value && props.value !== "") {
       fetch("http://localhost:8080/regist/get_earner", {
         method: "POST",
@@ -63,6 +68,7 @@ const Registration = (props) => {
                 setOccupation(data.occupation);
               });
           }
+
           if (inputElement) {
             document.querySelector("#address_detail").value =
               data.earner_info.address_detail || "";
@@ -293,7 +299,35 @@ const Registration = (props) => {
         setEarner({ ...earner, [name]: value });
       });
   };
-
+  const numberBlur = (event) => {
+    const { name, value } = event.target;
+    if (value === "") {
+      fetch("http://localhost:8080/regist/earner_update", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          param_value: 0,
+          param_name: name,
+          worker_id: localStorage.getItem("worker_id"),
+          earner_code: props.value,
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return response.json().then((error) => {
+              throw new Error(error.message);
+            });
+          }
+          return response.json();
+        })
+        .then((jsonData) => {
+          setEarner({ ...earner, [name]: value });
+        })
+        .catch((error) => {
+          setError((prevErrors) => [...prevErrors, error.message]);
+        });
+    }
+  };
   const handleBlur = (event) => {
     const { name, value } = event.target;
     if (name === "is_tuition") {
@@ -442,7 +476,7 @@ const Registration = (props) => {
           <h3>소득자 등록</h3>
 
           <div style={{ width: "100%" }}>
-            <table>
+            <table className="regist">
               <tbody>
                 <tr>
                   <td
@@ -774,7 +808,7 @@ const Registration = (props) => {
                       type="number"
                       id="deduction_amount"
                       name="deduction_amount"
-                      onBlur={handleBlur}
+                      onBlur={numberBlur}
                       onChange={onChange}
                       disabled={earner.is_tuition === "Y" ? false : true}
                     />
@@ -833,7 +867,7 @@ const Registration = (props) => {
         <>
           <h3>예술인 해당 사업소득자 등록</h3>
           <div style={{ width: "100%" }}>
-            <table>
+            <table className="regist">
               <tbody>
                 <tr>
                   <td
@@ -915,7 +949,7 @@ const Registration = (props) => {
                       onChange={onChange}
                       defaultValue={""}
                     >
-                      <option value=""> </option>
+                      <option value="0"> </option>
                       <option value="100">0.0</option>
                       <option value="80">1.80</option>
                     </select>
@@ -930,7 +964,7 @@ const Registration = (props) => {
           </div>
           <h3>노무제공자(특고) 해당 사업소득자 등록</h3>
           <div style={{ width: "100%" }}>
-            <table>
+            <table className="regist">
               <tbody>
                 <tr>
                   <td
@@ -1021,21 +1055,22 @@ const Registration = (props) => {
                       id="occupation_code"
                       value={earner.occupation_code || ""}
                       disabled={!inputEnabledS || earner.div_type === "예술인"}
-                      hidden
                       onClick={() => setSpecialModalOpen(true)}
+                      hidden
                     />
                     <input
                       type="text"
                       id="occupation_info"
+                      disabled={!inputEnabledS || earner.div_type === "예술인"}
                       value={
                         earner.occupation_code
                           ? "[" +
-                              earner.occupation_code +
-                              "]" +
-                              occupation.occupation_name || ""
+                            earner.occupation_code +
+                            "]" +
+                            occupation.occupation_name
                           : ""
                       }
-                      disabled={!inputEnabledS || earner.div_type === "예술인"}
+                      ref={occupationRef}
                       readOnly
                       onClick={() => setSpecialModalOpen(true)}
                     />
@@ -1110,7 +1145,7 @@ const Registration = (props) => {
                       onChange={onChange}
                       defaultValue={""}
                     >
-                      <option value=""> </option>
+                      <option value="0"> </option>
                       <option value="100">0.0</option>
                       <option value="80">1.80</option>
                     </select>
@@ -1198,7 +1233,7 @@ const Registration = (props) => {
                       onChange={onChange}
                       defaultValue={""}
                     >
-                      <option value=""> </option>
+                      <option value="0"> </option>
                       <option value="100">0.0</option>
                       <option value="50">1.50</option>
                     </select>
@@ -1281,7 +1316,9 @@ const Registration = (props) => {
         <button
           key={0}
           onClick={(e) => changeItem(0)}
-          style={{ width: "170px" }}
+          style={{
+            width: "170px",
+          }}
         >
           기본사항
         </button>

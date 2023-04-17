@@ -6,9 +6,33 @@ body {
   overflow-x: hidden;
   font-size: 12px;
 }
+.btn {
+  display: inline-block;
+  margin: 1rem;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 20px;
+  font-size: 1.6rem;
+  font-weight: 300;
+  text-align: center;
+  text-decoration: none;
+  color: #ffffff;
+  background-color: #7790d9;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+}
+.swal2-title {
+  font-size: 18px;
+}
 .ag-header {
   text-align: right;
 }
+
 .ag-theme-alpine .ag-header {
   text-align: center;
   font-size: 8px;
@@ -55,7 +79,12 @@ body.welcome {
   animation: puff 0.5s 1.8s cubic-bezier(0.55, 0.055, 0.675, 0.19) forwards,
     borderRadius 0.2s 2.3s linear forwards;
 }
-
+.button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 2rem;
+}
 .welcome #welcome {
   background: #c7c2dc;
   width: 56px;
@@ -192,7 +221,7 @@ body.welcome {
   border-radius: 2px;
 }
 
-table {
+table .regist {
   border-collapse: collapse;
   border-spacing: 0;
 }
@@ -203,11 +232,11 @@ table th {
   padding: 0px;
 }
 
-table tr:first-child {
+.regist tr:first-child {
   border-top: 1px solid black;
 }
 
-table tr:last-child {
+table.regist tr:last-child {
   border-bottom: 1px solid black;
 }
 .ag-header-cell-text {

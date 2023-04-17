@@ -1,5 +1,5 @@
 .header {
-  background-color: rgb(98, 115, 217);
+  background-color: #7f6cf0;
   color: white;
   height: 70px;
   text-align: center;
@@ -20,14 +20,14 @@ ul {
   left: -300px;
   transform: translateX(0);
   transition: 0.3s ease all;
-  background: rgb(98, 115, 217);
+  background: #7f6cf0;
 }
 
 .sidebar-menu.open {
   transform: translateX(300px);
 }
 .linkMenu li:hover a {
-  background-color: #7790d9;
+  background-color: #9a8af6;
 }
 .sidebar-menu .menu > li > a {
   padding: 15px 20px;

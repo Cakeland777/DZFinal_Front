@@ -12,9 +12,6 @@ function Head(props) {
   const menuIcon = props.isMenuOpen ? <RiMenuUnfoldLine /> : <RiMenuLine />;
   const deleteEarner = () => {
     if (props.title === "사업소득자료입력") {
-      console.log("넘어온 코드들", props.earnerCodes);
-      console.log("넘어온 날짜", props.paymentYm);
-
       if (!props.earnerCodes || props.earnerCodes.length === 0) {
         Swal.fire("체크된 값이 없습니다", "", "info");
       } else {
@@ -98,18 +95,18 @@ function Head(props) {
             style={{
               marginRight: 10,
               height: 30,
-              marginTop: 5,
+              marginTop: 2,
               marginLeft: -30,
-              backgroundColor: "#3B42BF",
+              backgroundColor: "#7f6cf0",
               width: "80px",
-              fontSize: "15px",
+              fontSize: "20px",
             }}
           >
             {menuIcon}
           </button>
         </li>
 
-        <li style={{ marginLeft: 0, whiteSpace: "nowrap", marginTop: "8px" }}>
+        <li style={{ marginLeft: 0, whiteSpace: "nowrap", marginTop: "10px" }}>
           <b>{props.title}</b>
         </li>
         {isDeleteButtonVisible && (
@@ -118,7 +115,11 @@ function Head(props) {
               type="button"
               className={`button small ${props.isMenuOpen ? "hide" : ""}`}
               onClick={() => deleteEarner()}
-              style={{ marginRight: 10, height: 30 }}
+              style={{
+                marginRight: 10,
+                height: 30,
+                backgroundColor: "#7f6cf0",
+              }}
             >
               <IoTrashOutline style={{ height: 20, width: 30 }} />
             </button>
@@ -166,20 +167,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-
-                  fontWeight: "bold",
-                }}
-                onClick={logOut}
-              >
-                로그아웃
-              </Link>
-            </li>
-            <li>
-              <Link
-                style={{
-                  textDecoration: "none",
-                  color: "white",
-
+                  fontSize: "19px",
                   fontWeight: "bold",
                 }}
                 to="/earnerRead"
@@ -194,7 +182,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-
+                  fontSize: "19px",
                   fontWeight: "bold",
                 }}
                 to="/registPage"
@@ -208,7 +196,7 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-
+                  fontSize: "19px",
                   fontWeight: "bold",
                 }}
                 to="/incomeInput2"
@@ -222,13 +210,26 @@ function Menu(props) {
                 style={{
                   textDecoration: "none",
                   color: "white",
-
+                  fontSize: "19px",
                   fontWeight: "bold",
                 }}
                 to="/codeconversion"
                 onClick={handleLinkClick}
               >
-                코드변환
+                소득구분코드변환
+              </Link>
+            </li>
+            <li>
+              <Link
+                style={{
+                  textDecoration: "none",
+                  color: "white",
+                  fontSize: "19px",
+                  fontWeight: "bold",
+                }}
+                onClick={logOut}
+              >
+                로그아웃
               </Link>
             </li>
           </div>
