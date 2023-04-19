@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useRef, useState, useMemo } from "react";
 import { FiEdit } from "react-icons/fi";
 
 import { AgGridReact } from "ag-grid-react";
@@ -71,91 +71,94 @@ const CodeConversion = (props) => {
       });
   };
 
-  const columnDefs = [
-    {
-      headerName: "변환 대상 소득자",
-      width: 265,
-      cellStyle: {
-        borderRight: "1px solid #000",
-      }, // 오른쪽 테두리 추가
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "변환 대상 소득자",
+        width: 265,
+        cellStyle: {
+          borderRight: "1px solid #000",
+        }, // 오른쪽 테두리 추가
 
-      children: [
-        {
-          headerName: "code",
-          field: "earner_code",
-          width: 265,
-        },
-        {
-          headerName: "소득자명",
-          field: "earner_name",
-          width: 265,
-        },
-        {
-          headerName: "주민(사업자)등록번호",
-          field: "personal_no",
-          width: 265,
-          cellStyle: {
-            color: "#DC143C",
-            backgroundColor: "mistyrose",
-            opacity: 0.6,
-            textAlign: "center",
+        children: [
+          {
+            headerName: "code",
+            field: "earner_code",
+            width: 265,
           },
-        },
-      ],
-    },
-    {
-      headerName: "과거이력용",
-      field: "old_div_code",
-
-      hide: "true",
-      width: 265,
-    },
-    {
-      headerName: "변환전 소득구분",
-      field: "div_code",
-      width: 265,
-    },
-    {
-      headerName: "변환후 소득구분",
-      field: "new_div_code",
-      width: 265,
-      cellRenderer: function (params) {
-        return (
-          <div style={{ position: "relative" }}>
-            <span>{params.value}</span>
-            <FiEdit
-              style={{
-                position: "absolute",
-                right: 0,
-
-                paddingTop: "13px",
-              }}
-            />
-          </div>
-        );
+          {
+            headerName: "소득자명",
+            field: "earner_name",
+            width: 265,
+          },
+          {
+            headerName: "주민(사업자)등록번호",
+            field: "personal_no",
+            width: 265,
+            cellStyle: {
+              color: "#DC143C",
+              backgroundColor: "mistyrose",
+              opacity: 0.6,
+              textAlign: "center",
+            },
+          },
+        ],
       },
-      onCellClicked: (event) => setIsModalOpen(true),
-    },
-    {
-      headerName: "변환후 소득이름",
-      field: "div_name",
-      hide: "true",
-      width: 265,
-    },
-    {
-      headerName: "최종작업시간",
+      {
+        headerName: "과거이력용",
+        field: "old_div_code",
 
-      field: "div_modified",
-      width: 280,
-      onCellClicked: (event) => setTimeOpen(true),
-    },
-    {
-      headerName: "div_type",
-      field: "div_type",
-      hide: "true",
-      width: 265,
-    },
-  ];
+        hide: "true",
+        width: 265,
+      },
+      {
+        headerName: "변환전 소득구분",
+        field: "div_code",
+        width: 265,
+      },
+      {
+        headerName: "변환후 소득구분",
+        field: "new_div_code",
+        width: 265,
+        cellRenderer: function (params) {
+          return (
+            <div style={{ position: "relative" }}>
+              <span>{params.value}</span>
+              <FiEdit
+                style={{
+                  position: "absolute",
+                  right: 0,
+
+                  paddingTop: "13px",
+                }}
+              />
+            </div>
+          );
+        },
+        onCellClicked: (event) => setIsModalOpen(true),
+      },
+      {
+        headerName: "변환후 소득이름",
+        field: "div_name",
+        hide: "true",
+        width: 265,
+      },
+      {
+        headerName: "최종작업시간",
+
+        field: "div_modified",
+        width: 280,
+        onCellClicked: (event) => setTimeOpen(true),
+      },
+      {
+        headerName: "div_type",
+        field: "div_type",
+        hide: "true",
+        width: 265,
+      },
+    ],
+    []
+  );
 
   const divColumn = [
     { headerName: "소득구분코드", field: "div_code", width: 270 },

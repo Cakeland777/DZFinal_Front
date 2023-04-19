@@ -28,11 +28,23 @@ function Home(props) {
                 <Link
                   to="/earnerRead"
                   className="waves-effect waves-light btn"
-                  style={{ width: "200px", marginRight: "10px" }}
+                  style={{
+                    width: "210px",
+                    marginRight: "10px",
+                    fontWeight: "bold",
+                  }}
                 >
                   사업소득조회
                 </Link>
-                <Link to="/registPage" className="waves-effect waves-light btn">
+                <Link
+                  to="/registPage"
+                  style={{
+                    width: "210px",
+                    marginRight: "10px",
+                    fontWeight: "bold",
+                  }}
+                  className="waves-effect waves-light btn"
+                >
                   사업소득자등록
                 </Link>
               </div>
@@ -40,12 +52,22 @@ function Home(props) {
               <div className="bottom-buttons">
                 <Link
                   to="/incomeInput2"
+                  style={{
+                    width: "210px",
+                    marginRight: "10px",
+                    fontWeight: "bold",
+                  }}
                   className="waves-effect waves-light btn"
                 >
                   사업소득자료입력
                 </Link>
                 <Link
                   to="/codeconversion"
+                  style={{
+                    width: "210px",
+                    marginRight: "10px",
+                    fontWeight: "bold",
+                  }}
                   className="waves-effect waves-light btn"
                 >
                   소득구분코드변환

@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   useReducer,
+  useMemo,
 } from "react";
 
 import { AgGridReact } from "ag-grid-react";
@@ -17,82 +18,85 @@ const EarnerGrid = (props) => {
   const gridRef = useRef(null);
   const gridRef2 = useRef(null);
 
-  const columnDefs = [
-    {
-      headerName: "V",
-      headerCheckboxSelection: true,
-      checkboxSelection: true,
-      maxWidth: 50,
-    },
-    {
-      headerName: "Code",
-      field: "earner_code",
-
-      editable: (params) => {
-        return !params.node.data.div_code && params.node.data.earner_name;
+  const columnDefs = useMemo(
+    () => [
+      {
+        headerName: "V",
+        headerCheckboxSelection: true,
+        checkboxSelection: true,
+        maxWidth: 50,
       },
-      maxWidth: 90,
-    },
-    {
-      headerName: "소득자명",
-      field: "earner_name",
-      editable: true,
-      maxWidth: 100,
-    },
+      {
+        headerName: "Code",
+        field: "earner_code",
 
-    {
-      headerName: "주민(외국인)번호",
-      children: [
-        {
-          headerName: "구분",
-          field: "is_native",
-          editable: true,
-          maxWidth: 70,
-          cellEditor: "agSelectCellEditor",
+        editable: (params) => {
+          return !params.node.data.div_code && params.node.data.earner_name;
+        },
+        maxWidth: 90,
+      },
+      {
+        headerName: "소득자명",
+        field: "earner_name",
+        editable: true,
+        maxWidth: 100,
+      },
 
-          cellEditorParams: {
-            values: ["내", "외"],
+      {
+        headerName: "주민(외국인)번호",
+        children: [
+          {
+            headerName: "구분",
+            field: "is_native",
+            editable: true,
+            maxWidth: 70,
+            cellEditor: "agSelectCellEditor",
+
+            cellEditorParams: {
+              values: ["내", "외"],
+            },
           },
-        },
-        {
-          headerName: "번호",
-          field: "personal_no",
-          minWidth: 130,
-          maxWidth: 130,
-          editable: true,
-          colspan: 2,
-          cellEditor: "agTextCellEditor",
+          {
+            headerName: "번호",
+            field: "personal_no",
+            minWidth: 130,
+            maxWidth: 130,
+            editable: true,
+            colspan: 2,
+            cellEditor: "agTextCellEditor",
 
-          cellEditorParams: {
-            // 입력 제한 설정
-            maxLength: 14,
-            pattern: "\\d*",
+            cellEditorParams: {
+              // 입력 제한 설정
+              maxLength: 14,
+              pattern: "\\d*",
+            },
           },
-        },
-      ],
-    },
-    {
-      headerName: "소득구분",
-      children: [
-        {
-          headerName: "구분코드",
-          field: "div_code",
-          editable: false,
+        ],
+      },
+      {
+        headerName: "소득구분",
+        children: [
+          {
+            headerName: "구분코드",
+            field: "div_code",
+            editable: false,
 
-          maxWidth: 90,
-        },
-        {
-          headerName: "구분명",
-          field: "div_name",
-          width: 95,
-          editable: false,
-          resizable: false,
-          colspan: 2,
-        },
-        { headerName: "타입", field: "div_type", width: 100, hide: true },
-      ],
-    },
-  ];
+            maxWidth: 90,
+          },
+          {
+            headerName: "구분명",
+            field: "div_name",
+            width: 95,
+            editable: false,
+            resizable: false,
+            colspan: 2,
+          },
+          { headerName: "타입", field: "div_type", width: 100, hide: true },
+        ],
+      },
+    ],
+    []
+  );
   const divColumn = [
     { headerName: "소득구분코드", field: "div_code", width: 180 },
     { headerName: "소득구분명", field: "div_name", width: 180 },

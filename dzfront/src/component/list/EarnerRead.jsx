@@ -82,7 +82,7 @@ const EarnerRead = (props) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        worker_id: "yuchan2",
+        worker_id: localStorage.getItem("worker_id"),
         search_value: "",
         payment_ym: "202401",
       }),
@@ -351,7 +351,7 @@ const EarnerRead = (props) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        worker_id: "yuchan2",
+        worker_id: localStorage.getItem("worker_id"),
         read_by: selectedOption,
         start_date: parseInt(format(startDate, "yyyyMM")),
         end_date: parseInt(format(endDate, "yyyyMM")),
@@ -432,7 +432,7 @@ const EarnerRead = (props) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        worker_id: "yuchan2",
+        worker_id: localStorage.getItem("worker_id"),
         search_value: value,
         payment_ym: "202401",
       }),

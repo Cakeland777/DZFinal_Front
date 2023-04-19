@@ -1,6 +1,7 @@
 import './App.css';
 import { useState, useEffect } from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { Route, Routes, useNavigate } from 'react-router-dom';
+
 import Login from './component/login/Login';
 import Calender from './component/Calendar';
 import Header from './component/Header';
@@ -16,14 +17,24 @@ import IncomeInput2 from './component/input/IncomeInput2';
 function App() {
 
   const [isLogin, setIsLogin] = useState(false);
+  const navigate = useNavigate();
   useEffect(() => {
     let status = localStorage.getItem("isLogon");
     if (status === "1") {
       setIsLogin(true);
+      const timeoutId = setTimeout(() => {
+        localStorage.clear();
+      }, 5 * 60 * 1000); // 5분 = 5 * 60 * 1000 밀리초
+      return () => clearTimeout(timeoutId);
+
     } else {
+
+      navigate('/login');
       setIsLogin(false);
+
+
     }
-  }, []);
+  }, [navigate]);
 
   const [title, setTitle] = useState();
   const [earnerCodes, setEarnerCodes] = useState();
